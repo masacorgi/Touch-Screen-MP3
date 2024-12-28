@@ -1,0 +1,1667 @@
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 4
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"ir_remocon.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.ir_remocon_init,"ax",%progbits
+  20              		.align	1
+  21              		.global	ir_remocon_init
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	ir_remocon_init:
+  27              	.LFB130:
+  28              		.file 1 "source\\ir_remocon\\ir_remocon.c"
+   1:source\ir_remocon/ir_remocon.c **** /********************************************************************************/
+   2:source\ir_remocon/ir_remocon.c **** /* ir_remocon.c                                                                 */
+   3:source\ir_remocon/ir_remocon.c **** /* STM32F407ZGT6                                                                */
+   4:source\ir_remocon/ir_remocon.c **** /* (Lee ChangWoo HL2IRW  hl2irw@daum.net 010-8573-6860)                 	*/
+   5:source\ir_remocon/ir_remocon.c **** /* stm32f4x_test								*/
+   6:source\ir_remocon/ir_remocon.c **** /********************************************************************************/
+   7:source\ir_remocon/ir_remocon.c **** #include "../../hwdefs.h"
+   8:source\ir_remocon/ir_remocon.c **** #include "../prototype.h"
+   9:source\ir_remocon/ir_remocon.c **** 
+  10:source\ir_remocon/ir_remocon.c **** #define RDATA				PA_INPUT(8)
+  11:source\ir_remocon/ir_remocon.c **** #define REMOTE_ID			0
+  12:source\ir_remocon/ir_remocon.c **** 
+  13:source\ir_remocon/ir_remocon.c **** unsigned char remote_count;
+  14:source\ir_remocon/ir_remocon.c **** unsigned char remocon_status = 0;
+  15:source\ir_remocon/ir_remocon.c **** unsigned short remocon_time,re_ir_enable;
+  16:source\ir_remocon/ir_remocon.c **** unsigned int remocon_recv = 0;
+  17:source\ir_remocon/ir_remocon.c **** unsigned char remote_count = 0;
+  18:source\ir_remocon/ir_remocon.c **** unsigned char ir_ret,old_ir,ir_time;
+  19:source\ir_remocon/ir_remocon.c **** 
+  20:source\ir_remocon/ir_remocon.c **** 
+  21:source\ir_remocon/ir_remocon.c **** extern volatile unsigned char volume,volume_flag,old_volume;
+  22:source\ir_remocon/ir_remocon.c **** extern volatile unsigned char play_key,play_audio,audio_repeat;
+  23:source\ir_remocon/ir_remocon.c **** 
+  24:source\ir_remocon/ir_remocon.c **** 
+  25:source\ir_remocon/ir_remocon.c **** void ir_remocon_init (void)
+  26:source\ir_remocon/ir_remocon.c **** {
+  29              		.loc 1 26 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 32
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  27:source\ir_remocon/ir_remocon.c ****       NVIC_InitTypeDef NVIC_InitStructure;
+  33              		.loc 1 27 7 view .LVU1
+  28:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+  34              		.loc 1 28 7 view .LVU2
+  29:source\ir_remocon/ir_remocon.c ****       TIM_ICInitTypeDef TIM1_ICInitStructure;
+  35              		.loc 1 29 7 view .LVU3
+  30:source\ir_remocon/ir_remocon.c ****       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+  36              		.loc 1 30 7 view .LVU4
+  26:source\ir_remocon/ir_remocon.c ****       NVIC_InitTypeDef NVIC_InitStructure;
+  37              		.loc 1 26 1 is_stmt 0 view .LVU5
+  38 0000 70B5     		push	{r4, r5, r6, lr}
+  39              		.cfi_def_cfa_offset 16
+  40              		.cfi_offset 4, -16
+  41              		.cfi_offset 5, -12
+  42              		.cfi_offset 6, -8
+  43              		.cfi_offset 14, -4
+  44              		.loc 1 30 7 view .LVU6
+  45 0002 0121     		movs	r1, #1
+  26:source\ir_remocon/ir_remocon.c ****       NVIC_InitTypeDef NVIC_InitStructure;
+  46              		.loc 1 26 1 view .LVU7
+  47 0004 88B0     		sub	sp, sp, #32
+  48              		.cfi_def_cfa_offset 48
+  49              		.loc 1 30 7 view .LVU8
+  50 0006 0846     		mov	r0, r1
+  51 0008 FFF7FEFF 		bl	RCC_AHB1PeriphClockCmd
+  52              	.LVL0:
+  31:source\ir_remocon/ir_remocon.c ****       RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+  53              		.loc 1 31 7 is_stmt 1 view .LVU9
+  54 000c 0121     		movs	r1, #1
+  55 000e 0846     		mov	r0, r1
+  56 0010 FFF7FEFF 		bl	RCC_APB2PeriphClockCmd
+  57              	.LVL1:
+  32:source\ir_remocon/ir_remocon.c ****       GPIO_Init_Pin(GPIOA,GPIO_Pin_8,GPIO_Speed_100MHz,GPIO_Mode_AF_PP_PU);
+  58              		.loc 1 32 7 view .LVU10
+  59 0014 1223     		movs	r3, #18
+  60 0016 2848     		ldr	r0, .L2
+  61 0018 0322     		movs	r2, #3
+  62 001a 4FF48071 		mov	r1, #256
+  63 001e FFF7FEFF 		bl	GPIO_Init_Pin
+  64              	.LVL2:
+  33:source\ir_remocon/ir_remocon.c ****       GPIO_PinAFConfig(GPIOA,GPIO_PinSource8,GPIO_AF_TIM1);
+  65              		.loc 1 33 7 view .LVU11
+  66 0022 2548     		ldr	r0, .L2
+  67 0024 0122     		movs	r2, #1
+  68 0026 0821     		movs	r1, #8
+  34:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseStructure.TIM_Prescaler = 167;	// 168MHz / (167 + 1) = 1MHz
+  35:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+  36:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseStructure.TIM_Period = 10000;		// 10 msec
+  37:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+  69              		.loc 1 37 47 is_stmt 0 view .LVU12
+  70 0028 0024     		movs	r4, #0
+  33:source\ir_remocon/ir_remocon.c ****       GPIO_PinAFConfig(GPIOA,GPIO_PinSource8,GPIO_AF_TIM1);
+  71              		.loc 1 33 7 view .LVU13
+  72 002a FFF7FEFF 		bl	GPIO_PinAFConfig
+  73              	.LVL3:
+  34:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseStructure.TIM_Prescaler = 167;	// 168MHz / (167 + 1) = 1MHz
+  74              		.loc 1 34 7 is_stmt 1 view .LVU14
+  35:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseStructure.TIM_Period = 10000;		// 10 msec
+  75              		.loc 1 35 7 view .LVU15
+  36:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+  76              		.loc 1 36 7 view .LVU16
+  77              		.loc 1 37 7 view .LVU17
+  36:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+  78              		.loc 1 36 40 is_stmt 0 view .LVU18
+  79 002e 42F21073 		movw	r3, #10000
+  80 0032 A722     		movs	r2, #167
+  38:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseInit(TIM1,&TIM_TimeBaseStructure);
+  81              		.loc 1 38 7 view .LVU19
+  82 0034 05A9     		add	r1, sp, #20
+  83 0036 2148     		ldr	r0, .L2+4
+  37:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseInit(TIM1,&TIM_TimeBaseStructure);
+  84              		.loc 1 37 47 view .LVU20
+  85 0038 ADF81C40 		strh	r4, [sp, #28]	@ movhi
+  86              		.loc 1 38 7 is_stmt 1 view .LVU21
+  36:source\ir_remocon/ir_remocon.c ****       TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+  87              		.loc 1 36 40 is_stmt 0 view .LVU22
+  88 003c CDE90523 		strd	r2, r3, [sp, #20]
+  39:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_Channel = TIM_Channel_1; //CC1S = 01
+  40:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+  41:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+  89              		.loc 1 41 44 view .LVU23
+  90 0040 0125     		movs	r5, #1
+  38:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_Channel = TIM_Channel_1; //CC1S = 01
+  91              		.loc 1 38 7 view .LVU24
+  92 0042 FFF7FEFF 		bl	TIM_TimeBaseInit
+  93              	.LVL4:
+  39:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_Channel = TIM_Channel_1; //CC1S = 01
+  94              		.loc 1 39 7 is_stmt 1 view .LVU25
+  42:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+  43:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICFilter = 0x03;
+  95              		.loc 1 43 41 is_stmt 0 view .LVU26
+  96 0046 0326     		movs	r6, #3
+  44:source\ir_remocon/ir_remocon.c ****       TIM_ICInit(TIM1, &TIM1_ICInitStructure);
+  97              		.loc 1 44 7 view .LVU27
+  98 0048 02A9     		add	r1, sp, #8
+  99 004a 1C48     		ldr	r0, .L2+4
+  39:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+ 100              		.loc 1 39 40 view .LVU28
+ 101 004c ADF80840 		strh	r4, [sp, #8]	@ movhi
+  40:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+ 102              		.loc 1 40 7 is_stmt 1 view .LVU29
+  40:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+ 103              		.loc 1 40 43 is_stmt 0 view .LVU30
+ 104 0050 ADF80A40 		strh	r4, [sp, #10]	@ movhi
+  41:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+ 105              		.loc 1 41 7 is_stmt 1 view .LVU31
+  41:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+ 106              		.loc 1 41 44 is_stmt 0 view .LVU32
+ 107 0054 ADF80C50 		strh	r5, [sp, #12]	@ movhi
+  42:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICFilter = 0x03;
+ 108              		.loc 1 42 7 is_stmt 1 view .LVU33
+  42:source\ir_remocon/ir_remocon.c ****       TIM1_ICInitStructure.TIM_ICFilter = 0x03;
+ 109              		.loc 1 42 44 is_stmt 0 view .LVU34
+ 110 0058 ADF80E40 		strh	r4, [sp, #14]	@ movhi
+  43:source\ir_remocon/ir_remocon.c ****       TIM_ICInit(TIM1, &TIM1_ICInitStructure);
+ 111              		.loc 1 43 7 is_stmt 1 view .LVU35
+  43:source\ir_remocon/ir_remocon.c ****       TIM_ICInit(TIM1, &TIM1_ICInitStructure);
+ 112              		.loc 1 43 41 is_stmt 0 view .LVU36
+ 113 005c ADF81060 		strh	r6, [sp, #16]	@ movhi
+ 114              		.loc 1 44 7 is_stmt 1 view .LVU37
+ 115 0060 FFF7FEFF 		bl	TIM_ICInit
+ 116              	.LVL5:
+  45:source\ir_remocon/ir_remocon.c ****       TIM_ITConfig(TIM1,TIM_IT_Update | TIM_IT_CC1,ENABLE);
+ 117              		.loc 1 45 7 view .LVU38
+ 118 0064 2A46     		mov	r2, r5
+ 119 0066 3146     		mov	r1, r6
+ 120 0068 1448     		ldr	r0, .L2+4
+ 121 006a FFF7FEFF 		bl	TIM_ITConfig
+ 122              	.LVL6:
+  46:source\ir_remocon/ir_remocon.c ****       TIM_Cmd(TIM1,ENABLE );
+ 123              		.loc 1 46 7 view .LVU39
+ 124 006e 2946     		mov	r1, r5
+ 125 0070 1248     		ldr	r0, .L2+4
+ 126 0072 FFF7FEFF 		bl	TIM_Cmd
+ 127              	.LVL7:
+  47:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannel = TIM1_CC_IRQn;
+ 128              		.loc 1 47 7 view .LVU40
+ 129              		.loc 1 47 42 is_stmt 0 view .LVU41
+ 130 0076 1B23     		movs	r3, #27
+ 131 0078 8DF80430 		strb	r3, [sp, #4]
+  48:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+ 132              		.loc 1 48 7 is_stmt 1 view .LVU42
+  49:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  50:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  51:source\ir_remocon/ir_remocon.c ****       NVIC_Init(&NVIC_InitStructure);
+ 133              		.loc 1 51 7 is_stmt 0 view .LVU43
+ 134 007c 01A8     		add	r0, sp, #4
+  48:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+ 135              		.loc 1 48 60 view .LVU44
+ 136 007e 0223     		movs	r3, #2
+ 137 0080 8DF80530 		strb	r3, [sp, #5]
+  49:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+ 138              		.loc 1 49 7 is_stmt 1 view .LVU45
+  49:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+ 139              		.loc 1 49 53 is_stmt 0 view .LVU46
+ 140 0084 8DF80640 		strb	r4, [sp, #6]
+  50:source\ir_remocon/ir_remocon.c ****       NVIC_Init(&NVIC_InitStructure);
+ 141              		.loc 1 50 7 is_stmt 1 view .LVU47
+  50:source\ir_remocon/ir_remocon.c ****       NVIC_Init(&NVIC_InitStructure);
+ 142              		.loc 1 50 45 is_stmt 0 view .LVU48
+ 143 0088 8DF80750 		strb	r5, [sp, #7]
+ 144              		.loc 1 51 7 is_stmt 1 view .LVU49
+ 145 008c FFF7FEFF 		bl	NVIC_Init
+ 146              	.LVL8:
+  52:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_TIM10_IRQn;
+ 147              		.loc 1 52 7 view .LVU50
+ 148              		.loc 1 52 42 is_stmt 0 view .LVU51
+ 149 0090 1923     		movs	r3, #25
+  53:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  54:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  55:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  56:source\ir_remocon/ir_remocon.c ****       NVIC_Init(&NVIC_InitStructure);
+ 150              		.loc 1 56 7 view .LVU52
+ 151 0092 01A8     		add	r0, sp, #4
+  52:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_TIM10_IRQn;
+ 152              		.loc 1 52 42 view .LVU53
+ 153 0094 8DF80430 		strb	r3, [sp, #4]
+  53:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+ 154              		.loc 1 53 7 is_stmt 1 view .LVU54
+  53:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+ 155              		.loc 1 53 60 is_stmt 0 view .LVU55
+ 156 0098 8DF80550 		strb	r5, [sp, #5]
+  54:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ 157              		.loc 1 54 7 is_stmt 1 view .LVU56
+  54:source\ir_remocon/ir_remocon.c ****       NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ 158              		.loc 1 54 53 is_stmt 0 view .LVU57
+ 159 009c 8DF80640 		strb	r4, [sp, #6]
+  55:source\ir_remocon/ir_remocon.c ****       NVIC_Init(&NVIC_InitStructure);
+ 160              		.loc 1 55 7 is_stmt 1 view .LVU58
+  55:source\ir_remocon/ir_remocon.c ****       NVIC_Init(&NVIC_InitStructure);
+ 161              		.loc 1 55 45 is_stmt 0 view .LVU59
+ 162 00a0 8DF80750 		strb	r5, [sp, #7]
+ 163              		.loc 1 56 7 is_stmt 1 view .LVU60
+ 164 00a4 FFF7FEFF 		bl	NVIC_Init
+ 165              	.LVL9:
+  57:source\ir_remocon/ir_remocon.c ****       ir_ret = 0;
+ 166              		.loc 1 57 7 view .LVU61
+ 167              		.loc 1 57 14 is_stmt 0 view .LVU62
+ 168 00a8 054B     		ldr	r3, .L2+8
+ 169 00aa 1C70     		strb	r4, [r3]
+  58:source\ir_remocon/ir_remocon.c ****       old_ir = 0;
+ 170              		.loc 1 58 7 is_stmt 1 view .LVU63
+ 171              		.loc 1 58 14 is_stmt 0 view .LVU64
+ 172 00ac 054B     		ldr	r3, .L2+12
+ 173 00ae 1C70     		strb	r4, [r3]
+  59:source\ir_remocon/ir_remocon.c ****       ir_time = 0;
+ 174              		.loc 1 59 7 is_stmt 1 view .LVU65
+ 175              		.loc 1 59 15 is_stmt 0 view .LVU66
+ 176 00b0 054B     		ldr	r3, .L2+16
+ 177 00b2 1C70     		strb	r4, [r3]
+  60:source\ir_remocon/ir_remocon.c **** }
+ 178              		.loc 1 60 1 view .LVU67
+ 179 00b4 08B0     		add	sp, sp, #32
+ 180              		.cfi_def_cfa_offset 16
+ 181              		@ sp needed
+ 182 00b6 70BD     		pop	{r4, r5, r6, pc}
+ 183              	.L3:
+ 184              		.align	2
+ 185              	.L2:
+ 186 00b8 00000240 		.word	1073872896
+ 187 00bc 00000140 		.word	1073807360
+ 188 00c0 00000000 		.word	.LANCHOR0
+ 189 00c4 00000000 		.word	.LANCHOR1
+ 190 00c8 00000000 		.word	.LANCHOR2
+ 191              		.cfi_endproc
+ 192              	.LFE130:
+ 194              		.section	.text.TIM1_UP_TIM10_IRQHandler,"ax",%progbits
+ 195              		.align	1
+ 196              		.global	TIM1_UP_TIM10_IRQHandler
+ 197              		.syntax unified
+ 198              		.thumb
+ 199              		.thumb_func
+ 201              	TIM1_UP_TIM10_IRQHandler:
+ 202              	.LFB131:
+  61:source\ir_remocon/ir_remocon.c **** 
+  62:source\ir_remocon/ir_remocon.c **** 
+  63:source\ir_remocon/ir_remocon.c **** void TIM1_UP_TIM10_IRQHandler (void)
+  64:source\ir_remocon/ir_remocon.c **** {
+ 203              		.loc 1 64 1 is_stmt 1 view -0
+ 204              		.cfi_startproc
+ 205              		@ args = 0, pretend = 0, frame = 0
+ 206              		@ frame_needed = 0, uses_anonymous_args = 0
+  65:source\ir_remocon/ir_remocon.c ****       if (TIM_GetITStatus(TIM1,TIM_IT_Update) == SET) {
+ 207              		.loc 1 65 7 view .LVU69
+  64:source\ir_remocon/ir_remocon.c ****       if (TIM_GetITStatus(TIM1,TIM_IT_Update) == SET) {
+ 208              		.loc 1 64 1 is_stmt 0 view .LVU70
+ 209 0000 08B5     		push	{r3, lr}
+ 210              		.cfi_def_cfa_offset 8
+ 211              		.cfi_offset 3, -8
+ 212              		.cfi_offset 14, -4
+ 213              		.loc 1 65 11 view .LVU71
+ 214 0002 1048     		ldr	r0, .L11
+ 215 0004 0121     		movs	r1, #1
+ 216 0006 FFF7FEFF 		bl	TIM_GetITStatus
+ 217              	.LVL10:
+ 218              		.loc 1 65 10 view .LVU72
+ 219 000a 0128     		cmp	r0, #1
+ 220 000c 14D1     		bne	.L5
+  66:source\ir_remocon/ir_remocon.c **** 	 if (remocon_status & 0x80) {
+ 221              		.loc 1 66 3 is_stmt 1 view .LVU73
+ 222              		.loc 1 66 7 is_stmt 0 view .LVU74
+ 223 000e 0E4B     		ldr	r3, .L11+4
+ 224              		.loc 1 66 6 view .LVU75
+ 225 0010 93F90010 		ldrsb	r1, [r3]
+ 226              		.loc 1 66 7 view .LVU76
+ 227 0014 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 228              		.loc 1 66 6 view .LVU77
+ 229 0016 0029     		cmp	r1, #0
+ 230 0018 0EDA     		bge	.L5
+  67:source\ir_remocon/ir_remocon.c **** 	    remocon_status &= ~(0x10);
+ 231              		.loc 1 67 6 is_stmt 1 view .LVU78
+ 232              		.loc 1 67 21 is_stmt 0 view .LVU79
+ 233 001a 02F0EF00 		and	r0, r2, #239
+  68:source\ir_remocon/ir_remocon.c **** 	    if ((remocon_status & 0x0F) == 0x00) remocon_status |= 1 << 6;
+ 234              		.loc 1 68 6 is_stmt 1 view .LVU80
+ 235              		.loc 1 68 9 is_stmt 0 view .LVU81
+ 236 001e 12F00F01 		ands	r1, r2, #15
+ 237              		.loc 1 68 43 is_stmt 1 view .LVU82
+ 238              		.loc 1 68 58 is_stmt 0 view .LVU83
+ 239 0022 08BF     		it	eq
+ 240 0024 40F04000 		orreq	r0, r0, #64
+ 241 0028 1870     		strb	r0, [r3]
+  69:source\ir_remocon/ir_remocon.c **** 	    if ((remocon_status & 0x0F) < 14) {
+ 242              		.loc 1 69 6 is_stmt 1 view .LVU84
+ 243              		.loc 1 69 26 is_stmt 0 view .LVU85
+ 244 002a 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 245              		.loc 1 69 9 view .LVU86
+ 246 002c 0D29     		cmp	r1, #13
+  70:source\ir_remocon/ir_remocon.c **** 	       remocon_status++;
+ 247              		.loc 1 70 9 is_stmt 1 view .LVU87
+ 248              		.loc 1 70 23 is_stmt 0 view .LVU88
+ 249 002e 94BF     		ite	ls
+ 250 0030 0132     		addls	r2, r2, #1
+  71:source\ir_remocon/ir_remocon.c **** 	    } else {
+  72:source\ir_remocon/ir_remocon.c **** 	       remocon_status &= ~(1 << 7);
+ 251              		.loc 1 72 9 is_stmt 1 view .LVU89
+  73:source\ir_remocon/ir_remocon.c **** 	       remocon_status &= 0xF0;
+ 252              		.loc 1 73 9 view .LVU90
+ 253              		.loc 1 73 24 is_stmt 0 view .LVU91
+ 254 0032 02F07002 		andhi	r2, r2, #112
+ 255 0036 1A70     		strb	r2, [r3]
+ 256              	.L5:
+  74:source\ir_remocon/ir_remocon.c **** 	    }
+  75:source\ir_remocon/ir_remocon.c **** 	 }
+  76:source\ir_remocon/ir_remocon.c ****       }
+  77:source\ir_remocon/ir_remocon.c ****       TIM_ClearITPendingBit(TIM1,TIM_IT_Update);
+ 257              		.loc 1 77 7 is_stmt 1 view .LVU92
+  78:source\ir_remocon/ir_remocon.c **** }
+ 258              		.loc 1 78 1 is_stmt 0 view .LVU93
+ 259 0038 BDE80840 		pop	{r3, lr}
+ 260              		.cfi_restore 14
+ 261              		.cfi_restore 3
+ 262              		.cfi_def_cfa_offset 0
+  77:source\ir_remocon/ir_remocon.c **** }
+ 263              		.loc 1 77 7 view .LVU94
+ 264 003c 0148     		ldr	r0, .L11
+ 265 003e 0121     		movs	r1, #1
+ 266 0040 FFF7FEBF 		b	TIM_ClearITPendingBit
+ 267              	.LVL11:
+ 268              	.L12:
+ 269              		.align	2
+ 270              	.L11:
+ 271 0044 00000140 		.word	1073807360
+ 272 0048 00000000 		.word	.LANCHOR3
+ 273              		.cfi_endproc
+ 274              	.LFE131:
+ 276              		.section	.text.TIM1_CC_IRQHandler,"ax",%progbits
+ 277              		.align	1
+ 278              		.global	TIM1_CC_IRQHandler
+ 279              		.syntax unified
+ 280              		.thumb
+ 281              		.thumb_func
+ 283              	TIM1_CC_IRQHandler:
+ 284              	.LFB132:
+  79:source\ir_remocon/ir_remocon.c **** 
+  80:source\ir_remocon/ir_remocon.c **** 
+  81:source\ir_remocon/ir_remocon.c **** void TIM1_CC_IRQHandler (void)
+  82:source\ir_remocon/ir_remocon.c **** {
+ 285              		.loc 1 82 1 is_stmt 1 view -0
+ 286              		.cfi_startproc
+ 287              		@ args = 0, pretend = 0, frame = 0
+ 288              		@ frame_needed = 0, uses_anonymous_args = 0
+  83:source\ir_remocon/ir_remocon.c ****       if (TIM_GetITStatus(TIM1,TIM_IT_CC1) == SET) {
+ 289              		.loc 1 83 7 view .LVU96
+  82:source\ir_remocon/ir_remocon.c ****       if (TIM_GetITStatus(TIM1,TIM_IT_CC1) == SET) {
+ 290              		.loc 1 82 1 is_stmt 0 view .LVU97
+ 291 0000 70B5     		push	{r4, r5, r6, lr}
+ 292              		.cfi_def_cfa_offset 16
+ 293              		.cfi_offset 4, -16
+ 294              		.cfi_offset 5, -12
+ 295              		.cfi_offset 6, -8
+ 296              		.cfi_offset 14, -4
+ 297              		.loc 1 83 11 view .LVU98
+ 298 0002 2F48     		ldr	r0, .L25
+ 299 0004 0221     		movs	r1, #2
+ 300 0006 FFF7FEFF 		bl	TIM_GetITStatus
+ 301              	.LVL12:
+ 302              		.loc 1 83 10 view .LVU99
+ 303 000a 0128     		cmp	r0, #1
+ 304 000c 10D1     		bne	.L14
+  84:source\ir_remocon/ir_remocon.c **** 	 if (RDATA) {
+ 305              		.loc 1 84 3 is_stmt 1 view .LVU100
+ 306              		.loc 1 84 7 is_stmt 0 view .LVU101
+ 307 000e 2D4B     		ldr	r3, .L25+4
+ 308 0010 2D4C     		ldr	r4, .L25+8
+ 309 0012 D3F82052 		ldr	r5, [r3, #544]
+ 310              		.loc 1 84 6 view .LVU102
+ 311 0016 8DB1     		cbz	r5, .L15
+  85:source\ir_remocon/ir_remocon.c **** 	    TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Falling);				// CC1P = 1
+ 312              		.loc 1 85 6 is_stmt 1 view .LVU103
+ 313 0018 2948     		ldr	r0, .L25
+ 314 001a 0221     		movs	r1, #2
+ 315 001c FFF7FEFF 		bl	TIM_OC1PolarityConfig
+ 316              	.LVL13:
+  86:source\ir_remocon/ir_remocon.c **** 	    TIM_SetCounter(TIM1,0);
+ 317              		.loc 1 86 6 view .LVU104
+ 318 0020 2748     		ldr	r0, .L25
+ 319 0022 0021     		movs	r1, #0
+ 320 0024 FFF7FEFF 		bl	TIM_SetCounter
+ 321              	.LVL14:
+  87:source\ir_remocon/ir_remocon.c **** 	    remocon_status |= 0x10;
+ 322              		.loc 1 87 6 view .LVU105
+ 323              		.loc 1 87 21 is_stmt 0 view .LVU106
+ 324 0028 2378     		ldrb	r3, [r4]	@ zero_extendqisi2
+ 325 002a 43F01003 		orr	r3, r3, #16
+ 326              	.L24:
+  88:source\ir_remocon/ir_remocon.c **** 	 } else {
+  89:source\ir_remocon/ir_remocon.c **** 	    remocon_time = TIM_GetCapture1(TIM1);
+  90:source\ir_remocon/ir_remocon.c **** 	    TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Rising);				// CC1P = 0
+  91:source\ir_remocon/ir_remocon.c **** 	    if (remocon_status & 0x10) {
+  92:source\ir_remocon/ir_remocon.c ****  	       if (remocon_status & 0x80) {
+  93:source\ir_remocon/ir_remocon.c **** 		  if ((remocon_time > 300) && (remocon_time < 800)) {			// 560us
+  94:source\ir_remocon/ir_remocon.c **** 		     remocon_recv <<= 1;
+  95:source\ir_remocon/ir_remocon.c **** 		     remocon_recv |= 0;
+  96:source\ir_remocon/ir_remocon.c **** 		  } else {
+  97:source\ir_remocon/ir_remocon.c **** 		     if ((remocon_time > 1400) && (remocon_time < 1800)) {		// 1680us
+  98:source\ir_remocon/ir_remocon.c **** 			remocon_recv <<= 1;
+  99:source\ir_remocon/ir_remocon.c **** 			remocon_recv |= 1;
+ 100:source\ir_remocon/ir_remocon.c **** 		     } else {
+ 101:source\ir_remocon/ir_remocon.c **** 		        if ((remocon_time > 2200) && (remocon_time < 2600)) {		// 2500us = 2.5ms
+ 102:source\ir_remocon/ir_remocon.c **** 			   remote_count++;
+ 103:source\ir_remocon/ir_remocon.c **** 			   remocon_status &= 0xF0;
+ 104:source\ir_remocon/ir_remocon.c **** 			}
+ 105:source\ir_remocon/ir_remocon.c **** 		     }
+ 106:source\ir_remocon/ir_remocon.c **** 	          }
+ 107:source\ir_remocon/ir_remocon.c **** 	       } else {
+ 108:source\ir_remocon/ir_remocon.c **** 		  if ((remocon_time > 4200) && (remocon_time < 4700)) {	// 4500us = 4.5ms
+ 109:source\ir_remocon/ir_remocon.c **** 		     remocon_status |= 1 << 7;
+ 110:source\ir_remocon/ir_remocon.c **** 		     remote_count = 0;
+ 111:source\ir_remocon/ir_remocon.c **** 		  }
+ 112:source\ir_remocon/ir_remocon.c **** 	       }
+ 113:source\ir_remocon/ir_remocon.c **** 	    }
+ 114:source\ir_remocon/ir_remocon.c **** 	    remocon_status &= ~(1 << 4);
+ 327              		.loc 1 114 21 view .LVU107
+ 328 002e 2370     		strb	r3, [r4]
+ 329              	.L14:
+ 115:source\ir_remocon/ir_remocon.c **** 	 }
+ 116:source\ir_remocon/ir_remocon.c ****       }
+ 117:source\ir_remocon/ir_remocon.c ****       TIM_ClearITPendingBit(TIM1,TIM_IT_CC1);
+ 330              		.loc 1 117 7 is_stmt 1 view .LVU108
+ 118:source\ir_remocon/ir_remocon.c **** }
+ 331              		.loc 1 118 1 is_stmt 0 view .LVU109
+ 332 0030 BDE87040 		pop	{r4, r5, r6, lr}
+ 333              		.cfi_remember_state
+ 334              		.cfi_restore 14
+ 335              		.cfi_restore 6
+ 336              		.cfi_restore 5
+ 337              		.cfi_restore 4
+ 338              		.cfi_def_cfa_offset 0
+ 117:source\ir_remocon/ir_remocon.c **** }
+ 339              		.loc 1 117 7 view .LVU110
+ 340 0034 2248     		ldr	r0, .L25
+ 341 0036 0221     		movs	r1, #2
+ 342 0038 FFF7FEBF 		b	TIM_ClearITPendingBit
+ 343              	.LVL15:
+ 344              	.L15:
+ 345              		.cfi_restore_state
+  89:source\ir_remocon/ir_remocon.c **** 	    TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Rising);				// CC1P = 0
+ 346              		.loc 1 89 6 is_stmt 1 view .LVU111
+  89:source\ir_remocon/ir_remocon.c **** 	    TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Rising);				// CC1P = 0
+ 347              		.loc 1 89 21 is_stmt 0 view .LVU112
+ 348 003c 2048     		ldr	r0, .L25
+  89:source\ir_remocon/ir_remocon.c **** 	    TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Rising);				// CC1P = 0
+ 349              		.loc 1 89 19 view .LVU113
+ 350 003e 234E     		ldr	r6, .L25+12
+  89:source\ir_remocon/ir_remocon.c **** 	    TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Rising);				// CC1P = 0
+ 351              		.loc 1 89 21 view .LVU114
+ 352 0040 FFF7FEFF 		bl	TIM_GetCapture1
+ 353              	.LVL16:
+  90:source\ir_remocon/ir_remocon.c **** 	    if (remocon_status & 0x10) {
+ 354              		.loc 1 90 6 view .LVU115
+ 355 0044 2946     		mov	r1, r5
+  89:source\ir_remocon/ir_remocon.c **** 	    TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Rising);				// CC1P = 0
+ 356              		.loc 1 89 19 view .LVU116
+ 357 0046 3080     		strh	r0, [r6]	@ movhi
+  90:source\ir_remocon/ir_remocon.c **** 	    if (remocon_status & 0x10) {
+ 358              		.loc 1 90 6 is_stmt 1 view .LVU117
+ 359 0048 1D48     		ldr	r0, .L25
+ 360 004a FFF7FEFF 		bl	TIM_OC1PolarityConfig
+ 361              	.LVL17:
+  91:source\ir_remocon/ir_remocon.c ****  	       if (remocon_status & 0x80) {
+ 362              		.loc 1 91 6 view .LVU118
+  91:source\ir_remocon/ir_remocon.c ****  	       if (remocon_status & 0x80) {
+ 363              		.loc 1 91 25 is_stmt 0 view .LVU119
+ 364 004e 2278     		ldrb	r2, [r4]	@ zero_extendqisi2
+  91:source\ir_remocon/ir_remocon.c ****  	       if (remocon_status & 0x80) {
+ 365              		.loc 1 91 9 view .LVU120
+ 366 0050 D306     		lsls	r3, r2, #27
+ 367 0052 0CD5     		bpl	.L16
+  92:source\ir_remocon/ir_remocon.c **** 		  if ((remocon_time > 300) && (remocon_time < 800)) {			// 560us
+ 368              		.loc 1 92 10 is_stmt 1 view .LVU121
+  93:source\ir_remocon/ir_remocon.c **** 		     remocon_recv <<= 1;
+ 369              		.loc 1 93 30 is_stmt 0 view .LVU122
+ 370 0054 3388     		ldrh	r3, [r6]
+  92:source\ir_remocon/ir_remocon.c **** 		  if ((remocon_time > 300) && (remocon_time < 800)) {			// 560us
+ 371              		.loc 1 92 13 view .LVU123
+ 372 0056 1606     		lsls	r6, r2, #24
+ 373 0058 26D5     		bpl	.L17
+  93:source\ir_remocon/ir_remocon.c **** 		     remocon_recv <<= 1;
+ 374              		.loc 1 93 5 is_stmt 1 view .LVU124
+  93:source\ir_remocon/ir_remocon.c **** 		     remocon_recv <<= 1;
+ 375              		.loc 1 93 8 is_stmt 0 view .LVU125
+ 376 005a 6FF49670 		mvn	r0, #300
+ 377 005e 1918     		adds	r1, r3, r0
+ 378 0060 B1F5F97F 		cmp	r1, #498
+ 379 0064 07D8     		bhi	.L18
+  94:source\ir_remocon/ir_remocon.c **** 		     remocon_recv |= 0;
+ 380              		.loc 1 94 8 is_stmt 1 view .LVU126
+  94:source\ir_remocon/ir_remocon.c **** 		     remocon_recv |= 0;
+ 381              		.loc 1 94 21 is_stmt 0 view .LVU127
+ 382 0066 1A4A     		ldr	r2, .L25+16
+ 383 0068 1368     		ldr	r3, [r2]
+ 384 006a 5B00     		lsls	r3, r3, #1
+ 385              	.L23:
+  99:source\ir_remocon/ir_remocon.c **** 		     } else {
+ 386              		.loc 1 99 17 view .LVU128
+ 387 006c 1360     		str	r3, [r2]
+ 388              	.L16:
+ 114:source\ir_remocon/ir_remocon.c **** 	 }
+ 389              		.loc 1 114 6 is_stmt 1 view .LVU129
+ 114:source\ir_remocon/ir_remocon.c **** 	 }
+ 390              		.loc 1 114 21 is_stmt 0 view .LVU130
+ 391 006e 2378     		ldrb	r3, [r4]	@ zero_extendqisi2
+ 392 0070 23F01003 		bic	r3, r3, #16
+ 393 0074 DBE7     		b	.L24
+ 394              	.L18:
+  97:source\ir_remocon/ir_remocon.c **** 			remocon_recv <<= 1;
+ 395              		.loc 1 97 8 is_stmt 1 view .LVU131
+  97:source\ir_remocon/ir_remocon.c **** 			remocon_recv <<= 1;
+ 396              		.loc 1 97 11 is_stmt 0 view .LVU132
+ 397 0076 6FF4AF61 		mvn	r1, #1400
+ 398 007a 5918     		adds	r1, r3, r1
+ 399 007c B1F5C77F 		cmp	r1, #398
+ 400 0080 05D8     		bhi	.L19
+  98:source\ir_remocon/ir_remocon.c **** 			remocon_recv |= 1;
+ 401              		.loc 1 98 4 is_stmt 1 view .LVU133
+  99:source\ir_remocon/ir_remocon.c **** 		     } else {
+ 402              		.loc 1 99 4 view .LVU134
+  99:source\ir_remocon/ir_remocon.c **** 		     } else {
+ 403              		.loc 1 99 17 is_stmt 0 view .LVU135
+ 404 0082 134A     		ldr	r2, .L25+16
+  98:source\ir_remocon/ir_remocon.c **** 			remocon_recv |= 1;
+ 405              		.loc 1 98 17 view .LVU136
+ 406 0084 1368     		ldr	r3, [r2]
+ 407 0086 5B00     		lsls	r3, r3, #1
+  99:source\ir_remocon/ir_remocon.c **** 		     } else {
+ 408              		.loc 1 99 17 view .LVU137
+ 409 0088 43F00103 		orr	r3, r3, #1
+ 410 008c EEE7     		b	.L23
+ 411              	.L19:
+ 101:source\ir_remocon/ir_remocon.c **** 			   remote_count++;
+ 412              		.loc 1 101 11 is_stmt 1 view .LVU138
+ 101:source\ir_remocon/ir_remocon.c **** 			   remote_count++;
+ 413              		.loc 1 101 14 is_stmt 0 view .LVU139
+ 414 008e A3F69903 		subw	r3, r3, #2201
+ 415 0092 B3F5C77F 		cmp	r3, #398
+ 416 0096 EAD8     		bhi	.L16
+ 102:source\ir_remocon/ir_remocon.c **** 			   remocon_status &= 0xF0;
+ 417              		.loc 1 102 7 is_stmt 1 view .LVU140
+ 102:source\ir_remocon/ir_remocon.c **** 			   remocon_status &= 0xF0;
+ 418              		.loc 1 102 19 is_stmt 0 view .LVU141
+ 419 0098 0E49     		ldr	r1, .L25+20
+ 420 009a 0B78     		ldrb	r3, [r1]	@ zero_extendqisi2
+ 103:source\ir_remocon/ir_remocon.c **** 			}
+ 421              		.loc 1 103 22 view .LVU142
+ 422 009c 22F00F02 		bic	r2, r2, #15
+ 102:source\ir_remocon/ir_remocon.c **** 			   remocon_status &= 0xF0;
+ 423              		.loc 1 102 19 view .LVU143
+ 424 00a0 0133     		adds	r3, r3, #1
+ 425 00a2 0B70     		strb	r3, [r1]
+ 103:source\ir_remocon/ir_remocon.c **** 			}
+ 426              		.loc 1 103 7 is_stmt 1 view .LVU144
+ 103:source\ir_remocon/ir_remocon.c **** 			}
+ 427              		.loc 1 103 22 is_stmt 0 view .LVU145
+ 428 00a4 2270     		strb	r2, [r4]
+ 429 00a6 E2E7     		b	.L16
+ 430              	.L17:
+ 108:source\ir_remocon/ir_remocon.c **** 		     remocon_status |= 1 << 7;
+ 431              		.loc 1 108 5 is_stmt 1 view .LVU146
+ 108:source\ir_remocon/ir_remocon.c **** 		     remocon_status |= 1 << 7;
+ 432              		.loc 1 108 8 is_stmt 0 view .LVU147
+ 433 00a8 A3F58353 		sub	r3, r3, #4192
+ 434 00ac 093B     		subs	r3, r3, #9
+ 435 00ae B3F5F97F 		cmp	r3, #498
+ 109:source\ir_remocon/ir_remocon.c **** 		     remote_count = 0;
+ 436              		.loc 1 109 8 is_stmt 1 view .LVU148
+ 110:source\ir_remocon/ir_remocon.c **** 		  }
+ 437              		.loc 1 110 21 is_stmt 0 view .LVU149
+ 438 00b2 9FBF     		itttt	ls
+ 439 00b4 074B     		ldrls	r3, .L25+20
+ 109:source\ir_remocon/ir_remocon.c **** 		     remote_count = 0;
+ 440              		.loc 1 109 23 view .LVU150
+ 441 00b6 62F07F02 		ornls	r2, r2, #127
+ 442 00ba 2270     		strbls	r2, [r4]
+ 110:source\ir_remocon/ir_remocon.c **** 		  }
+ 443              		.loc 1 110 8 is_stmt 1 view .LVU151
+ 110:source\ir_remocon/ir_remocon.c **** 		  }
+ 444              		.loc 1 110 21 is_stmt 0 view .LVU152
+ 445 00bc 1D70     		strbls	r5, [r3]
+ 446 00be D6E7     		b	.L16
+ 447              	.L26:
+ 448              		.align	2
+ 449              	.L25:
+ 450 00c0 00000140 		.word	1073807360
+ 451 00c4 00004042 		.word	1111490560
+ 452 00c8 00000000 		.word	.LANCHOR3
+ 453 00cc 00000000 		.word	.LANCHOR4
+ 454 00d0 00000000 		.word	.LANCHOR5
+ 455 00d4 00000000 		.word	.LANCHOR6
+ 456              		.cfi_endproc
+ 457              	.LFE132:
+ 459              		.section	.text.remocon_scan,"ax",%progbits
+ 460              		.align	1
+ 461              		.global	remocon_scan
+ 462              		.syntax unified
+ 463              		.thumb
+ 464              		.thumb_func
+ 466              	remocon_scan:
+ 467              	.LFB133:
+ 119:source\ir_remocon/ir_remocon.c **** 
+ 120:source\ir_remocon/ir_remocon.c **** 
+ 121:source\ir_remocon/ir_remocon.c **** unsigned char remocon_scan (void)
+ 122:source\ir_remocon/ir_remocon.c **** {
+ 468              		.loc 1 122 1 is_stmt 1 view -0
+ 469              		.cfi_startproc
+ 470              		@ args = 0, pretend = 0, frame = 0
+ 471              		@ frame_needed = 0, uses_anonymous_args = 0
+ 123:source\ir_remocon/ir_remocon.c ****       unsigned char status = 0;
+ 472              		.loc 1 123 7 view .LVU154
+ 473              	.LVL18:
+ 124:source\ir_remocon/ir_remocon.c ****       unsigned char t1,t2;
+ 474              		.loc 1 124 7 view .LVU155
+ 125:source\ir_remocon/ir_remocon.c ****       if (remocon_status & (1 << 6)) {
+ 475              		.loc 1 125 7 view .LVU156
+ 122:source\ir_remocon/ir_remocon.c ****       unsigned char status = 0;
+ 476              		.loc 1 122 1 is_stmt 0 view .LVU157
+ 477 0000 10B5     		push	{r4, lr}
+ 478              		.cfi_def_cfa_offset 8
+ 479              		.cfi_offset 4, -8
+ 480              		.cfi_offset 14, -4
+ 481              		.loc 1 125 26 view .LVU158
+ 482 0002 114C     		ldr	r4, .L39
+ 483 0004 2278     		ldrb	r2, [r4]	@ zero_extendqisi2
+ 484              		.loc 1 125 10 view .LVU159
+ 485 0006 12F04000 		ands	r0, r2, #64
+ 486 000a 11D0     		beq	.L28
+ 126:source\ir_remocon/ir_remocon.c **** 	 t1 = remocon_recv >> 24;
+ 487              		.loc 1 126 3 is_stmt 1 view .LVU160
+ 488              		.loc 1 126 21 is_stmt 0 view .LVU161
+ 489 000c 0F4B     		ldr	r3, .L39+4
+ 490 000e 1B68     		ldr	r3, [r3]
+ 491              	.LVL19:
+ 127:source\ir_remocon/ir_remocon.c **** 	 t2 = (remocon_recv >> 16) & 0xff;
+ 492              		.loc 1 127 3 is_stmt 1 view .LVU162
+ 128:source\ir_remocon/ir_remocon.c ****  	 if (((t1 == (unsigned char)~t2)) && (t1 == REMOTE_ID)) {
+ 493              		.loc 1 128 4 view .LVU163
+ 494              		.loc 1 128 16 is_stmt 0 view .LVU164
+ 495 0010 6FEA1341 		mvn	r1, r3, lsr #16
+ 496              		.loc 1 128 7 view .LVU165
+ 497 0014 C9B2     		uxtb	r1, r1
+ 498 0016 B1EB136F 		cmp	r1, r3, lsr #24
+ 499 001a 0AD1     		bne	.L31
+ 500              		.loc 1 128 37 discriminator 1 view .LVU166
+ 501 001c 49B9     		cbnz	r1, .L31
+ 129:source\ir_remocon/ir_remocon.c **** 	    t1 = remocon_recv >> 8;
+ 502              		.loc 1 129 6 is_stmt 1 view .LVU167
+ 503              		.loc 1 129 9 is_stmt 0 view .LVU168
+ 504 001e C3F30720 		ubfx	r0, r3, #8, #8
+ 505              	.LVL20:
+ 130:source\ir_remocon/ir_remocon.c **** 	    t2 = remocon_recv;
+ 506              		.loc 1 130 6 is_stmt 1 view .LVU169
+ 131:source\ir_remocon/ir_remocon.c **** 	    if (t1 == (unsigned char)~t2) status = t1;
+ 507              		.loc 1 131 6 view .LVU170
+ 508              		.loc 1 131 16 is_stmt 0 view .LVU171
+ 509 0022 DB43     		mvns	r3, r3
+ 510              	.LVL21:
+ 511              		.loc 1 131 9 view .LVU172
+ 512 0024 DBB2     		uxtb	r3, r3
+ 513 0026 8342     		cmp	r3, r0
+ 514 0028 0BD1     		bne	.L32
+ 515              		.loc 1 131 36 is_stmt 1 view .LVU173
+ 516              	.LVL22:
+ 132:source\ir_remocon/ir_remocon.c ****          }
+ 133:source\ir_remocon/ir_remocon.c **** 	 if ((status == 0) || ((remocon_status & 0x80) == 0)) {
+ 517              		.loc 1 133 3 view .LVU174
+ 518              		.loc 1 133 6 is_stmt 0 view .LVU175
+ 519 002a 18B1     		cbz	r0, .L29
+ 520              		.loc 1 133 21 discriminator 1 view .LVU176
+ 521 002c 1306     		lsls	r3, r2, #24
+ 522 002e 01D5     		bpl	.L29
+ 523              	.LVL23:
+ 524              	.L28:
+ 134:source\ir_remocon/ir_remocon.c **** 	    remocon_status &= ~(1 << 6);
+ 135:source\ir_remocon/ir_remocon.c **** 	    remote_count = 0;
+ 136:source\ir_remocon/ir_remocon.c **** 	 }
+ 137:source\ir_remocon/ir_remocon.c ****       }
+ 138:source\ir_remocon/ir_remocon.c ****       return status;
+ 525              		.loc 1 138 7 is_stmt 1 view .LVU177
+ 139:source\ir_remocon/ir_remocon.c **** }
+ 526              		.loc 1 139 1 is_stmt 0 view .LVU178
+ 527 0030 10BD     		pop	{r4, pc}
+ 528              	.LVL24:
+ 529              	.L31:
+ 123:source\ir_remocon/ir_remocon.c ****       unsigned char t1,t2;
+ 530              		.loc 1 123 21 view .LVU179
+ 531 0032 0020     		movs	r0, #0
+ 532              	.LVL25:
+ 533              	.L29:
+ 134:source\ir_remocon/ir_remocon.c **** 	    remocon_status &= ~(1 << 6);
+ 534              		.loc 1 134 6 is_stmt 1 view .LVU180
+ 134:source\ir_remocon/ir_remocon.c **** 	    remocon_status &= ~(1 << 6);
+ 535              		.loc 1 134 21 is_stmt 0 view .LVU181
+ 536 0034 22F04002 		bic	r2, r2, #64
+ 135:source\ir_remocon/ir_remocon.c **** 	 }
+ 537              		.loc 1 135 19 view .LVU182
+ 538 0038 054B     		ldr	r3, .L39+8
+ 134:source\ir_remocon/ir_remocon.c **** 	    remote_count = 0;
+ 539              		.loc 1 134 21 view .LVU183
+ 540 003a 2270     		strb	r2, [r4]
+ 135:source\ir_remocon/ir_remocon.c **** 	 }
+ 541              		.loc 1 135 6 is_stmt 1 view .LVU184
+ 135:source\ir_remocon/ir_remocon.c **** 	 }
+ 542              		.loc 1 135 19 is_stmt 0 view .LVU185
+ 543 003c 0022     		movs	r2, #0
+ 544 003e 1A70     		strb	r2, [r3]
+ 545 0040 F6E7     		b	.L28
+ 546              	.LVL26:
+ 547              	.L32:
+ 123:source\ir_remocon/ir_remocon.c ****       unsigned char t1,t2;
+ 548              		.loc 1 123 21 view .LVU186
+ 549 0042 0846     		mov	r0, r1
+ 550              	.LVL27:
+ 123:source\ir_remocon/ir_remocon.c ****       unsigned char t1,t2;
+ 551              		.loc 1 123 21 view .LVU187
+ 552 0044 F6E7     		b	.L29
+ 553              	.L40:
+ 554 0046 00BF     		.align	2
+ 555              	.L39:
+ 556 0048 00000000 		.word	.LANCHOR3
+ 557 004c 00000000 		.word	.LANCHOR5
+ 558 0050 00000000 		.word	.LANCHOR6
+ 559              		.cfi_endproc
+ 560              	.LFE133:
+ 562              		.section	.rodata.ir_process.str1.1,"aMS",%progbits,1
+ 563              	.LC0:
+ 564 0000 3230302B 		.ascii	"200+\000"
+ 564      00
+ 565              	.LC1:
+ 566 0005 43482D20 		.ascii	"CH- \000"
+ 566      00
+ 567              	.LC2:
+ 568 000a 43482000 		.ascii	"CH \000"
+ 569              	.LC3:
+ 570 000e 43482B20 		.ascii	"CH+ \000"
+ 570      00
+ 571              	.LC4:
+ 572 0013 52522020 		.ascii	"RR  \000"
+ 572      00
+ 573              	.LC5:
+ 574 0018 46462020 		.ascii	"FF  \000"
+ 574      00
+ 575              	.LC6:
+ 576 001d 504C4159 		.ascii	"PLAY\000"
+ 576      00
+ 577              	.LC7:
+ 578 0022 564F4C2D 		.ascii	"VOL-\000"
+ 578      00
+ 579              	.LC8:
+ 580 0027 564F4C2B 		.ascii	"VOL+\000"
+ 580      00
+ 581              	.LC9:
+ 582 002c 45512020 		.ascii	"EQ  \000"
+ 582      00
+ 583              	.LC10:
+ 584 0031 30202020 		.ascii	"0   \000"
+ 584      00
+ 585              	.LC11:
+ 586 0036 3130302B 		.ascii	"100+\000"
+ 586      00
+ 587              	.LC12:
+ 588 003b 34202020 		.ascii	"4   \000"
+ 588      00
+ 589              	.LC13:
+ 590 0040 35202020 		.ascii	"5   \000"
+ 590      00
+ 591              	.LC14:
+ 592 0045 36202020 		.ascii	"6   \000"
+ 592      00
+ 593              	.LC15:
+ 594 004a 32202020 		.ascii	"2   \000"
+ 594      00
+ 595              	.LC16:
+ 596 004f 38202020 		.ascii	"8   \000"
+ 596      00
+ 597              	.LC17:
+ 598 0054 39202020 		.ascii	"9   \000"
+ 598      00
+ 599              	.LC18:
+ 600 0059 37202020 		.ascii	"7   \000"
+ 600      00
+ 601              	.LC19:
+ 602 005e 31202020 		.ascii	"1   \000"
+ 602      00
+ 603              	.LC20:
+ 604 0063 33202020 		.ascii	"3   \000"
+ 604      00
+ 605              	.LC21:
+ 606 0068 49525F52 		.ascii	"IR_RECV: %.2X Key %s \000"
+ 606      4543563A 
+ 606      20252E32 
+ 606      58204B65 
+ 606      79202573 
+ 607              		.section	.text.ir_process,"ax",%progbits
+ 608              		.align	1
+ 609              		.global	ir_process
+ 610              		.syntax unified
+ 611              		.thumb
+ 612              		.thumb_func
+ 614              	ir_process:
+ 615              	.LFB134:
+ 140:source\ir_remocon/ir_remocon.c **** 
+ 141:source\ir_remocon/ir_remocon.c **** 
+ 142:source\ir_remocon/ir_remocon.c **** void ir_process (void)
+ 143:source\ir_remocon/ir_remocon.c **** {
+ 616              		.loc 1 143 1 is_stmt 1 view -0
+ 617              		.cfi_startproc
+ 618              		@ args = 0, pretend = 0, frame = 0
+ 619              		@ frame_needed = 0, uses_anonymous_args = 0
+ 144:source\ir_remocon/ir_remocon.c ****       char *str = 0;
+ 620              		.loc 1 144 7 view .LVU189
+ 621              	.LVL28:
+ 145:source\ir_remocon/ir_remocon.c ****       if (re_ir_enable) {
+ 622              		.loc 1 145 7 view .LVU190
+ 143:source\ir_remocon/ir_remocon.c ****       char *str = 0;
+ 623              		.loc 1 143 1 is_stmt 0 view .LVU191
+ 624 0000 37B5     		push	{r0, r1, r2, r4, r5, lr}
+ 625              		.cfi_def_cfa_offset 24
+ 626              		.cfi_offset 4, -12
+ 627              		.cfi_offset 5, -8
+ 628              		.cfi_offset 14, -4
+ 629              		.loc 1 145 11 view .LVU192
+ 630 0002 6D4C     		ldr	r4, .L91
+ 631 0004 2388     		ldrh	r3, [r4]
+ 632              		.loc 1 145 10 view .LVU193
+ 633 0006 53B1     		cbz	r3, .L42
+ 146:source\ir_remocon/ir_remocon.c ****       	 re_ir_enable--;
+ 634              		.loc 1 146 9 is_stmt 1 view .LVU194
+ 635              		.loc 1 146 21 is_stmt 0 view .LVU195
+ 636 0008 013B     		subs	r3, r3, #1
+ 637 000a 2380     		strh	r3, [r4]	@ movhi
+ 638              	.L43:
+ 147:source\ir_remocon/ir_remocon.c ****       } else {
+ 148:source\ir_remocon/ir_remocon.c ****       	 old_ir = 0;
+ 149:source\ir_remocon/ir_remocon.c ****       }
+ 150:source\ir_remocon/ir_remocon.c ****       ir_time++;
+ 639              		.loc 1 150 7 is_stmt 1 view .LVU196
+ 640              		.loc 1 150 14 is_stmt 0 view .LVU197
+ 641 000c 6B4A     		ldr	r2, .L91+4
+ 642 000e 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 643 0010 0133     		adds	r3, r3, #1
+ 644 0012 DBB2     		uxtb	r3, r3
+ 151:source\ir_remocon/ir_remocon.c ****       if (ir_time >= 20) {
+ 645              		.loc 1 151 7 is_stmt 1 view .LVU198
+ 646              		.loc 1 151 10 is_stmt 0 view .LVU199
+ 647 0014 132B     		cmp	r3, #19
+ 648 0016 05D8     		bhi	.L44
+ 150:source\ir_remocon/ir_remocon.c ****       if (ir_time >= 20) {
+ 649              		.loc 1 150 14 view .LVU200
+ 650 0018 1370     		strb	r3, [r2]
+ 651              	.LVL29:
+ 652              	.L41:
+ 152:source\ir_remocon/ir_remocon.c ****          ir_time = 0;
+ 153:source\ir_remocon/ir_remocon.c **** 	 ir_ret = remocon_scan();
+ 154:source\ir_remocon/ir_remocon.c **** 	 if ((ir_ret) && (ir_ret != old_ir) && (re_ir_enable == 0)) {
+ 155:source\ir_remocon/ir_remocon.c **** 	    old_ir = ir_ret;
+ 156:source\ir_remocon/ir_remocon.c **** 	    switch (ir_ret) {
+ 157:source\ir_remocon/ir_remocon.c ****                case 0xA2:
+ 158:source\ir_remocon/ir_remocon.c ****                	 str = "CH- ";
+ 159:source\ir_remocon/ir_remocon.c ****                	 play_key |= 0x20;
+ 160:source\ir_remocon/ir_remocon.c ****                	 break;
+ 161:source\ir_remocon/ir_remocon.c **** 	       case 0x62:
+ 162:source\ir_remocon/ir_remocon.c **** 	       	 str = "CH ";
+ 163:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x40;
+ 164:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 165:source\ir_remocon/ir_remocon.c **** 	       case 0xE2:
+ 166:source\ir_remocon/ir_remocon.c **** 	       	 str = "CH+ ";
+ 167:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x80;
+ 168:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 169:source\ir_remocon/ir_remocon.c **** 	       case 0x22:
+ 170:source\ir_remocon/ir_remocon.c **** 	       	 str = "RR  ";
+ 171:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x04;
+ 172:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 173:source\ir_remocon/ir_remocon.c **** 	       case 0x02:
+ 174:source\ir_remocon/ir_remocon.c **** 	       	 str = "FF  ";
+ 175:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x02;
+ 176:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 177:source\ir_remocon/ir_remocon.c **** 	       case 0xC2: ////////////////////////////////////
+ 178:source\ir_remocon/ir_remocon.c **** 	       	 str = "PLAY";
+ 179:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x01;
+ 180:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 181:source\ir_remocon/ir_remocon.c **** 	       case 0xE0:
+ 182:source\ir_remocon/ir_remocon.c **** 	       	 str = "VOL-";
+ 183:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x08;
+ 184:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 185:source\ir_remocon/ir_remocon.c **** 	       case 0xA8:
+ 186:source\ir_remocon/ir_remocon.c **** 	       	 str = "VOL+";
+ 187:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x10;
+ 188:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 189:source\ir_remocon/ir_remocon.c **** 	       case 0x90:
+ 190:source\ir_remocon/ir_remocon.c **** 	       	 str = "EQ  ";
+ 191:source\ir_remocon/ir_remocon.c **** 	       	 if (wm8978set.speakersw) {
+ 192:source\ir_remocon/ir_remocon.c ****                     wm8978set.speakersw = 0;
+ 193:source\ir_remocon/ir_remocon.c ****                  } else {
+ 194:source\ir_remocon/ir_remocon.c ****                     wm8978set.speakersw = 1;
+ 195:source\ir_remocon/ir_remocon.c ****                  }
+ 196:source\ir_remocon/ir_remocon.c ****                  old_volume = -1;
+ 197:source\ir_remocon/ir_remocon.c ****                  volume_flag = 1;
+ 198:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 199:source\ir_remocon/ir_remocon.c **** 	       case 0x68:
+ 200:source\ir_remocon/ir_remocon.c **** 	       	 str = "0   ";
+ 201:source\ir_remocon/ir_remocon.c **** 	       	 if (play_audio) {
+ 202:source\ir_remocon/ir_remocon.c ****       	            play_audio = 0;
+ 203:source\ir_remocon/ir_remocon.c ****       	            if (audio_stop_function) audio_stop_function();
+ 204:source\ir_remocon/ir_remocon.c ****       	         }
+ 205:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 206:source\ir_remocon/ir_remocon.c **** 	       case 0x98:
+ 207:source\ir_remocon/ir_remocon.c **** 	      	 str = "100+";
+ 208:source\ir_remocon/ir_remocon.c **** 	      	 if (audio_repeat) audio_repeat = 0;else audio_repeat = 1;
+ 209:source\ir_remocon/ir_remocon.c **** 	      	 break;
+ 210:source\ir_remocon/ir_remocon.c **** 	       case 0xB0:
+ 211:source\ir_remocon/ir_remocon.c **** 	       	 str = "200+";
+ 212:source\ir_remocon/ir_remocon.c **** 	       	 if (play_audio) {
+ 213:source\ir_remocon/ir_remocon.c ****       	            if (audio_stop_function) audio_stop_function();
+ 214:source\ir_remocon/ir_remocon.c ****       	         }
+ 215:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 216:source\ir_remocon/ir_remocon.c **** 	       case 0x30:
+ 217:source\ir_remocon/ir_remocon.c **** 	       	 str = "1   ";
+ 218:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 219:source\ir_remocon/ir_remocon.c **** 	       case 0x18:
+ 220:source\ir_remocon/ir_remocon.c **** 	       	 str = "2   ";
+ 221:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 222:source\ir_remocon/ir_remocon.c **** 	       case 0x7A:
+ 223:source\ir_remocon/ir_remocon.c **** 	       	 str = "3   ";
+ 224:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 225:source\ir_remocon/ir_remocon.c **** 	       case 0x10:
+ 226:source\ir_remocon/ir_remocon.c **** 	       	 str = "4   ";
+ 227:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 228:source\ir_remocon/ir_remocon.c **** 	       case 0x38:
+ 229:source\ir_remocon/ir_remocon.c **** 	       	 str = "5   ";
+ 230:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 231:source\ir_remocon/ir_remocon.c **** 	       case 0x5A:
+ 232:source\ir_remocon/ir_remocon.c **** 	       	 str = "6   ";
+ 233:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 234:source\ir_remocon/ir_remocon.c **** 	       case 0x42:
+ 235:source\ir_remocon/ir_remocon.c **** 	       	 str = "7   ";
+ 236:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 237:source\ir_remocon/ir_remocon.c **** 	       case 0x4A:
+ 238:source\ir_remocon/ir_remocon.c **** 	       	 str = "8   ";
+ 239:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 240:source\ir_remocon/ir_remocon.c **** 	       case 0x52:
+ 241:source\ir_remocon/ir_remocon.c **** 	       	 str = "9   ";
+ 242:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 243:source\ir_remocon/ir_remocon.c **** 	    }
+ 244:source\ir_remocon/ir_remocon.c ****             re_ir_enable = 50;
+ 245:source\ir_remocon/ir_remocon.c **** 	    remocon_status = 0;
+ 246:source\ir_remocon/ir_remocon.c **** 	    remocon_recv = 0;
+ 247:source\ir_remocon/ir_remocon.c **** 	    lcd_printf(1,2,"IR_RECV: %.2X Key %s ",ir_ret,str);
+ 248:source\ir_remocon/ir_remocon.c **** 	 }
+ 249:source\ir_remocon/ir_remocon.c ****       }
+ 250:source\ir_remocon/ir_remocon.c **** }
+ 653              		.loc 1 250 1 view .LVU201
+ 654 001a 03B0     		add	sp, sp, #12
+ 655              		.cfi_remember_state
+ 656              		.cfi_def_cfa_offset 12
+ 657              		@ sp needed
+ 658 001c 30BD     		pop	{r4, r5, pc}
+ 659              	.LVL30:
+ 660              	.L42:
+ 661              		.cfi_restore_state
+ 148:source\ir_remocon/ir_remocon.c ****       }
+ 662              		.loc 1 148 9 is_stmt 1 view .LVU202
+ 148:source\ir_remocon/ir_remocon.c ****       }
+ 663              		.loc 1 148 16 is_stmt 0 view .LVU203
+ 664 001e 684A     		ldr	r2, .L91+8
+ 665 0020 1370     		strb	r3, [r2]
+ 666 0022 F3E7     		b	.L43
+ 667              	.L44:
+ 152:source\ir_remocon/ir_remocon.c ****          ir_time = 0;
+ 668              		.loc 1 152 10 is_stmt 1 view .LVU204
+ 152:source\ir_remocon/ir_remocon.c ****          ir_time = 0;
+ 669              		.loc 1 152 18 is_stmt 0 view .LVU205
+ 670 0024 0023     		movs	r3, #0
+ 671 0026 1370     		strb	r3, [r2]
+ 153:source\ir_remocon/ir_remocon.c **** 	 if ((ir_ret) && (ir_ret != old_ir) && (re_ir_enable == 0)) {
+ 672              		.loc 1 153 3 is_stmt 1 view .LVU206
+ 153:source\ir_remocon/ir_remocon.c **** 	 if ((ir_ret) && (ir_ret != old_ir) && (re_ir_enable == 0)) {
+ 673              		.loc 1 153 12 is_stmt 0 view .LVU207
+ 674 0028 FFF7FEFF 		bl	remocon_scan
+ 675              	.LVL31:
+ 153:source\ir_remocon/ir_remocon.c **** 	 if ((ir_ret) && (ir_ret != old_ir) && (re_ir_enable == 0)) {
+ 676              		.loc 1 153 10 view .LVU208
+ 677 002c 654D     		ldr	r5, .L91+12
+ 678 002e 2870     		strb	r0, [r5]
+ 154:source\ir_remocon/ir_remocon.c **** 	    old_ir = ir_ret;
+ 679              		.loc 1 154 3 is_stmt 1 view .LVU209
+ 154:source\ir_remocon/ir_remocon.c **** 	    old_ir = ir_ret;
+ 680              		.loc 1 154 6 is_stmt 0 view .LVU210
+ 681 0030 0028     		cmp	r0, #0
+ 682 0032 F2D0     		beq	.L41
+ 154:source\ir_remocon/ir_remocon.c **** 	    old_ir = ir_ret;
+ 683              		.loc 1 154 27 discriminator 1 view .LVU211
+ 684 0034 624B     		ldr	r3, .L91+8
+ 154:source\ir_remocon/ir_remocon.c **** 	    old_ir = ir_ret;
+ 685              		.loc 1 154 16 discriminator 1 view .LVU212
+ 686 0036 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 687 0038 8242     		cmp	r2, r0
+ 688 003a EED0     		beq	.L41
+ 154:source\ir_remocon/ir_remocon.c **** 	    old_ir = ir_ret;
+ 689              		.loc 1 154 38 discriminator 2 view .LVU213
+ 690 003c 2288     		ldrh	r2, [r4]
+ 691 003e 002A     		cmp	r2, #0
+ 692 0040 EBD1     		bne	.L41
+ 155:source\ir_remocon/ir_remocon.c **** 	    switch (ir_ret) {
+ 693              		.loc 1 155 6 is_stmt 1 view .LVU214
+ 156:source\ir_remocon/ir_remocon.c ****                case 0xA2:
+ 694              		.loc 1 156 6 is_stmt 0 view .LVU215
+ 695 0042 6228     		cmp	r0, #98
+ 155:source\ir_remocon/ir_remocon.c **** 	    switch (ir_ret) {
+ 696              		.loc 1 155 13 view .LVU216
+ 697 0044 1870     		strb	r0, [r3]
+ 156:source\ir_remocon/ir_remocon.c ****                case 0xA2:
+ 698              		.loc 1 156 6 is_stmt 1 view .LVU217
+ 699 0046 5ED0     		beq	.L47
+ 700 0048 2ED8     		bhi	.L48
+ 701 004a 3828     		cmp	r0, #56
+ 702 004c 00F0AB80 		beq	.L70
+ 703 0050 1DD8     		bhi	.L50
+ 704 0052 1828     		cmp	r0, #24
+ 705 0054 00F0A980 		beq	.L71
+ 706 0058 14D8     		bhi	.L51
+ 707 005a 0228     		cmp	r0, #2
+ 708 005c 61D0     		beq	.L52
+ 226:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 709              		.loc 1 226 15 is_stmt 0 view .LVU218
+ 710 005e 5A4B     		ldr	r3, .L91+16
+ 711 0060 1028     		cmp	r0, #16
+ 712              	.L89:
+ 223:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 713              		.loc 1 223 15 view .LVU219
+ 714 0062 18BF     		it	ne
+ 715 0064 0023     		movne	r3, #0
+ 716              	.LVL32:
+ 717              	.L49:
+ 244:source\ir_remocon/ir_remocon.c **** 	    remocon_status = 0;
+ 718              		.loc 1 244 13 is_stmt 1 view .LVU220
+ 245:source\ir_remocon/ir_remocon.c **** 	    remocon_recv = 0;
+ 719              		.loc 1 245 21 is_stmt 0 view .LVU221
+ 720 0066 5949     		ldr	r1, .L91+20
+ 244:source\ir_remocon/ir_remocon.c **** 	    remocon_status = 0;
+ 721              		.loc 1 244 26 view .LVU222
+ 722 0068 3222     		movs	r2, #50
+ 723 006a 2280     		strh	r2, [r4]	@ movhi
+ 245:source\ir_remocon/ir_remocon.c **** 	    remocon_recv = 0;
+ 724              		.loc 1 245 6 is_stmt 1 view .LVU223
+ 245:source\ir_remocon/ir_remocon.c **** 	    remocon_recv = 0;
+ 725              		.loc 1 245 21 is_stmt 0 view .LVU224
+ 726 006c 0022     		movs	r2, #0
+ 727 006e 0A70     		strb	r2, [r1]
+ 246:source\ir_remocon/ir_remocon.c **** 	    lcd_printf(1,2,"IR_RECV: %.2X Key %s ",ir_ret,str);
+ 728              		.loc 1 246 6 is_stmt 1 view .LVU225
+ 246:source\ir_remocon/ir_remocon.c **** 	    lcd_printf(1,2,"IR_RECV: %.2X Key %s ",ir_ret,str);
+ 729              		.loc 1 246 19 is_stmt 0 view .LVU226
+ 730 0070 5749     		ldr	r1, .L91+24
+ 247:source\ir_remocon/ir_remocon.c **** 	 }
+ 731              		.loc 1 247 6 view .LVU227
+ 732 0072 0120     		movs	r0, #1
+ 246:source\ir_remocon/ir_remocon.c **** 	    lcd_printf(1,2,"IR_RECV: %.2X Key %s ",ir_ret,str);
+ 733              		.loc 1 246 19 view .LVU228
+ 734 0074 0A60     		str	r2, [r1]
+ 247:source\ir_remocon/ir_remocon.c **** 	 }
+ 735              		.loc 1 247 6 is_stmt 1 view .LVU229
+ 736 0076 0093     		str	r3, [sp]
+ 737 0078 564A     		ldr	r2, .L91+28
+ 738 007a 2B78     		ldrb	r3, [r5]	@ zero_extendqisi2
+ 739              	.LVL33:
+ 247:source\ir_remocon/ir_remocon.c **** 	 }
+ 740              		.loc 1 247 6 is_stmt 0 view .LVU230
+ 741 007c 0221     		movs	r1, #2
+ 742 007e FFF7FEFF 		bl	lcd_printf
+ 743              	.LVL34:
+ 744              		.loc 1 250 1 view .LVU231
+ 745 0082 CAE7     		b	.L41
+ 746              	.LVL35:
+ 747              	.L51:
+ 156:source\ir_remocon/ir_remocon.c ****                case 0xA2:
+ 748              		.loc 1 156 6 view .LVU232
+ 749 0084 2228     		cmp	r0, #34
+ 750 0086 45D0     		beq	.L53
+ 751 0088 534B     		ldr	r3, .L91+32
+ 752 008a 3028     		cmp	r0, #48
+ 753 008c E9E7     		b	.L89
+ 754              	.L50:
+ 755 008e 5228     		cmp	r0, #82
+ 756 0090 00F08D80 		beq	.L74
+ 757 0094 05D8     		bhi	.L54
+ 758 0096 4228     		cmp	r0, #66
+ 759 0098 00F08B80 		beq	.L75
+ 238:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 760              		.loc 1 238 15 view .LVU233
+ 761 009c 4F4B     		ldr	r3, .L91+36
+ 762 009e 4A28     		cmp	r0, #74
+ 763 00a0 DFE7     		b	.L89
+ 764              	.L54:
+ 232:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 765              		.loc 1 232 15 view .LVU234
+ 766 00a2 4F4B     		ldr	r3, .L91+40
+ 767 00a4 5A28     		cmp	r0, #90
+ 768 00a6 DCE7     		b	.L89
+ 769              	.L48:
+ 156:source\ir_remocon/ir_remocon.c ****                case 0xA2:
+ 770              		.loc 1 156 6 view .LVU235
+ 771 00a8 A828     		cmp	r0, #168
+ 772 00aa 48D0     		beq	.L55
+ 773 00ac 0DD8     		bhi	.L56
+ 774 00ae 9028     		cmp	r0, #144
+ 775 00b0 4CD0     		beq	.L57
+ 776 00b2 04D8     		bhi	.L58
+ 777 00b4 6828     		cmp	r0, #104
+ 778 00b6 57D0     		beq	.L59
+ 223:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 779              		.loc 1 223 15 view .LVU236
+ 780 00b8 4A4B     		ldr	r3, .L91+44
+ 781 00ba 7A28     		cmp	r0, #122
+ 782 00bc D1E7     		b	.L89
+ 783              	.L58:
+ 156:source\ir_remocon/ir_remocon.c ****                case 0xA2:
+ 784              		.loc 1 156 6 view .LVU237
+ 785 00be 9828     		cmp	r0, #152
+ 786 00c0 5FD0     		beq	.L60
+ 787 00c2 A228     		cmp	r0, #162
+ 788 00c4 18D0     		beq	.L61
+ 789              	.L87:
+ 144:source\ir_remocon/ir_remocon.c ****       if (re_ir_enable) {
+ 790              		.loc 1 144 13 view .LVU238
+ 791 00c6 0023     		movs	r3, #0
+ 792 00c8 CDE7     		b	.L49
+ 793              	.L56:
+ 156:source\ir_remocon/ir_remocon.c ****                case 0xA2:
+ 794              		.loc 1 156 6 view .LVU239
+ 795 00ca E028     		cmp	r0, #224
+ 796 00cc 30D0     		beq	.L62
+ 797 00ce 0AD8     		bhi	.L63
+ 798 00d0 B028     		cmp	r0, #176
+ 799 00d2 5FD0     		beq	.L64
+ 800 00d4 C228     		cmp	r0, #194
+ 801 00d6 F6D1     		bne	.L87
+ 178:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x01;
+ 802              		.loc 1 178 11 is_stmt 1 view .LVU240
+ 803              	.LVL36:
+ 179:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 804              		.loc 1 179 11 view .LVU241
+ 179:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 805              		.loc 1 179 20 is_stmt 0 view .LVU242
+ 806 00d8 434A     		ldr	r2, .L91+48
+ 807 00da 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 808 00dc 43F00103 		orr	r3, r3, #1
+ 809 00e0 1370     		strb	r3, [r2]
+ 180:source\ir_remocon/ir_remocon.c **** 	       case 0xE0:
+ 810              		.loc 1 180 11 is_stmt 1 view .LVU243
+ 178:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x01;
+ 811              		.loc 1 178 15 is_stmt 0 view .LVU244
+ 812 00e2 424B     		ldr	r3, .L91+52
+ 180:source\ir_remocon/ir_remocon.c **** 	       case 0xE0:
+ 813              		.loc 1 180 11 view .LVU245
+ 814 00e4 BFE7     		b	.L49
+ 815              	.LVL37:
+ 816              	.L63:
+ 156:source\ir_remocon/ir_remocon.c ****                case 0xA2:
+ 817              		.loc 1 156 6 view .LVU246
+ 818 00e6 E228     		cmp	r0, #226
+ 819 00e8 EDD1     		bne	.L87
+ 166:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x80;
+ 820              		.loc 1 166 11 is_stmt 1 view .LVU247
+ 821              	.LVL38:
+ 167:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 822              		.loc 1 167 11 view .LVU248
+ 167:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 823              		.loc 1 167 20 is_stmt 0 view .LVU249
+ 824 00ea 3F4A     		ldr	r2, .L91+48
+ 825 00ec 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 826 00ee 43F08003 		orr	r3, r3, #128
+ 827 00f2 1370     		strb	r3, [r2]
+ 168:source\ir_remocon/ir_remocon.c **** 	       case 0x22:
+ 828              		.loc 1 168 11 is_stmt 1 view .LVU250
+ 166:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x80;
+ 829              		.loc 1 166 15 is_stmt 0 view .LVU251
+ 830 00f4 3E4B     		ldr	r3, .L91+56
+ 168:source\ir_remocon/ir_remocon.c **** 	       case 0x22:
+ 831              		.loc 1 168 11 view .LVU252
+ 832 00f6 B6E7     		b	.L49
+ 833              	.LVL39:
+ 834              	.L61:
+ 158:source\ir_remocon/ir_remocon.c ****                	 play_key |= 0x20;
+ 835              		.loc 1 158 18 is_stmt 1 view .LVU253
+ 159:source\ir_remocon/ir_remocon.c ****                	 break;
+ 836              		.loc 1 159 18 view .LVU254
+ 159:source\ir_remocon/ir_remocon.c ****                	 break;
+ 837              		.loc 1 159 27 is_stmt 0 view .LVU255
+ 838 00f8 3B4A     		ldr	r2, .L91+48
+ 839 00fa 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 840 00fc 43F02003 		orr	r3, r3, #32
+ 841 0100 1370     		strb	r3, [r2]
+ 160:source\ir_remocon/ir_remocon.c **** 	       case 0x62:
+ 842              		.loc 1 160 18 is_stmt 1 view .LVU256
+ 158:source\ir_remocon/ir_remocon.c ****                	 play_key |= 0x20;
+ 843              		.loc 1 158 22 is_stmt 0 view .LVU257
+ 844 0102 3C4B     		ldr	r3, .L91+60
+ 160:source\ir_remocon/ir_remocon.c **** 	       case 0x62:
+ 845              		.loc 1 160 18 view .LVU258
+ 846 0104 AFE7     		b	.L49
+ 847              	.LVL40:
+ 848              	.L47:
+ 162:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x40;
+ 849              		.loc 1 162 11 is_stmt 1 view .LVU259
+ 163:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 850              		.loc 1 163 11 view .LVU260
+ 163:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 851              		.loc 1 163 20 is_stmt 0 view .LVU261
+ 852 0106 384A     		ldr	r2, .L91+48
+ 853 0108 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 854 010a 43F04003 		orr	r3, r3, #64
+ 855 010e 1370     		strb	r3, [r2]
+ 164:source\ir_remocon/ir_remocon.c **** 	       case 0xE2:
+ 856              		.loc 1 164 11 is_stmt 1 view .LVU262
+ 162:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x40;
+ 857              		.loc 1 162 15 is_stmt 0 view .LVU263
+ 858 0110 394B     		ldr	r3, .L91+64
+ 164:source\ir_remocon/ir_remocon.c **** 	       case 0xE2:
+ 859              		.loc 1 164 11 view .LVU264
+ 860 0112 A8E7     		b	.L49
+ 861              	.LVL41:
+ 862              	.L53:
+ 170:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x04;
+ 863              		.loc 1 170 11 is_stmt 1 view .LVU265
+ 171:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 864              		.loc 1 171 11 view .LVU266
+ 171:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 865              		.loc 1 171 20 is_stmt 0 view .LVU267
+ 866 0114 344A     		ldr	r2, .L91+48
+ 867 0116 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 868 0118 43F00403 		orr	r3, r3, #4
+ 869 011c 1370     		strb	r3, [r2]
+ 172:source\ir_remocon/ir_remocon.c **** 	       case 0x02:
+ 870              		.loc 1 172 11 is_stmt 1 view .LVU268
+ 170:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x04;
+ 871              		.loc 1 170 15 is_stmt 0 view .LVU269
+ 872 011e 374B     		ldr	r3, .L91+68
+ 172:source\ir_remocon/ir_remocon.c **** 	       case 0x02:
+ 873              		.loc 1 172 11 view .LVU270
+ 874 0120 A1E7     		b	.L49
+ 875              	.LVL42:
+ 876              	.L52:
+ 174:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x02;
+ 877              		.loc 1 174 11 is_stmt 1 view .LVU271
+ 175:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 878              		.loc 1 175 11 view .LVU272
+ 175:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 879              		.loc 1 175 20 is_stmt 0 view .LVU273
+ 880 0122 314A     		ldr	r2, .L91+48
+ 881 0124 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 882 0126 43F00203 		orr	r3, r3, #2
+ 883 012a 1370     		strb	r3, [r2]
+ 176:source\ir_remocon/ir_remocon.c **** 	       case 0xC2: ////////////////////////////////////
+ 884              		.loc 1 176 11 is_stmt 1 view .LVU274
+ 174:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x02;
+ 885              		.loc 1 174 15 is_stmt 0 view .LVU275
+ 886 012c 344B     		ldr	r3, .L91+72
+ 176:source\ir_remocon/ir_remocon.c **** 	       case 0xC2: ////////////////////////////////////
+ 887              		.loc 1 176 11 view .LVU276
+ 888 012e 9AE7     		b	.L49
+ 889              	.LVL43:
+ 890              	.L62:
+ 182:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x08;
+ 891              		.loc 1 182 11 is_stmt 1 view .LVU277
+ 183:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 892              		.loc 1 183 11 view .LVU278
+ 183:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 893              		.loc 1 183 20 is_stmt 0 view .LVU279
+ 894 0130 2D4A     		ldr	r2, .L91+48
+ 895 0132 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 896 0134 43F00803 		orr	r3, r3, #8
+ 897 0138 1370     		strb	r3, [r2]
+ 184:source\ir_remocon/ir_remocon.c **** 	       case 0xA8:
+ 898              		.loc 1 184 11 is_stmt 1 view .LVU280
+ 182:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x08;
+ 899              		.loc 1 182 15 is_stmt 0 view .LVU281
+ 900 013a 324B     		ldr	r3, .L91+76
+ 184:source\ir_remocon/ir_remocon.c **** 	       case 0xA8:
+ 901              		.loc 1 184 11 view .LVU282
+ 902 013c 93E7     		b	.L49
+ 903              	.LVL44:
+ 904              	.L55:
+ 186:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x10;
+ 905              		.loc 1 186 11 is_stmt 1 view .LVU283
+ 187:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 906              		.loc 1 187 11 view .LVU284
+ 187:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 907              		.loc 1 187 20 is_stmt 0 view .LVU285
+ 908 013e 2A4A     		ldr	r2, .L91+48
+ 909 0140 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 910 0142 43F01003 		orr	r3, r3, #16
+ 911 0146 1370     		strb	r3, [r2]
+ 188:source\ir_remocon/ir_remocon.c **** 	       case 0x90:
+ 912              		.loc 1 188 11 is_stmt 1 view .LVU286
+ 186:source\ir_remocon/ir_remocon.c **** 	       	 play_key |= 0x10;
+ 913              		.loc 1 186 15 is_stmt 0 view .LVU287
+ 914 0148 2F4B     		ldr	r3, .L91+80
+ 188:source\ir_remocon/ir_remocon.c **** 	       case 0x90:
+ 915              		.loc 1 188 11 view .LVU288
+ 916 014a 8CE7     		b	.L49
+ 917              	.LVL45:
+ 918              	.L57:
+ 190:source\ir_remocon/ir_remocon.c **** 	       	 if (wm8978set.speakersw) {
+ 919              		.loc 1 190 11 is_stmt 1 view .LVU289
+ 191:source\ir_remocon/ir_remocon.c ****                     wm8978set.speakersw = 0;
+ 920              		.loc 1 191 11 view .LVU290
+ 921 014c 2F4A     		ldr	r2, .L91+84
+ 191:source\ir_remocon/ir_remocon.c ****                     wm8978set.speakersw = 0;
+ 922              		.loc 1 191 14 is_stmt 0 view .LVU291
+ 923 014e 137B     		ldrb	r3, [r2, #12]	@ zero_extendqisi2
+ 924 0150 B3FA83F3 		clz	r3, r3
+ 925 0154 5B09     		lsrs	r3, r3, #5
+ 926 0156 1373     		strb	r3, [r2, #12]
+ 196:source\ir_remocon/ir_remocon.c ****                  volume_flag = 1;
+ 927              		.loc 1 196 18 is_stmt 1 view .LVU292
+ 196:source\ir_remocon/ir_remocon.c ****                  volume_flag = 1;
+ 928              		.loc 1 196 29 is_stmt 0 view .LVU293
+ 929 0158 2D4B     		ldr	r3, .L91+88
+ 930 015a FF22     		movs	r2, #255
+ 931 015c 1A70     		strb	r2, [r3]
+ 197:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 932              		.loc 1 197 18 is_stmt 1 view .LVU294
+ 197:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 933              		.loc 1 197 30 is_stmt 0 view .LVU295
+ 934 015e 2D4B     		ldr	r3, .L91+92
+ 935 0160 0122     		movs	r2, #1
+ 936 0162 1A70     		strb	r2, [r3]
+ 198:source\ir_remocon/ir_remocon.c **** 	       case 0x68:
+ 937              		.loc 1 198 11 is_stmt 1 view .LVU296
+ 190:source\ir_remocon/ir_remocon.c **** 	       	 if (wm8978set.speakersw) {
+ 938              		.loc 1 190 15 is_stmt 0 view .LVU297
+ 939 0164 2C4B     		ldr	r3, .L91+96
+ 198:source\ir_remocon/ir_remocon.c **** 	       case 0x68:
+ 940              		.loc 1 198 11 view .LVU298
+ 941 0166 7EE7     		b	.L49
+ 942              	.LVL46:
+ 943              	.L59:
+ 200:source\ir_remocon/ir_remocon.c **** 	       	 if (play_audio) {
+ 944              		.loc 1 200 11 is_stmt 1 view .LVU299
+ 201:source\ir_remocon/ir_remocon.c ****       	            play_audio = 0;
+ 945              		.loc 1 201 11 view .LVU300
+ 201:source\ir_remocon/ir_remocon.c ****       	            play_audio = 0;
+ 946              		.loc 1 201 15 is_stmt 0 view .LVU301
+ 947 0168 2C4B     		ldr	r3, .L91+100
+ 948 016a 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 201:source\ir_remocon/ir_remocon.c ****       	            play_audio = 0;
+ 949              		.loc 1 201 14 view .LVU302
+ 950 016c 0AB9     		cbnz	r2, .L67
+ 951              	.L90:
+ 200:source\ir_remocon/ir_remocon.c **** 	       	 if (play_audio) {
+ 952              		.loc 1 200 15 discriminator 1 view .LVU303
+ 953 016e 2C4B     		ldr	r3, .L91+104
+ 954 0170 79E7     		b	.L49
+ 955              	.L67:
+ 202:source\ir_remocon/ir_remocon.c ****       	            if (audio_stop_function) audio_stop_function();
+ 956              		.loc 1 202 20 is_stmt 1 view .LVU304
+ 202:source\ir_remocon/ir_remocon.c ****       	            if (audio_stop_function) audio_stop_function();
+ 957              		.loc 1 202 31 is_stmt 0 view .LVU305
+ 958 0172 0022     		movs	r2, #0
+ 959 0174 1A70     		strb	r2, [r3]
+ 203:source\ir_remocon/ir_remocon.c ****       	         }
+ 960              		.loc 1 203 20 is_stmt 1 view .LVU306
+ 203:source\ir_remocon/ir_remocon.c ****       	         }
+ 961              		.loc 1 203 24 is_stmt 0 view .LVU307
+ 962 0176 2B4B     		ldr	r3, .L91+108
+ 963 0178 1B68     		ldr	r3, [r3]
+ 203:source\ir_remocon/ir_remocon.c ****       	         }
+ 964              		.loc 1 203 23 view .LVU308
+ 965 017a 002B     		cmp	r3, #0
+ 966 017c F7D0     		beq	.L90
+ 203:source\ir_remocon/ir_remocon.c ****       	         }
+ 967              		.loc 1 203 45 is_stmt 1 discriminator 1 view .LVU309
+ 968 017e 9847     		blx	r3
+ 969              	.LVL47:
+ 970 0180 F5E7     		b	.L90
+ 971              	.LVL48:
+ 972              	.L60:
+ 207:source\ir_remocon/ir_remocon.c **** 	      	 if (audio_repeat) audio_repeat = 0;else audio_repeat = 1;
+ 973              		.loc 1 207 10 view .LVU310
+ 208:source\ir_remocon/ir_remocon.c **** 	      	 break;
+ 974              		.loc 1 208 10 view .LVU311
+ 208:source\ir_remocon/ir_remocon.c **** 	      	 break;
+ 975              		.loc 1 208 14 is_stmt 0 view .LVU312
+ 976 0182 294B     		ldr	r3, .L91+112
+ 977 0184 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 208:source\ir_remocon/ir_remocon.c **** 	      	 break;
+ 978              		.loc 1 208 13 view .LVU313
+ 979 0186 1AB1     		cbz	r2, .L69
+ 208:source\ir_remocon/ir_remocon.c **** 	      	 break;
+ 980              		.loc 1 208 28 is_stmt 1 discriminator 1 view .LVU314
+ 208:source\ir_remocon/ir_remocon.c **** 	      	 break;
+ 981              		.loc 1 208 41 is_stmt 0 discriminator 1 view .LVU315
+ 982 0188 0022     		movs	r2, #0
+ 983              	.L88:
+ 208:source\ir_remocon/ir_remocon.c **** 	      	 break;
+ 984              		.loc 1 208 63 discriminator 2 view .LVU316
+ 985 018a 1A70     		strb	r2, [r3]
+ 207:source\ir_remocon/ir_remocon.c **** 	      	 if (audio_repeat) audio_repeat = 0;else audio_repeat = 1;
+ 986              		.loc 1 207 14 discriminator 2 view .LVU317
+ 987 018c 274B     		ldr	r3, .L91+116
+ 988 018e 6AE7     		b	.L49
+ 989              	.L69:
+ 208:source\ir_remocon/ir_remocon.c **** 	      	 break;
+ 990              		.loc 1 208 50 is_stmt 1 discriminator 2 view .LVU318
+ 208:source\ir_remocon/ir_remocon.c **** 	      	 break;
+ 991              		.loc 1 208 63 is_stmt 0 discriminator 2 view .LVU319
+ 992 0190 0122     		movs	r2, #1
+ 993 0192 FAE7     		b	.L88
+ 994              	.LVL49:
+ 995              	.L64:
+ 211:source\ir_remocon/ir_remocon.c **** 	       	 if (play_audio) {
+ 996              		.loc 1 211 11 is_stmt 1 view .LVU320
+ 212:source\ir_remocon/ir_remocon.c ****       	            if (audio_stop_function) audio_stop_function();
+ 997              		.loc 1 212 11 view .LVU321
+ 212:source\ir_remocon/ir_remocon.c ****       	            if (audio_stop_function) audio_stop_function();
+ 998              		.loc 1 212 15 is_stmt 0 view .LVU322
+ 999 0194 214B     		ldr	r3, .L91+100
+ 1000 0196 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 212:source\ir_remocon/ir_remocon.c ****       	            if (audio_stop_function) audio_stop_function();
+ 1001              		.loc 1 212 14 view .LVU323
+ 1002 0198 1BB1     		cbz	r3, .L80
+ 213:source\ir_remocon/ir_remocon.c ****       	         }
+ 1003              		.loc 1 213 20 is_stmt 1 view .LVU324
+ 213:source\ir_remocon/ir_remocon.c ****       	         }
+ 1004              		.loc 1 213 24 is_stmt 0 view .LVU325
+ 1005 019a 224B     		ldr	r3, .L91+108
+ 1006 019c 1B68     		ldr	r3, [r3]
+ 213:source\ir_remocon/ir_remocon.c ****       	         }
+ 1007              		.loc 1 213 23 view .LVU326
+ 1008 019e 03B1     		cbz	r3, .L80
+ 213:source\ir_remocon/ir_remocon.c ****       	         }
+ 1009              		.loc 1 213 45 is_stmt 1 discriminator 1 view .LVU327
+ 1010 01a0 9847     		blx	r3
+ 1011              	.LVL50:
+ 1012              	.L80:
+ 211:source\ir_remocon/ir_remocon.c **** 	       	 if (play_audio) {
+ 1013              		.loc 1 211 15 is_stmt 0 view .LVU328
+ 1014 01a2 234B     		ldr	r3, .L91+120
+ 1015 01a4 5FE7     		b	.L49
+ 1016              	.LVL51:
+ 1017              	.L70:
+ 229:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 1018              		.loc 1 229 15 view .LVU329
+ 1019 01a6 234B     		ldr	r3, .L91+124
+ 1020 01a8 5DE7     		b	.L49
+ 1021              	.L71:
+ 220:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 1022              		.loc 1 220 15 view .LVU330
+ 1023 01aa 234B     		ldr	r3, .L91+128
+ 1024 01ac 5BE7     		b	.L49
+ 1025              	.L74:
+ 241:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 1026              		.loc 1 241 15 view .LVU331
+ 1027 01ae 234B     		ldr	r3, .L91+132
+ 1028 01b0 59E7     		b	.L49
+ 1029              	.L75:
+ 235:source\ir_remocon/ir_remocon.c **** 	       	 break;
+ 1030              		.loc 1 235 15 view .LVU332
+ 1031 01b2 234B     		ldr	r3, .L91+136
+ 1032 01b4 57E7     		b	.L49
+ 1033              	.L92:
+ 1034 01b6 00BF     		.align	2
+ 1035              	.L91:
+ 1036 01b8 00000000 		.word	.LANCHOR7
+ 1037 01bc 00000000 		.word	.LANCHOR2
+ 1038 01c0 00000000 		.word	.LANCHOR1
+ 1039 01c4 00000000 		.word	.LANCHOR0
+ 1040 01c8 3B000000 		.word	.LC12
+ 1041 01cc 00000000 		.word	.LANCHOR3
+ 1042 01d0 00000000 		.word	.LANCHOR5
+ 1043 01d4 68000000 		.word	.LC21
+ 1044 01d8 5E000000 		.word	.LC19
+ 1045 01dc 4F000000 		.word	.LC16
+ 1046 01e0 45000000 		.word	.LC14
+ 1047 01e4 63000000 		.word	.LC20
+ 1048 01e8 00000000 		.word	play_key
+ 1049 01ec 1D000000 		.word	.LC6
+ 1050 01f0 0E000000 		.word	.LC3
+ 1051 01f4 05000000 		.word	.LC1
+ 1052 01f8 0A000000 		.word	.LC2
+ 1053 01fc 13000000 		.word	.LC4
+ 1054 0200 18000000 		.word	.LC5
+ 1055 0204 22000000 		.word	.LC7
+ 1056 0208 27000000 		.word	.LC8
+ 1057 020c 00000000 		.word	wm8978set
+ 1058 0210 00000000 		.word	old_volume
+ 1059 0214 00000000 		.word	volume_flag
+ 1060 0218 2C000000 		.word	.LC9
+ 1061 021c 00000000 		.word	play_audio
+ 1062 0220 31000000 		.word	.LC10
+ 1063 0224 00000000 		.word	audio_stop_function
+ 1064 0228 00000000 		.word	audio_repeat
+ 1065 022c 36000000 		.word	.LC11
+ 1066 0230 00000000 		.word	.LC0
+ 1067 0234 40000000 		.word	.LC13
+ 1068 0238 4A000000 		.word	.LC15
+ 1069 023c 54000000 		.word	.LC17
+ 1070 0240 59000000 		.word	.LC18
+ 1071              		.cfi_endproc
+ 1072              	.LFE134:
+ 1074              		.global	ir_time
+ 1075              		.global	old_ir
+ 1076              		.global	ir_ret
+ 1077              		.global	remocon_recv
+ 1078              		.global	re_ir_enable
+ 1079              		.global	remocon_time
+ 1080              		.global	remocon_status
+ 1081              		.global	remote_count
+ 1082              		.section	.bss.ir_ret,"aw",%nobits
+ 1083              		.set	.LANCHOR0,. + 0
+ 1086              	ir_ret:
+ 1087 0000 00       		.space	1
+ 1088              		.section	.bss.ir_time,"aw",%nobits
+ 1089              		.set	.LANCHOR2,. + 0
+ 1092              	ir_time:
+ 1093 0000 00       		.space	1
+ 1094              		.section	.bss.old_ir,"aw",%nobits
+ 1095              		.set	.LANCHOR1,. + 0
+ 1098              	old_ir:
+ 1099 0000 00       		.space	1
+ 1100              		.section	.bss.re_ir_enable,"aw",%nobits
+ 1101              		.align	1
+ 1102              		.set	.LANCHOR7,. + 0
+ 1105              	re_ir_enable:
+ 1106 0000 0000     		.space	2
+ 1107              		.section	.bss.remocon_recv,"aw",%nobits
+ 1108              		.align	2
+ 1109              		.set	.LANCHOR5,. + 0
+ 1112              	remocon_recv:
+ 1113 0000 00000000 		.space	4
+ 1114              		.section	.bss.remocon_status,"aw",%nobits
+ 1115              		.set	.LANCHOR3,. + 0
+ 1118              	remocon_status:
+ 1119 0000 00       		.space	1
+ 1120              		.section	.bss.remocon_time,"aw",%nobits
+ 1121              		.align	1
+ 1122              		.set	.LANCHOR4,. + 0
+ 1125              	remocon_time:
+ 1126 0000 0000     		.space	2
+ 1127              		.section	.bss.remote_count,"aw",%nobits
+ 1128              		.set	.LANCHOR6,. + 0
+ 1131              	remote_count:
+ 1132 0000 00       		.space	1
+ 1133              		.text
+ 1134              	.Letext0:
+ 1135              		.file 2 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 1136              		.file 3 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 1137              		.file 4 "/project/stm32f4x_iolib/include/cmsis/stm32f4xx.h"
+ 1138              		.file 5 "/project/stm32f4x_iolib/include/misc.h"
+ 1139              		.file 6 "/project/stm32f4x_iolib/include/stm32f4xx_gpio.h"
+ 1140              		.file 7 "/project/stm32f4x_iolib/include/stm32f4xx_tim.h"
+ 1141              		.file 8 "source\\ir_remocon\\../prototype.h"
+ 1142              		.file 9 "/project/stm32f4x_iolib/include/fundefs.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 ir_remocon.c
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:20     .text.ir_remocon_init:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:26     .text.ir_remocon_init:00000000 ir_remocon_init
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:186    .text.ir_remocon_init:000000b8 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:195    .text.TIM1_UP_TIM10_IRQHandler:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:201    .text.TIM1_UP_TIM10_IRQHandler:00000000 TIM1_UP_TIM10_IRQHandler
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:271    .text.TIM1_UP_TIM10_IRQHandler:00000044 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:277    .text.TIM1_CC_IRQHandler:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:283    .text.TIM1_CC_IRQHandler:00000000 TIM1_CC_IRQHandler
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:450    .text.TIM1_CC_IRQHandler:000000c0 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:460    .text.remocon_scan:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:466    .text.remocon_scan:00000000 remocon_scan
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:556    .text.remocon_scan:00000048 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:608    .text.ir_process:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:614    .text.ir_process:00000000 ir_process
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1036   .text.ir_process:000001b8 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1092   .bss.ir_time:00000000 ir_time
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1098   .bss.old_ir:00000000 old_ir
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1086   .bss.ir_ret:00000000 ir_ret
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1112   .bss.remocon_recv:00000000 remocon_recv
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1105   .bss.re_ir_enable:00000000 re_ir_enable
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1125   .bss.remocon_time:00000000 remocon_time
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1118   .bss.remocon_status:00000000 remocon_status
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1131   .bss.remote_count:00000000 remote_count
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1087   .bss.ir_ret:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1093   .bss.ir_time:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1099   .bss.old_ir:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1101   .bss.re_ir_enable:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1108   .bss.remocon_recv:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1119   .bss.remocon_status:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1121   .bss.remocon_time:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccnlYTl7.s:1132   .bss.remote_count:00000000 $d
+
+UNDEFINED SYMBOLS
+RCC_AHB1PeriphClockCmd
+RCC_APB2PeriphClockCmd
+GPIO_Init_Pin
+GPIO_PinAFConfig
+TIM_TimeBaseInit
+TIM_ICInit
+TIM_ITConfig
+TIM_Cmd
+NVIC_Init
+TIM_GetITStatus
+TIM_ClearITPendingBit
+TIM_OC1PolarityConfig
+TIM_SetCounter
+TIM_GetCapture1
+lcd_printf
+play_key
+wm8978set
+old_volume
+volume_flag
+play_audio
+audio_stop_function
+audio_repeat

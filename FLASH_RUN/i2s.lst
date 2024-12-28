@@ -1,0 +1,1279 @@
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 4
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"i2s.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.I2S2_Init,"ax",%progbits
+  20              		.align	1
+  21              		.global	I2S2_Init
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	I2S2_Init:
+  27              	.LVL0:
+  28              	.LFB130:
+  29              		.file 1 "source\\i2s\\i2s.c"
+   1:source\i2s/i2s.c **** /********************************************************************************/
+   2:source\i2s/i2s.c **** /* i2s.c                                                                        */
+   3:source\i2s/i2s.c **** /* STM32F407ZGT6                                                                */
+   4:source\i2s/i2s.c **** /* (Lee ChangWoo HL2IRW  hl2irw@daum.net 010-8573-6860)                 	*/
+   5:source\i2s/i2s.c **** /* stm32f4x_test								*/
+   6:source\i2s/i2s.c **** /********************************************************************************/
+   7:source\i2s/i2s.c **** #include "../../hwdefs.h"
+   8:source\i2s/i2s.c **** #include "../prototype.h"
+   9:source\i2s/i2s.c **** 
+  10:source\i2s/i2s.c **** 
+  11:source\i2s/i2s.c **** void (*i2s_tx_callback)(void);
+  12:source\i2s/i2s.c **** void (*i2s_rx_callback)(void);
+  13:source\i2s/i2s.c **** 
+  14:source\i2s/i2s.c **** 
+  15:source\i2s/i2s.c **** 
+  16:source\i2s/i2s.c **** void I2S2_Init (unsigned short I2S_Standard,unsigned short I2S_Mode,unsigned short I2S_Clock_Polari
+  17:source\i2s/i2s.c **** {
+  30              		.loc 1 17 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 16
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  18:source\i2s/i2s.c ****       I2S_InitTypeDef I2S_InitStructure;
+  34              		.loc 1 18 7 view .LVU1
+  19:source\i2s/i2s.c ****       RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+  35              		.loc 1 19 7 view .LVU2
+  17:source\i2s/i2s.c ****       I2S_InitTypeDef I2S_InitStructure;
+  36              		.loc 1 17 1 is_stmt 0 view .LVU3
+  37 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+  38              		.cfi_def_cfa_offset 20
+  39              		.cfi_offset 4, -20
+  40              		.cfi_offset 5, -16
+  41              		.cfi_offset 6, -12
+  42              		.cfi_offset 7, -8
+  43              		.cfi_offset 14, -4
+  44 0002 0646     		mov	r6, r0
+  45 0004 85B0     		sub	sp, sp, #20
+  46              		.cfi_def_cfa_offset 40
+  17:source\i2s/i2s.c ****       I2S_InitTypeDef I2S_InitStructure;
+  47              		.loc 1 17 1 view .LVU4
+  48 0006 0F46     		mov	r7, r1
+  49              		.loc 1 19 7 view .LVU5
+  50 0008 4FF48040 		mov	r0, #16384
+  51              	.LVL1:
+  52              		.loc 1 19 7 view .LVU6
+  53 000c 0121     		movs	r1, #1
+  54              	.LVL2:
+  17:source\i2s/i2s.c ****       I2S_InitTypeDef I2S_InitStructure;
+  55              		.loc 1 17 1 view .LVU7
+  56 000e 1446     		mov	r4, r2
+  57 0010 1D46     		mov	r5, r3
+  58              		.loc 1 19 7 view .LVU8
+  59 0012 FFF7FEFF 		bl	RCC_APB1PeriphClockCmd
+  60              	.LVL3:
+  20:source\i2s/i2s.c ****       RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2,ENABLE);
+  61              		.loc 1 20 7 is_stmt 1 view .LVU9
+  62 0016 0121     		movs	r1, #1
+  63 0018 4FF48040 		mov	r0, #16384
+  64 001c FFF7FEFF 		bl	RCC_APB1PeriphResetCmd
+  65              	.LVL4:
+  21:source\i2s/i2s.c ****       RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2,DISABLE);
+  66              		.loc 1 21 7 view .LVU10
+  67 0020 0021     		movs	r1, #0
+  68 0022 4FF48040 		mov	r0, #16384
+  69 0026 FFF7FEFF 		bl	RCC_APB1PeriphResetCmd
+  70              	.LVL5:
+  22:source\i2s/i2s.c ****       I2S_InitStructure.I2S_Mode = I2S_Mode;
+  71              		.loc 1 22 7 view .LVU11
+  23:source\i2s/i2s.c ****       I2S_InitStructure.I2S_Standard = I2S_Standard;
+  24:source\i2s/i2s.c ****       I2S_InitStructure.I2S_DataFormat = I2S_DataFormat;
+  25:source\i2s/i2s.c ****       I2S_InitStructure.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
+  72              		.loc 1 25 40 is_stmt 0 view .LVU12
+  73 002a 0023     		movs	r3, #0
+  24:source\i2s/i2s.c ****       I2S_InitStructure.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
+  74              		.loc 1 24 40 view .LVU13
+  75 002c ADF80450 		strh	r5, [sp, #4]	@ movhi
+  26:source\i2s/i2s.c ****       I2S_InitStructure.I2S_AudioFreq = I2S_AudioFreq_Default;
+  27:source\i2s/i2s.c ****       I2S_InitStructure.I2S_CPOL = I2S_Clock_Polarity;
+  28:source\i2s/i2s.c ****       I2S_Init(SPI2,&I2S_InitStructure);
+  76              		.loc 1 28 7 view .LVU14
+  77 0030 6946     		mov	r1, sp
+  26:source\i2s/i2s.c ****       I2S_InitStructure.I2S_AudioFreq = I2S_AudioFreq_Default;
+  78              		.loc 1 26 39 view .LVU15
+  79 0032 0225     		movs	r5, #2
+  80              		.loc 1 28 7 view .LVU16
+  81 0034 0B48     		ldr	r0, .L2
+  25:source\i2s/i2s.c ****       I2S_InitStructure.I2S_AudioFreq = I2S_AudioFreq_Default;
+  82              		.loc 1 25 40 view .LVU17
+  83 0036 ADF80630 		strh	r3, [sp, #6]	@ movhi
+  22:source\i2s/i2s.c ****       I2S_InitStructure.I2S_Standard = I2S_Standard;
+  84              		.loc 1 22 34 view .LVU18
+  85 003a ADF80070 		strh	r7, [sp]	@ movhi
+  23:source\i2s/i2s.c ****       I2S_InitStructure.I2S_DataFormat = I2S_DataFormat;
+  86              		.loc 1 23 7 is_stmt 1 view .LVU19
+  23:source\i2s/i2s.c ****       I2S_InitStructure.I2S_DataFormat = I2S_DataFormat;
+  87              		.loc 1 23 38 is_stmt 0 view .LVU20
+  88 003e ADF80260 		strh	r6, [sp, #2]	@ movhi
+  24:source\i2s/i2s.c ****       I2S_InitStructure.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
+  89              		.loc 1 24 7 is_stmt 1 view .LVU21
+  25:source\i2s/i2s.c ****       I2S_InitStructure.I2S_AudioFreq = I2S_AudioFreq_Default;
+  90              		.loc 1 25 7 view .LVU22
+  26:source\i2s/i2s.c ****       I2S_InitStructure.I2S_CPOL = I2S_Clock_Polarity;
+  91              		.loc 1 26 7 view .LVU23
+  26:source\i2s/i2s.c ****       I2S_InitStructure.I2S_CPOL = I2S_Clock_Polarity;
+  92              		.loc 1 26 39 is_stmt 0 view .LVU24
+  93 0042 0295     		str	r5, [sp, #8]
+  27:source\i2s/i2s.c ****       I2S_Init(SPI2,&I2S_InitStructure);
+  94              		.loc 1 27 7 is_stmt 1 view .LVU25
+  27:source\i2s/i2s.c ****       I2S_Init(SPI2,&I2S_InitStructure);
+  95              		.loc 1 27 34 is_stmt 0 view .LVU26
+  96 0044 ADF80C40 		strh	r4, [sp, #12]	@ movhi
+  97              		.loc 1 28 7 is_stmt 1 view .LVU27
+  98 0048 FFF7FEFF 		bl	I2S_Init
+  99              	.LVL6:
+  29:source\i2s/i2s.c ****       SPI_I2S_DMACmd(SPI2,SPI_I2S_DMAReq_Tx,ENABLE);
+ 100              		.loc 1 29 7 view .LVU28
+ 101 004c 0122     		movs	r2, #1
+ 102 004e 2946     		mov	r1, r5
+ 103 0050 0448     		ldr	r0, .L2
+ 104 0052 FFF7FEFF 		bl	SPI_I2S_DMACmd
+ 105              	.LVL7:
+  30:source\i2s/i2s.c ****       I2S_Cmd(SPI2,ENABLE);
+ 106              		.loc 1 30 7 view .LVU29
+ 107 0056 0348     		ldr	r0, .L2
+ 108 0058 0121     		movs	r1, #1
+ 109 005a FFF7FEFF 		bl	I2S_Cmd
+ 110              	.LVL8:
+  31:source\i2s/i2s.c **** }
+ 111              		.loc 1 31 1 is_stmt 0 view .LVU30
+ 112 005e 05B0     		add	sp, sp, #20
+ 113              		.cfi_def_cfa_offset 20
+ 114              		@ sp needed
+ 115 0060 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 116              	.L3:
+ 117 0062 00BF     		.align	2
+ 118              	.L2:
+ 119 0064 00380040 		.word	1073756160
+ 120              		.cfi_endproc
+ 121              	.LFE130:
+ 123              		.section	.text.I2S2ext_Init,"ax",%progbits
+ 124              		.align	1
+ 125              		.global	I2S2ext_Init
+ 126              		.syntax unified
+ 127              		.thumb
+ 128              		.thumb_func
+ 130              	I2S2ext_Init:
+ 131              	.LVL9:
+ 132              	.LFB131:
+  32:source\i2s/i2s.c **** 
+  33:source\i2s/i2s.c **** 
+  34:source\i2s/i2s.c **** void I2S2ext_Init (unsigned short I2S_Standard,unsigned short I2S_Mode,unsigned short I2S_Clock_Pol
+  35:source\i2s/i2s.c **** {
+ 133              		.loc 1 35 1 is_stmt 1 view -0
+ 134              		.cfi_startproc
+ 135              		@ args = 0, pretend = 0, frame = 16
+ 136              		@ frame_needed = 0, uses_anonymous_args = 0
+  36:source\i2s/i2s.c ****       I2S_InitTypeDef I2S2ext_InitStructure;
+ 137              		.loc 1 36 7 view .LVU32
+  37:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_Mode = I2S_Mode ^ (1 << 8);
+ 138              		.loc 1 37 7 view .LVU33
+  35:source\i2s/i2s.c ****       I2S_InitTypeDef I2S2ext_InitStructure;
+ 139              		.loc 1 35 1 is_stmt 0 view .LVU34
+ 140 0000 1FB5     		push	{r0, r1, r2, r3, r4, lr}
+ 141              		.cfi_def_cfa_offset 24
+ 142              		.cfi_offset 14, -4
+ 143              		.loc 1 37 38 view .LVU35
+ 144 0002 81F48071 		eor	r1, r1, #256
+ 145              	.LVL10:
+  38:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_Standard = I2S_Standard;
+  39:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_DataFormat = I2S_DataFormat;
+ 146              		.loc 1 39 44 view .LVU36
+ 147 0006 ADF80430 		strh	r3, [sp, #4]	@ movhi
+  40:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
+ 148              		.loc 1 40 44 view .LVU37
+ 149 000a 0023     		movs	r3, #0
+ 150              	.LVL11:
+  37:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_Standard = I2S_Standard;
+ 151              		.loc 1 37 38 view .LVU38
+ 152 000c ADF80010 		strh	r1, [sp]	@ movhi
+  38:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_Standard = I2S_Standard;
+ 153              		.loc 1 38 7 is_stmt 1 view .LVU39
+  38:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_Standard = I2S_Standard;
+ 154              		.loc 1 38 42 is_stmt 0 view .LVU40
+ 155 0010 ADF80200 		strh	r0, [sp, #2]	@ movhi
+  39:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
+ 156              		.loc 1 39 7 is_stmt 1 view .LVU41
+ 157              		.loc 1 40 7 view .LVU42
+ 158              		.loc 1 40 44 is_stmt 0 view .LVU43
+ 159 0014 ADF80630 		strh	r3, [sp, #6]	@ movhi
+  41:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_AudioFreq = I2S_AudioFreq_Default;
+ 160              		.loc 1 41 7 is_stmt 1 view .LVU44
+  42:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_CPOL = I2S_Clock_Polarity;
+  43:source\i2s/i2s.c ****       I2S_FullDuplexConfig(I2S2ext,&I2S2ext_InitStructure);
+ 161              		.loc 1 43 7 is_stmt 0 view .LVU45
+ 162 0018 6946     		mov	r1, sp
+  41:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_AudioFreq = I2S_AudioFreq_Default;
+ 163              		.loc 1 41 43 view .LVU46
+ 164 001a 0223     		movs	r3, #2
+ 165              		.loc 1 43 7 view .LVU47
+ 166 001c 0848     		ldr	r0, .L5
+ 167              	.LVL12:
+  41:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_AudioFreq = I2S_AudioFreq_Default;
+ 168              		.loc 1 41 43 view .LVU48
+ 169 001e 0293     		str	r3, [sp, #8]
+  42:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_CPOL = I2S_Clock_Polarity;
+ 170              		.loc 1 42 7 is_stmt 1 view .LVU49
+  42:source\i2s/i2s.c ****       I2S2ext_InitStructure.I2S_CPOL = I2S_Clock_Polarity;
+ 171              		.loc 1 42 38 is_stmt 0 view .LVU50
+ 172 0020 ADF80C20 		strh	r2, [sp, #12]	@ movhi
+ 173              		.loc 1 43 7 is_stmt 1 view .LVU51
+ 174 0024 FFF7FEFF 		bl	I2S_FullDuplexConfig
+ 175              	.LVL13:
+  44:source\i2s/i2s.c ****       SPI_I2S_DMACmd(I2S2ext,SPI_I2S_DMAReq_Rx,ENABLE);
+ 176              		.loc 1 44 7 view .LVU52
+ 177 0028 0122     		movs	r2, #1
+ 178 002a 1146     		mov	r1, r2
+ 179 002c 0448     		ldr	r0, .L5
+ 180 002e FFF7FEFF 		bl	SPI_I2S_DMACmd
+ 181              	.LVL14:
+  45:source\i2s/i2s.c ****       I2S_Cmd(I2S2ext,ENABLE);
+ 182              		.loc 1 45 7 view .LVU53
+ 183 0032 0348     		ldr	r0, .L5
+ 184 0034 0121     		movs	r1, #1
+ 185 0036 FFF7FEFF 		bl	I2S_Cmd
+ 186              	.LVL15:
+  46:source\i2s/i2s.c **** }
+ 187              		.loc 1 46 1 is_stmt 0 view .LVU54
+ 188 003a 05B0     		add	sp, sp, #20
+ 189              		.cfi_def_cfa_offset 4
+ 190              		@ sp needed
+ 191 003c 5DF804FB 		ldr	pc, [sp], #4
+ 192              	.L6:
+ 193              		.align	2
+ 194              	.L5:
+ 195 0040 00340040 		.word	1073755136
+ 196              		.cfi_endproc
+ 197              	.LFE131:
+ 199              		.section	.text.I2S2_SampleRate_Set,"ax",%progbits
+ 200              		.align	1
+ 201              		.global	I2S2_SampleRate_Set
+ 202              		.syntax unified
+ 203              		.thumb
+ 204              		.thumb_func
+ 206              	I2S2_SampleRate_Set:
+ 207              	.LVL16:
+ 208              	.LFB132:
+  47:source\i2s/i2s.c **** 
+  48:source\i2s/i2s.c **** 
+  49:source\i2s/i2s.c **** const unsigned short I2S_PSC_TBL[][5] = {
+  50:source\i2s/i2s.c ****       {800,256,5,12,1},			//8Khz
+  51:source\i2s/i2s.c ****       {1102,429,4,19,0},		//11.025Khz
+  52:source\i2s/i2s.c ****       {1600,213,2,13,0},		//16Khz
+  53:source\i2s/i2s.c ****       {2205,429,4,9,1},			//22.05Khz
+  54:source\i2s/i2s.c ****       {3200,213,2,6,1},			//32Khz
+  55:source\i2s/i2s.c ****       {4410,271,2,6,0},			//44.1Khz
+  56:source\i2s/i2s.c ****       {4800,258,3,3,1},			//48Khz
+  57:source\i2s/i2s.c ****       {8820,316,2,3,1},			//88.2Khz
+  58:source\i2s/i2s.c ****       {9600,344,2,3,1},			//96Khz
+  59:source\i2s/i2s.c ****       {17640,361,2,2,0},		//176.4Khz
+  60:source\i2s/i2s.c ****       {19200,393,2,2,0},		//192Khz
+  61:source\i2s/i2s.c **** };
+  62:source\i2s/i2s.c **** 
+  63:source\i2s/i2s.c **** 
+  64:source\i2s/i2s.c **** unsigned char I2S2_SampleRate_Set (unsigned int samplerate)
+  65:source\i2s/i2s.c **** {
+ 209              		.loc 1 65 1 is_stmt 1 view -0
+ 210              		.cfi_startproc
+ 211              		@ args = 0, pretend = 0, frame = 0
+ 212              		@ frame_needed = 0, uses_anonymous_args = 0
+  66:source\i2s/i2s.c ****       unsigned char i = 0;
+ 213              		.loc 1 66 7 view .LVU56
+  67:source\i2s/i2s.c ****       unsigned int tempreg = 0;
+ 214              		.loc 1 67 7 view .LVU57
+  68:source\i2s/i2s.c ****       samplerate /= 10;
+ 215              		.loc 1 68 7 view .LVU58
+  65:source\i2s/i2s.c ****       unsigned char i = 0;
+ 216              		.loc 1 65 1 is_stmt 0 view .LVU59
+ 217 0000 38B5     		push	{r3, r4, r5, lr}
+ 218              		.cfi_def_cfa_offset 16
+ 219              		.cfi_offset 3, -16
+ 220              		.cfi_offset 4, -12
+ 221              		.cfi_offset 5, -8
+ 222              		.cfi_offset 14, -4
+  69:source\i2s/i2s.c ****       for (i=0;i<(sizeof(I2S_PSC_TBL)/10);i++) {
+  70:source\i2s/i2s.c **** 	  if (samplerate == I2S_PSC_TBL[i][0]) break;
+ 223              		.loc 1 70 36 view .LVU60
+ 224 0002 194C     		ldr	r4, .L16
+  68:source\i2s/i2s.c ****       for (i=0;i<(sizeof(I2S_PSC_TBL)/10);i++) {
+ 225              		.loc 1 68 18 view .LVU61
+ 226 0004 0023     		movs	r3, #0
+ 227 0006 0A22     		movs	r2, #10
+ 228 0008 B0FBF2F0 		udiv	r0, r0, r2
+ 229              	.LVL17:
+  69:source\i2s/i2s.c ****       for (i=0;i<(sizeof(I2S_PSC_TBL)/10);i++) {
+ 230              		.loc 1 69 7 is_stmt 1 view .LVU62
+  69:source\i2s/i2s.c ****       for (i=0;i<(sizeof(I2S_PSC_TBL)/10);i++) {
+ 231              		.loc 1 69 16 view .LVU63
+ 232              	.L9:
+ 233              		.loc 1 70 36 is_stmt 0 view .LVU64
+ 234 000c 02FB03F1 		mul	r1, r2, r3
+ 235 0010 DDB2     		uxtb	r5, r3
+ 236              	.LVL18:
+ 237              		.loc 1 70 4 is_stmt 1 view .LVU65
+ 238              		.loc 1 70 36 is_stmt 0 view .LVU66
+ 239 0012 095B     		ldrh	r1, [r1, r4]
+ 240              		.loc 1 70 7 view .LVU67
+ 241 0014 8142     		cmp	r1, r0
+ 242 0016 03D0     		beq	.L8
+  69:source\i2s/i2s.c ****       for (i=0;i<(sizeof(I2S_PSC_TBL)/10);i++) {
+ 243              		.loc 1 69 43 is_stmt 1 discriminator 2 view .LVU68
+ 244              	.LVL19:
+  69:source\i2s/i2s.c ****       for (i=0;i<(sizeof(I2S_PSC_TBL)/10);i++) {
+ 245              		.loc 1 69 16 discriminator 2 view .LVU69
+  69:source\i2s/i2s.c ****       for (i=0;i<(sizeof(I2S_PSC_TBL)/10);i++) {
+ 246              		.loc 1 69 7 is_stmt 0 discriminator 2 view .LVU70
+ 247 0018 0133     		adds	r3, r3, #1
+ 248              	.LVL20:
+  69:source\i2s/i2s.c ****       for (i=0;i<(sizeof(I2S_PSC_TBL)/10);i++) {
+ 249              		.loc 1 69 7 discriminator 2 view .LVU71
+ 250 001a 0B2B     		cmp	r3, #11
+ 251 001c F6D1     		bne	.L9
+ 252 001e 1D46     		mov	r5, r3
+ 253              	.LVL21:
+ 254              	.L8:
+  71:source\i2s/i2s.c ****       }
+  72:source\i2s/i2s.c ****       RCC_PLLI2SCmd(DISABLE);
+ 255              		.loc 1 72 7 is_stmt 1 view .LVU72
+ 256 0020 0020     		movs	r0, #0
+ 257              	.LVL22:
+ 258              		.loc 1 72 7 is_stmt 0 view .LVU73
+ 259 0022 FFF7FEFF 		bl	RCC_PLLI2SCmd
+ 260              	.LVL23:
+  73:source\i2s/i2s.c ****       if (i == (sizeof(I2S_PSC_TBL) / 10)) return 1;
+ 261              		.loc 1 73 7 is_stmt 1 view .LVU74
+ 262              		.loc 1 73 10 is_stmt 0 view .LVU75
+ 263 0026 0B2D     		cmp	r5, #11
+ 264 0028 1CD0     		beq	.L12
+  74:source\i2s/i2s.c ****       RCC_PLLI2SConfig((unsigned int)I2S_PSC_TBL[i][1],(unsigned int)I2S_PSC_TBL[i][2]);
+ 265              		.loc 1 74 7 is_stmt 1 view .LVU76
+ 266              		.loc 1 74 84 is_stmt 0 view .LVU77
+ 267 002a 0A23     		movs	r3, #10
+ 268 002c 03FB0543 		mla	r3, r3, r5, r4
+ 269              		.loc 1 74 7 view .LVU78
+ 270 0030 9988     		ldrh	r1, [r3, #4]
+ 271 0032 5888     		ldrh	r0, [r3, #2]
+ 272 0034 FFF7FEFF 		bl	RCC_PLLI2SConfig
+ 273              	.LVL24:
+  75:source\i2s/i2s.c ****       RCC->CR |= 1 << 26;
+ 274              		.loc 1 75 7 is_stmt 1 view .LVU79
+ 275              		.loc 1 75 15 is_stmt 0 view .LVU80
+ 276 0038 0C4B     		ldr	r3, .L16+4
+ 277 003a 1A68     		ldr	r2, [r3]
+ 278 003c 42F08062 		orr	r2, r2, #67108864
+ 279 0040 1A60     		str	r2, [r3]
+  76:source\i2s/i2s.c ****       while ((RCC->CR & 1 << 27) == 0);
+ 280              		.loc 1 76 7 is_stmt 1 view .LVU81
+ 281              	.L11:
+ 282              		.loc 1 76 39 discriminator 1 view .LVU82
+ 283              		.loc 1 76 13 discriminator 1 view .LVU83
+ 284              		.loc 1 76 18 is_stmt 0 discriminator 1 view .LVU84
+ 285 0042 1A68     		ldr	r2, [r3]
+ 286              		.loc 1 76 13 discriminator 1 view .LVU85
+ 287 0044 1201     		lsls	r2, r2, #4
+ 288 0046 FCD5     		bpl	.L11
+  77:source\i2s/i2s.c ****       tempreg = I2S_PSC_TBL[i][3] << 0;
+ 289              		.loc 1 77 7 is_stmt 1 view .LVU86
+ 290              		.loc 1 77 31 is_stmt 0 view .LVU87
+ 291 0048 0A23     		movs	r3, #10
+ 292 004a 03FB0544 		mla	r4, r3, r5, r4
+  78:source\i2s/i2s.c ****       tempreg |= I2S_PSC_TBL[i][4] << 8;
+  79:source\i2s/i2s.c ****       tempreg |= 1 << 9;
+  80:source\i2s/i2s.c ****       SPI2->I2SPR = tempreg;
+  81:source\i2s/i2s.c ****       return 0;
+ 293              		.loc 1 81 14 view .LVU88
+ 294 004e 0020     		movs	r0, #0
+  78:source\i2s/i2s.c ****       tempreg |= I2S_PSC_TBL[i][4] << 8;
+ 295              		.loc 1 78 32 view .LVU89
+ 296 0050 2289     		ldrh	r2, [r4, #8]
+  77:source\i2s/i2s.c ****       tempreg = I2S_PSC_TBL[i][3] << 0;
+ 297              		.loc 1 77 15 view .LVU90
+ 298 0052 E388     		ldrh	r3, [r4, #6]
+ 299              	.LVL25:
+  78:source\i2s/i2s.c ****       tempreg |= I2S_PSC_TBL[i][4] << 8;
+ 300              		.loc 1 78 7 is_stmt 1 view .LVU91
+  78:source\i2s/i2s.c ****       tempreg |= I2S_PSC_TBL[i][4] << 8;
+ 301              		.loc 1 78 15 is_stmt 0 view .LVU92
+ 302 0054 43EA0223 		orr	r3, r3, r2, lsl #8
+ 303              	.LVL26:
+  79:source\i2s/i2s.c ****       SPI2->I2SPR = tempreg;
+ 304              		.loc 1 79 7 is_stmt 1 view .LVU93
+  80:source\i2s/i2s.c ****       return 0;
+ 305              		.loc 1 80 7 view .LVU94
+  79:source\i2s/i2s.c ****       SPI2->I2SPR = tempreg;
+ 306              		.loc 1 79 15 is_stmt 0 view .LVU95
+ 307 0058 43F40073 		orr	r3, r3, #512
+ 308              	.LVL27:
+  80:source\i2s/i2s.c ****       return 0;
+ 309              		.loc 1 80 19 view .LVU96
+ 310 005c 044A     		ldr	r2, .L16+8
+ 311 005e 9BB2     		uxth	r3, r3
+ 312              	.LVL28:
+  80:source\i2s/i2s.c ****       return 0;
+ 313              		.loc 1 80 19 view .LVU97
+ 314 0060 1384     		strh	r3, [r2, #32]	@ movhi
+ 315              		.loc 1 81 7 is_stmt 1 view .LVU98
+ 316              	.LVL29:
+ 317              	.L10:
+  82:source\i2s/i2s.c **** }
+ 318              		.loc 1 82 1 is_stmt 0 view .LVU99
+ 319 0062 38BD     		pop	{r3, r4, r5, pc}
+ 320              	.LVL30:
+ 321              	.L12:
+  73:source\i2s/i2s.c ****       RCC_PLLI2SConfig((unsigned int)I2S_PSC_TBL[i][1],(unsigned int)I2S_PSC_TBL[i][2]);
+ 322              		.loc 1 73 51 view .LVU100
+ 323 0064 0120     		movs	r0, #1
+ 324 0066 FCE7     		b	.L10
+ 325              	.L17:
+ 326              		.align	2
+ 327              	.L16:
+ 328 0068 00000000 		.word	.LANCHOR0
+ 329 006c 00380240 		.word	1073887232
+ 330 0070 00380040 		.word	1073756160
+ 331              		.cfi_endproc
+ 332              	.LFE132:
+ 334              		.section	.text.I2S2_TX_DMA_Init,"ax",%progbits
+ 335              		.align	1
+ 336              		.global	I2S2_TX_DMA_Init
+ 337              		.syntax unified
+ 338              		.thumb
+ 339              		.thumb_func
+ 341              	I2S2_TX_DMA_Init:
+ 342              	.LVL31:
+ 343              	.LFB133:
+  83:source\i2s/i2s.c **** 
+  84:source\i2s/i2s.c **** 
+  85:source\i2s/i2s.c **** void I2S2_TX_DMA_Init (unsigned char *buf0,unsigned char *buf1,unsigned short num)
+  86:source\i2s/i2s.c **** {
+ 344              		.loc 1 86 1 is_stmt 1 view -0
+ 345              		.cfi_startproc
+ 346              		@ args = 0, pretend = 0, frame = 64
+ 347              		@ frame_needed = 0, uses_anonymous_args = 0
+  87:source\i2s/i2s.c ****       NVIC_InitTypeDef NVIC_InitStructure;
+ 348              		.loc 1 87 7 view .LVU102
+  88:source\i2s/i2s.c ****       DMA_InitTypeDef DMA_InitStructure;
+ 349              		.loc 1 88 7 view .LVU103
+  89:source\i2s/i2s.c ****       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1,ENABLE);
+ 350              		.loc 1 89 7 view .LVU104
+  86:source\i2s/i2s.c ****       NVIC_InitTypeDef NVIC_InitStructure;
+ 351              		.loc 1 86 1 is_stmt 0 view .LVU105
+ 352 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 353              		.cfi_def_cfa_offset 20
+ 354              		.cfi_offset 4, -20
+ 355              		.cfi_offset 5, -16
+ 356              		.cfi_offset 6, -12
+ 357              		.cfi_offset 7, -8
+ 358              		.cfi_offset 14, -4
+ 359 0002 0746     		mov	r7, r0
+ 360 0004 91B0     		sub	sp, sp, #68
+ 361              		.cfi_def_cfa_offset 88
+ 362              		.loc 1 89 7 view .LVU106
+ 363 0006 4FF40010 		mov	r0, #2097152
+ 364              	.LVL32:
+  86:source\i2s/i2s.c ****       NVIC_InitTypeDef NVIC_InitStructure;
+ 365              		.loc 1 86 1 view .LVU107
+ 366 000a 0D46     		mov	r5, r1
+ 367              		.loc 1 89 7 view .LVU108
+ 368 000c 0121     		movs	r1, #1
+ 369              	.LVL33:
+  86:source\i2s/i2s.c ****       NVIC_InitTypeDef NVIC_InitStructure;
+ 370              		.loc 1 86 1 view .LVU109
+ 371 000e 1646     		mov	r6, r2
+ 372              		.loc 1 89 7 view .LVU110
+ 373 0010 FFF7FEFF 		bl	RCC_AHB1PeriphClockCmd
+ 374              	.LVL34:
+  90:source\i2s/i2s.c ****       DMA_DeInit(DMA1_Stream4);
+ 375              		.loc 1 90 7 is_stmt 1 view .LVU111
+ 376 0014 2448     		ldr	r0, .L21
+ 377 0016 FFF7FEFF 		bl	DMA_DeInit
+ 378              	.LVL35:
+  91:source\i2s/i2s.c ****       while (DMA_GetCmdStatus(DMA1_Stream4) != DISABLE){}
+ 379              		.loc 1 91 7 view .LVU112
+ 380              	.L19:
+ 381              		.loc 1 91 57 discriminator 1 view .LVU113
+ 382              		.loc 1 91 13 discriminator 1 view .LVU114
+ 383              		.loc 1 91 14 is_stmt 0 discriminator 1 view .LVU115
+ 384 001a 2348     		ldr	r0, .L21
+ 385 001c FFF7FEFF 		bl	DMA_GetCmdStatus
+ 386              	.LVL36:
+ 387              		.loc 1 91 13 discriminator 1 view .LVU116
+ 388 0020 0446     		mov	r4, r0
+ 389 0022 0028     		cmp	r0, #0
+ 390 0024 F9D1     		bne	.L19
+  92:source\i2s/i2s.c ****       DMA_ClearITPendingBit(DMA1_Stream4,DMA_IT_FEIF4 | DMA_IT_DMEIF4 | DMA_IT_TEIF4 | DMA_IT_HTIF4
+ 391              		.loc 1 92 7 is_stmt 1 view .LVU117
+ 392 0026 2149     		ldr	r1, .L21+4
+ 393 0028 1F48     		ldr	r0, .L21
+ 394 002a FFF7FEFF 		bl	DMA_ClearITPendingBit
+ 395              	.LVL37:
+  93:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Channel = DMA_Channel_0;
+ 396              		.loc 1 93 7 view .LVU118
+  94:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralBaseAddr = (unsigned int)&SPI2->DR;
+ 397              		.loc 1 94 48 is_stmt 0 view .LVU119
+ 398 002e 204B     		ldr	r3, .L21+8
+  95:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Memory0BaseAddr = (unsigned int)buf0;
+  96:source\i2s/i2s.c ****       DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+  97:source\i2s/i2s.c ****       DMA_InitStructure.DMA_BufferSize = num;
+  98:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  99:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+ 100:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+ 101:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+ 102:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+ 103:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+ 104:source\i2s/i2s.c ****       DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+ 105:source\i2s/i2s.c ****       DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+ 106:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+ 107:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+ 108:source\i2s/i2s.c ****       DMA_Init(DMA1_Stream4, &DMA_InitStructure);
+ 399              		.loc 1 108 7 view .LVU120
+ 400 0030 1D48     		ldr	r0, .L21
+  93:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralBaseAddr = (unsigned int)&SPI2->DR;
+ 401              		.loc 1 93 37 view .LVU121
+ 402 0032 0194     		str	r4, [sp, #4]
+  94:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralBaseAddr = (unsigned int)&SPI2->DR;
+ 403              		.loc 1 94 7 is_stmt 1 view .LVU122
+  95:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Memory0BaseAddr = (unsigned int)buf0;
+ 404              		.loc 1 95 45 is_stmt 0 view .LVU123
+ 405 0034 CDE90237 		strd	r3, r7, [sp, #8]
+  96:source\i2s/i2s.c ****       DMA_InitStructure.DMA_BufferSize = num;
+ 406              		.loc 1 96 7 is_stmt 1 view .LVU124
+  96:source\i2s/i2s.c ****       DMA_InitStructure.DMA_BufferSize = num;
+ 407              		.loc 1 96 33 is_stmt 0 view .LVU125
+ 408 0038 4023     		movs	r3, #64
+  97:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+ 409              		.loc 1 97 40 view .LVU126
+ 410 003a CDE90436 		strd	r3, r6, [sp, #16]
+  98:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+ 411              		.loc 1 98 7 is_stmt 1 view .LVU127
+ 100:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+ 412              		.loc 1 100 48 is_stmt 0 view .LVU128
+ 413 003e 4FF48062 		mov	r2, #1024
+ 414 0042 4FF40063 		mov	r3, #2048
+ 415 0046 CDE90723 		strd	r2, r3, [sp, #28]
+ 102:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+ 416              		.loc 1 102 34 view .LVU129
+ 417 004a 4FF40051 		mov	r1, #8192
+ 418 004e 4FF48073 		mov	r3, #256
+ 419 0052 CDE90913 		strd	r1, r3, [sp, #36]
+ 103:source\i2s/i2s.c ****       DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+ 420              		.loc 1 103 38 view .LVU130
+ 421 0056 4FF40033 		mov	r3, #131072
+ 422              		.loc 1 108 7 view .LVU131
+ 423 005a 01A9     		add	r1, sp, #4
+ 104:source\i2s/i2s.c ****       DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+ 424              		.loc 1 104 38 view .LVU132
+ 425 005c CDE90B34 		strd	r3, r4, [sp, #44]
+ 106:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+ 426              		.loc 1 106 41 view .LVU133
+ 427 0060 CDE90D44 		strd	r4, r4, [sp, #52]
+  98:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+ 428              		.loc 1 98 43 view .LVU134
+ 429 0064 0694     		str	r4, [sp, #24]
+  99:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+ 430              		.loc 1 99 7 is_stmt 1 view .LVU135
+ 101:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+ 431              		.loc 1 101 7 view .LVU136
+ 103:source\i2s/i2s.c ****       DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+ 432              		.loc 1 103 7 view .LVU137
+ 105:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+ 433              		.loc 1 105 7 view .LVU138
+ 107:source\i2s/i2s.c ****       DMA_Init(DMA1_Stream4, &DMA_InitStructure);
+ 434              		.loc 1 107 7 view .LVU139
+ 107:source\i2s/i2s.c ****       DMA_Init(DMA1_Stream4, &DMA_InitStructure);
+ 435              		.loc 1 107 45 is_stmt 0 view .LVU140
+ 436 0066 0F94     		str	r4, [sp, #60]
+ 437              		.loc 1 108 7 is_stmt 1 view .LVU141
+ 438 0068 FFF7FEFF 		bl	DMA_Init
+ 439              	.LVL38:
+ 109:source\i2s/i2s.c ****       DMA_DoubleBufferModeConfig(DMA1_Stream4,(unsigned int)buf1,DMA_Memory_0);
+ 440              		.loc 1 109 7 view .LVU142
+ 441 006c 2246     		mov	r2, r4
+ 442 006e 2946     		mov	r1, r5
+ 443 0070 0D48     		ldr	r0, .L21
+ 444 0072 FFF7FEFF 		bl	DMA_DoubleBufferModeConfig
+ 445              	.LVL39:
+ 110:source\i2s/i2s.c ****       DMA_DoubleBufferModeCmd(DMA1_Stream4,ENABLE);
+ 446              		.loc 1 110 7 view .LVU143
+ 447 0076 0C48     		ldr	r0, .L21
+ 448 0078 0121     		movs	r1, #1
+ 449 007a FFF7FEFF 		bl	DMA_DoubleBufferModeCmd
+ 450              	.LVL40:
+ 111:source\i2s/i2s.c ****       DMA_ITConfig(DMA1_Stream4,DMA_IT_TC,ENABLE);
+ 451              		.loc 1 111 7 view .LVU144
+ 452 007e 0122     		movs	r2, #1
+ 453 0080 1021     		movs	r1, #16
+ 454 0082 0948     		ldr	r0, .L21
+ 455 0084 FFF7FEFF 		bl	DMA_ITConfig
+ 456              	.LVL41:
+ 112:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream4_IRQn;
+ 457              		.loc 1 112 7 view .LVU145
+ 458              		.loc 1 112 42 is_stmt 0 view .LVU146
+ 459 0088 0F23     		movs	r3, #15
+ 460 008a 8DF80030 		strb	r3, [sp]
+ 113:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+ 461              		.loc 1 113 7 is_stmt 1 view .LVU147
+ 114:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+ 115:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ 116:source\i2s/i2s.c ****       NVIC_Init(&NVIC_InitStructure);
+ 462              		.loc 1 116 7 is_stmt 0 view .LVU148
+ 463 008e 6846     		mov	r0, sp
+ 115:source\i2s/i2s.c ****       NVIC_Init(&NVIC_InitStructure);
+ 464              		.loc 1 115 45 view .LVU149
+ 465 0090 0123     		movs	r3, #1
+ 113:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+ 466              		.loc 1 113 60 view .LVU150
+ 467 0092 8DF80140 		strb	r4, [sp, #1]
+ 114:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+ 468              		.loc 1 114 7 is_stmt 1 view .LVU151
+ 114:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+ 469              		.loc 1 114 53 is_stmt 0 view .LVU152
+ 470 0096 8DF80240 		strb	r4, [sp, #2]
+ 115:source\i2s/i2s.c ****       NVIC_Init(&NVIC_InitStructure);
+ 471              		.loc 1 115 7 is_stmt 1 view .LVU153
+ 115:source\i2s/i2s.c ****       NVIC_Init(&NVIC_InitStructure);
+ 472              		.loc 1 115 45 is_stmt 0 view .LVU154
+ 473 009a 8DF80330 		strb	r3, [sp, #3]
+ 474              		.loc 1 116 7 is_stmt 1 view .LVU155
+ 475 009e FFF7FEFF 		bl	NVIC_Init
+ 476              	.LVL42:
+ 117:source\i2s/i2s.c **** }
+ 477              		.loc 1 117 1 is_stmt 0 view .LVU156
+ 478 00a2 11B0     		add	sp, sp, #68
+ 479              		.cfi_def_cfa_offset 20
+ 480              		@ sp needed
+ 481 00a4 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 482              	.LVL43:
+ 483              	.L22:
+ 484              		.loc 1 117 1 view .LVU157
+ 485 00a6 00BF     		.align	2
+ 486              	.L21:
+ 487 00a8 70600240 		.word	1073897584
+ 488 00ac 3DF000A0 		.word	-1610551235
+ 489 00b0 0C380040 		.word	1073756172
+ 490              		.cfi_endproc
+ 491              	.LFE133:
+ 493              		.section	.text.I2S2ext_RX_DMA_Init,"ax",%progbits
+ 494              		.align	1
+ 495              		.global	I2S2ext_RX_DMA_Init
+ 496              		.syntax unified
+ 497              		.thumb
+ 498              		.thumb_func
+ 500              	I2S2ext_RX_DMA_Init:
+ 501              	.LVL44:
+ 502              	.LFB134:
+ 118:source\i2s/i2s.c **** 
+ 119:source\i2s/i2s.c **** 
+ 120:source\i2s/i2s.c **** void I2S2ext_RX_DMA_Init (unsigned char *buf0,unsigned char *buf1,unsigned short num)
+ 121:source\i2s/i2s.c **** {
+ 503              		.loc 1 121 1 is_stmt 1 view -0
+ 504              		.cfi_startproc
+ 505              		@ args = 0, pretend = 0, frame = 64
+ 506              		@ frame_needed = 0, uses_anonymous_args = 0
+ 122:source\i2s/i2s.c **** 
+ 123:source\i2s/i2s.c ****       NVIC_InitTypeDef NVIC_InitStructure;
+ 507              		.loc 1 123 7 view .LVU159
+ 124:source\i2s/i2s.c ****       DMA_InitTypeDef DMA_InitStructure;
+ 508              		.loc 1 124 7 view .LVU160
+ 125:source\i2s/i2s.c ****       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1,ENABLE);
+ 509              		.loc 1 125 7 view .LVU161
+ 121:source\i2s/i2s.c **** 
+ 510              		.loc 1 121 1 is_stmt 0 view .LVU162
+ 511 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 512              		.cfi_def_cfa_offset 20
+ 513              		.cfi_offset 4, -20
+ 514              		.cfi_offset 5, -16
+ 515              		.cfi_offset 6, -12
+ 516              		.cfi_offset 7, -8
+ 517              		.cfi_offset 14, -4
+ 518 0002 0746     		mov	r7, r0
+ 519 0004 91B0     		sub	sp, sp, #68
+ 520              		.cfi_def_cfa_offset 88
+ 521              		.loc 1 125 7 view .LVU163
+ 522 0006 4FF40010 		mov	r0, #2097152
+ 523              	.LVL45:
+ 121:source\i2s/i2s.c **** 
+ 524              		.loc 1 121 1 view .LVU164
+ 525 000a 0D46     		mov	r5, r1
+ 526              		.loc 1 125 7 view .LVU165
+ 527 000c 0121     		movs	r1, #1
+ 528              	.LVL46:
+ 121:source\i2s/i2s.c **** 
+ 529              		.loc 1 121 1 view .LVU166
+ 530 000e 1646     		mov	r6, r2
+ 531              		.loc 1 125 7 view .LVU167
+ 532 0010 FFF7FEFF 		bl	RCC_AHB1PeriphClockCmd
+ 533              	.LVL47:
+ 126:source\i2s/i2s.c ****       DMA_DeInit(DMA1_Stream3);
+ 534              		.loc 1 126 7 is_stmt 1 view .LVU168
+ 535 0014 2448     		ldr	r0, .L26
+ 536 0016 FFF7FEFF 		bl	DMA_DeInit
+ 537              	.LVL48:
+ 127:source\i2s/i2s.c ****       while (DMA_GetCmdStatus(DMA1_Stream3) != DISABLE){}
+ 538              		.loc 1 127 7 view .LVU169
+ 539              	.L24:
+ 540              		.loc 1 127 57 discriminator 1 view .LVU170
+ 541              		.loc 1 127 13 discriminator 1 view .LVU171
+ 542              		.loc 1 127 14 is_stmt 0 discriminator 1 view .LVU172
+ 543 001a 2348     		ldr	r0, .L26
+ 544 001c FFF7FEFF 		bl	DMA_GetCmdStatus
+ 545              	.LVL49:
+ 546              		.loc 1 127 13 discriminator 1 view .LVU173
+ 547 0020 0446     		mov	r4, r0
+ 548 0022 0028     		cmp	r0, #0
+ 549 0024 F9D1     		bne	.L24
+ 128:source\i2s/i2s.c ****       DMA_ClearITPendingBit(DMA1_Stream3,DMA_IT_FEIF3 | DMA_IT_DMEIF3 | DMA_IT_TEIF3 | DMA_IT_HTIF3
+ 550              		.loc 1 128 7 is_stmt 1 view .LVU174
+ 551 0026 2149     		ldr	r1, .L26+4
+ 552 0028 1F48     		ldr	r0, .L26
+ 553 002a FFF7FEFF 		bl	DMA_ClearITPendingBit
+ 554              	.LVL50:
+ 129:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Channel = DMA_Channel_3;
+ 555              		.loc 1 129 7 view .LVU175
+ 130:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralBaseAddr = (unsigned int)&I2S2ext->DR;
+ 556              		.loc 1 130 48 is_stmt 0 view .LVU176
+ 557 002e 204B     		ldr	r3, .L26+8
+ 131:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Memory0BaseAddr = (unsigned int)buf0;
+ 132:source\i2s/i2s.c ****       DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
+ 133:source\i2s/i2s.c ****       DMA_InitStructure.DMA_BufferSize = num;
+ 134:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+ 135:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+ 136:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+ 137:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+ 138:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+ 139:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+ 140:source\i2s/i2s.c ****       DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+ 141:source\i2s/i2s.c ****       DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+ 142:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+ 143:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+ 558              		.loc 1 143 45 view .LVU177
+ 559 0030 0F94     		str	r4, [sp, #60]
+ 130:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralBaseAddr = (unsigned int)&I2S2ext->DR;
+ 560              		.loc 1 130 48 view .LVU178
+ 561 0032 4FF0C062 		mov	r2, #100663296
+ 562 0036 CDE90123 		strd	r2, r3, [sp, #4]
+ 131:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Memory0BaseAddr = (unsigned int)buf0;
+ 563              		.loc 1 131 7 is_stmt 1 view .LVU179
+ 136:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+ 564              		.loc 1 136 48 is_stmt 0 view .LVU180
+ 565 003a 4FF48061 		mov	r1, #1024
+ 566 003e 4FF40063 		mov	r3, #2048
+ 567 0042 CDE90713 		strd	r1, r3, [sp, #28]
+ 138:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+ 568              		.loc 1 138 34 view .LVU181
+ 569 0046 4FF40050 		mov	r0, #8192
+ 570 004a 4FF48073 		mov	r3, #256
+ 571 004e CDE90903 		strd	r0, r3, [sp, #36]
+ 144:source\i2s/i2s.c ****       DMA_Init(DMA1_Stream3, &DMA_InitStructure);
+ 572              		.loc 1 144 7 view .LVU182
+ 573 0052 01A9     		add	r1, sp, #4
+ 139:source\i2s/i2s.c ****       DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+ 574              		.loc 1 139 38 view .LVU183
+ 575 0054 4FF48033 		mov	r3, #65536
+ 576              		.loc 1 144 7 view .LVU184
+ 577 0058 1348     		ldr	r0, .L26
+ 140:source\i2s/i2s.c ****       DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+ 578              		.loc 1 140 38 view .LVU185
+ 579 005a CDE90B34 		strd	r3, r4, [sp, #44]
+ 132:source\i2s/i2s.c ****       DMA_InitStructure.DMA_BufferSize = num;
+ 580              		.loc 1 132 33 view .LVU186
+ 581 005e CDE90374 		strd	r7, r4, [sp, #12]
+ 133:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+ 582              		.loc 1 133 7 is_stmt 1 view .LVU187
+ 134:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+ 583              		.loc 1 134 43 is_stmt 0 view .LVU188
+ 584 0062 CDE90564 		strd	r6, r4, [sp, #20]
+ 135:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+ 585              		.loc 1 135 7 is_stmt 1 view .LVU189
+ 137:source\i2s/i2s.c ****       DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+ 586              		.loc 1 137 7 view .LVU190
+ 139:source\i2s/i2s.c ****       DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+ 587              		.loc 1 139 7 view .LVU191
+ 141:source\i2s/i2s.c ****       DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+ 588              		.loc 1 141 7 view .LVU192
+ 142:source\i2s/i2s.c ****       DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+ 589              		.loc 1 142 41 is_stmt 0 view .LVU193
+ 590 0066 CDE90D44 		strd	r4, r4, [sp, #52]
+ 143:source\i2s/i2s.c ****       DMA_Init(DMA1_Stream3, &DMA_InitStructure);
+ 591              		.loc 1 143 7 is_stmt 1 view .LVU194
+ 592              		.loc 1 144 7 view .LVU195
+ 593 006a FFF7FEFF 		bl	DMA_Init
+ 594              	.LVL51:
+ 145:source\i2s/i2s.c ****       DMA_DoubleBufferModeConfig(DMA1_Stream3,(unsigned int)buf1,DMA_Memory_0);
+ 595              		.loc 1 145 7 view .LVU196
+ 596 006e 2246     		mov	r2, r4
+ 597 0070 2946     		mov	r1, r5
+ 598 0072 0D48     		ldr	r0, .L26
+ 599 0074 FFF7FEFF 		bl	DMA_DoubleBufferModeConfig
+ 600              	.LVL52:
+ 146:source\i2s/i2s.c ****       DMA_DoubleBufferModeCmd(DMA1_Stream3,ENABLE);
+ 601              		.loc 1 146 7 view .LVU197
+ 602 0078 0B48     		ldr	r0, .L26
+ 603 007a 0121     		movs	r1, #1
+ 604 007c FFF7FEFF 		bl	DMA_DoubleBufferModeCmd
+ 605              	.LVL53:
+ 147:source\i2s/i2s.c ****       DMA_ITConfig(DMA1_Stream3,DMA_IT_TC,ENABLE);
+ 606              		.loc 1 147 7 view .LVU198
+ 607 0080 0122     		movs	r2, #1
+ 608 0082 1021     		movs	r1, #16
+ 609 0084 0848     		ldr	r0, .L26
+ 610 0086 FFF7FEFF 		bl	DMA_ITConfig
+ 611              	.LVL54:
+ 148:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream3_IRQn;
+ 612              		.loc 1 148 7 view .LVU199
+ 613              		.loc 1 148 42 is_stmt 0 view .LVU200
+ 614 008a 0E23     		movs	r3, #14
+ 615 008c 8DF80030 		strb	r3, [sp]
+ 149:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority =0x00;
+ 616              		.loc 1 149 7 is_stmt 1 view .LVU201
+ 150:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
+ 151:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ 152:source\i2s/i2s.c ****       NVIC_Init(&NVIC_InitStructure);
+ 617              		.loc 1 152 7 is_stmt 0 view .LVU202
+ 618 0090 6846     		mov	r0, sp
+ 150:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
+ 619              		.loc 1 150 53 view .LVU203
+ 620 0092 0123     		movs	r3, #1
+ 149:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority =0x00;
+ 621              		.loc 1 149 60 view .LVU204
+ 622 0094 8DF80140 		strb	r4, [sp, #1]
+ 150:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
+ 623              		.loc 1 150 7 is_stmt 1 view .LVU205
+ 150:source\i2s/i2s.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
+ 624              		.loc 1 150 53 is_stmt 0 view .LVU206
+ 625 0098 8DF80230 		strb	r3, [sp, #2]
+ 151:source\i2s/i2s.c ****       NVIC_Init(&NVIC_InitStructure);
+ 626              		.loc 1 151 7 is_stmt 1 view .LVU207
+ 151:source\i2s/i2s.c ****       NVIC_Init(&NVIC_InitStructure);
+ 627              		.loc 1 151 45 is_stmt 0 view .LVU208
+ 628 009c 8DF80330 		strb	r3, [sp, #3]
+ 629              		.loc 1 152 7 is_stmt 1 view .LVU209
+ 630 00a0 FFF7FEFF 		bl	NVIC_Init
+ 631              	.LVL55:
+ 153:source\i2s/i2s.c **** }
+ 632              		.loc 1 153 1 is_stmt 0 view .LVU210
+ 633 00a4 11B0     		add	sp, sp, #68
+ 634              		.cfi_def_cfa_offset 20
+ 635              		@ sp needed
+ 636 00a6 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 637              	.LVL56:
+ 638              	.L27:
+ 639              		.loc 1 153 1 view .LVU211
+ 640              		.align	2
+ 641              	.L26:
+ 642 00a8 58600240 		.word	1073897560
+ 643 00ac 00F0409F 		.word	-1623134208
+ 644 00b0 0C340040 		.word	1073755148
+ 645              		.cfi_endproc
+ 646              	.LFE134:
+ 648              		.section	.text.DMA1_Stream4_IRQHandler,"ax",%progbits
+ 649              		.align	1
+ 650              		.global	DMA1_Stream4_IRQHandler
+ 651              		.syntax unified
+ 652              		.thumb
+ 653              		.thumb_func
+ 655              	DMA1_Stream4_IRQHandler:
+ 656              	.LFB135:
+ 154:source\i2s/i2s.c **** 
+ 155:source\i2s/i2s.c **** 
+ 156:source\i2s/i2s.c **** void DMA1_Stream4_IRQHandler (void)
+ 157:source\i2s/i2s.c **** {
+ 657              		.loc 1 157 1 is_stmt 1 view -0
+ 658              		.cfi_startproc
+ 659              		@ args = 0, pretend = 0, frame = 0
+ 660              		@ frame_needed = 0, uses_anonymous_args = 0
+ 158:source\i2s/i2s.c ****       if (DMA_GetITStatus(DMA1_Stream4,DMA_IT_TCIF4) == SET) {
+ 661              		.loc 1 158 7 view .LVU213
+ 157:source\i2s/i2s.c ****       if (DMA_GetITStatus(DMA1_Stream4,DMA_IT_TCIF4) == SET) {
+ 662              		.loc 1 157 1 is_stmt 0 view .LVU214
+ 663 0000 10B5     		push	{r4, lr}
+ 664              		.cfi_def_cfa_offset 8
+ 665              		.cfi_offset 4, -8
+ 666              		.cfi_offset 14, -4
+ 667              		.loc 1 158 11 view .LVU215
+ 668 0002 0849     		ldr	r1, .L30
+ 669 0004 0848     		ldr	r0, .L30+4
+ 670 0006 FFF7FEFF 		bl	DMA_GetITStatus
+ 671              	.LVL57:
+ 672              		.loc 1 158 10 view .LVU216
+ 673 000a 0128     		cmp	r0, #1
+ 674 000c 08D1     		bne	.L28
+ 159:source\i2s/i2s.c **** 	 DMA_ClearITPendingBit(DMA1_Stream4,DMA_IT_TCIF4);
+ 675              		.loc 1 159 3 is_stmt 1 view .LVU217
+ 676 000e 0549     		ldr	r1, .L30
+ 677 0010 0548     		ldr	r0, .L30+4
+ 678 0012 FFF7FEFF 		bl	DMA_ClearITPendingBit
+ 679              	.LVL58:
+ 160:source\i2s/i2s.c ****       	 i2s_tx_callback();
+ 680              		.loc 1 160 9 view .LVU218
+ 681 0016 054B     		ldr	r3, .L30+8
+ 161:source\i2s/i2s.c ****       }
+ 162:source\i2s/i2s.c **** }
+ 682              		.loc 1 162 1 is_stmt 0 view .LVU219
+ 683 0018 BDE81040 		pop	{r4, lr}
+ 684              		.cfi_remember_state
+ 685              		.cfi_restore 14
+ 686              		.cfi_restore 4
+ 687              		.cfi_def_cfa_offset 0
+ 160:source\i2s/i2s.c ****       	 i2s_tx_callback();
+ 688              		.loc 1 160 9 view .LVU220
+ 689 001c 1B68     		ldr	r3, [r3]
+ 690 001e 1847     		bx	r3	@ indirect register sibling call
+ 691              	.LVL59:
+ 692              	.L28:
+ 693              		.cfi_restore_state
+ 694              		.loc 1 162 1 view .LVU221
+ 695 0020 10BD     		pop	{r4, pc}
+ 696              	.L31:
+ 697 0022 00BF     		.align	2
+ 698              	.L30:
+ 699 0024 20800020 		.word	536903712
+ 700 0028 70600240 		.word	1073897584
+ 701 002c 00000000 		.word	.LANCHOR1
+ 702              		.cfi_endproc
+ 703              	.LFE135:
+ 705              		.section	.text.DMA1_Stream3_IRQHandler,"ax",%progbits
+ 706              		.align	1
+ 707              		.global	DMA1_Stream3_IRQHandler
+ 708              		.syntax unified
+ 709              		.thumb
+ 710              		.thumb_func
+ 712              	DMA1_Stream3_IRQHandler:
+ 713              	.LFB136:
+ 163:source\i2s/i2s.c **** 
+ 164:source\i2s/i2s.c **** 
+ 165:source\i2s/i2s.c **** void DMA1_Stream3_IRQHandler (void)
+ 166:source\i2s/i2s.c **** {
+ 714              		.loc 1 166 1 is_stmt 1 view -0
+ 715              		.cfi_startproc
+ 716              		@ args = 0, pretend = 0, frame = 0
+ 717              		@ frame_needed = 0, uses_anonymous_args = 0
+ 167:source\i2s/i2s.c ****       if (DMA_GetITStatus(DMA1_Stream3,DMA_IT_TCIF3) == SET) {
+ 718              		.loc 1 167 7 view .LVU223
+ 166:source\i2s/i2s.c ****       if (DMA_GetITStatus(DMA1_Stream3,DMA_IT_TCIF3) == SET) {
+ 719              		.loc 1 166 1 is_stmt 0 view .LVU224
+ 720 0000 10B5     		push	{r4, lr}
+ 721              		.cfi_def_cfa_offset 8
+ 722              		.cfi_offset 4, -8
+ 723              		.cfi_offset 14, -4
+ 724              		.loc 1 167 11 view .LVU225
+ 725 0002 0849     		ldr	r1, .L34
+ 726 0004 0848     		ldr	r0, .L34+4
+ 727 0006 FFF7FEFF 		bl	DMA_GetITStatus
+ 728              	.LVL60:
+ 729              		.loc 1 167 10 view .LVU226
+ 730 000a 0128     		cmp	r0, #1
+ 731 000c 08D1     		bne	.L32
+ 168:source\i2s/i2s.c **** 	 DMA_ClearITPendingBit(DMA1_Stream3,DMA_IT_TCIF3);
+ 732              		.loc 1 168 3 is_stmt 1 view .LVU227
+ 733 000e 0549     		ldr	r1, .L34
+ 734 0010 0548     		ldr	r0, .L34+4
+ 735 0012 FFF7FEFF 		bl	DMA_ClearITPendingBit
+ 736              	.LVL61:
+ 169:source\i2s/i2s.c ****       	 i2s_rx_callback();
+ 737              		.loc 1 169 9 view .LVU228
+ 738 0016 054B     		ldr	r3, .L34+8
+ 170:source\i2s/i2s.c ****       }
+ 171:source\i2s/i2s.c **** }
+ 739              		.loc 1 171 1 is_stmt 0 view .LVU229
+ 740 0018 BDE81040 		pop	{r4, lr}
+ 741              		.cfi_remember_state
+ 742              		.cfi_restore 14
+ 743              		.cfi_restore 4
+ 744              		.cfi_def_cfa_offset 0
+ 169:source\i2s/i2s.c ****       	 i2s_rx_callback();
+ 745              		.loc 1 169 9 view .LVU230
+ 746 001c 1B68     		ldr	r3, [r3]
+ 747 001e 1847     		bx	r3	@ indirect register sibling call
+ 748              	.LVL62:
+ 749              	.L32:
+ 750              		.cfi_restore_state
+ 751              		.loc 1 171 1 view .LVU231
+ 752 0020 10BD     		pop	{r4, pc}
+ 753              	.L35:
+ 754 0022 00BF     		.align	2
+ 755              	.L34:
+ 756 0024 00800018 		.word	402685952
+ 757 0028 58600240 		.word	1073897560
+ 758 002c 00000000 		.word	.LANCHOR2
+ 759              		.cfi_endproc
+ 760              	.LFE136:
+ 762              		.section	.text.I2S_Play_Start,"ax",%progbits
+ 763              		.align	1
+ 764              		.global	I2S_Play_Start
+ 765              		.syntax unified
+ 766              		.thumb
+ 767              		.thumb_func
+ 769              	I2S_Play_Start:
+ 770              	.LFB137:
+ 172:source\i2s/i2s.c **** 
+ 173:source\i2s/i2s.c **** 
+ 174:source\i2s/i2s.c **** void I2S_Play_Start (void)
+ 175:source\i2s/i2s.c **** {
+ 771              		.loc 1 175 1 is_stmt 1 view -0
+ 772              		.cfi_startproc
+ 773              		@ args = 0, pretend = 0, frame = 0
+ 774              		@ frame_needed = 0, uses_anonymous_args = 0
+ 775              		@ link register save eliminated.
+ 176:source\i2s/i2s.c ****       DMA_Cmd(DMA1_Stream4,ENABLE);
+ 776              		.loc 1 176 7 view .LVU233
+ 777 0000 0148     		ldr	r0, .L37
+ 778 0002 0121     		movs	r1, #1
+ 779 0004 FFF7FEBF 		b	DMA_Cmd
+ 780              	.LVL63:
+ 781              	.L38:
+ 782              		.align	2
+ 783              	.L37:
+ 784 0008 70600240 		.word	1073897584
+ 785              		.cfi_endproc
+ 786              	.LFE137:
+ 788              		.section	.text.I2S_Play_Stop,"ax",%progbits
+ 789              		.align	1
+ 790              		.global	I2S_Play_Stop
+ 791              		.syntax unified
+ 792              		.thumb
+ 793              		.thumb_func
+ 795              	I2S_Play_Stop:
+ 796              	.LFB138:
+ 177:source\i2s/i2s.c **** }
+ 178:source\i2s/i2s.c **** 
+ 179:source\i2s/i2s.c **** 
+ 180:source\i2s/i2s.c **** void I2S_Play_Stop (void)
+ 181:source\i2s/i2s.c **** {
+ 797              		.loc 1 181 1 view -0
+ 798              		.cfi_startproc
+ 799              		@ args = 0, pretend = 0, frame = 0
+ 800              		@ frame_needed = 0, uses_anonymous_args = 0
+ 801              		@ link register save eliminated.
+ 182:source\i2s/i2s.c ****       DMA_Cmd(DMA1_Stream4,DISABLE);
+ 802              		.loc 1 182 7 view .LVU235
+ 803 0000 0148     		ldr	r0, .L40
+ 804 0002 0021     		movs	r1, #0
+ 805 0004 FFF7FEBF 		b	DMA_Cmd
+ 806              	.LVL64:
+ 807              	.L41:
+ 808              		.align	2
+ 809              	.L40:
+ 810 0008 70600240 		.word	1073897584
+ 811              		.cfi_endproc
+ 812              	.LFE138:
+ 814              		.section	.text.I2S_Rec_Start,"ax",%progbits
+ 815              		.align	1
+ 816              		.global	I2S_Rec_Start
+ 817              		.syntax unified
+ 818              		.thumb
+ 819              		.thumb_func
+ 821              	I2S_Rec_Start:
+ 822              	.LFB139:
+ 183:source\i2s/i2s.c **** }
+ 184:source\i2s/i2s.c **** 
+ 185:source\i2s/i2s.c **** 
+ 186:source\i2s/i2s.c **** void I2S_Rec_Start (void)
+ 187:source\i2s/i2s.c **** {
+ 823              		.loc 1 187 1 view -0
+ 824              		.cfi_startproc
+ 825              		@ args = 0, pretend = 0, frame = 0
+ 826              		@ frame_needed = 0, uses_anonymous_args = 0
+ 827              		@ link register save eliminated.
+ 188:source\i2s/i2s.c ****       DMA_Cmd(DMA1_Stream3,ENABLE);
+ 828              		.loc 1 188 7 view .LVU237
+ 829 0000 0148     		ldr	r0, .L43
+ 830 0002 0121     		movs	r1, #1
+ 831 0004 FFF7FEBF 		b	DMA_Cmd
+ 832              	.LVL65:
+ 833              	.L44:
+ 834              		.align	2
+ 835              	.L43:
+ 836 0008 58600240 		.word	1073897560
+ 837              		.cfi_endproc
+ 838              	.LFE139:
+ 840              		.section	.text.I2S_Rec_Stop,"ax",%progbits
+ 841              		.align	1
+ 842              		.global	I2S_Rec_Stop
+ 843              		.syntax unified
+ 844              		.thumb
+ 845              		.thumb_func
+ 847              	I2S_Rec_Stop:
+ 848              	.LFB140:
+ 189:source\i2s/i2s.c **** }
+ 190:source\i2s/i2s.c **** 
+ 191:source\i2s/i2s.c **** 
+ 192:source\i2s/i2s.c **** void I2S_Rec_Stop (void)
+ 193:source\i2s/i2s.c **** {
+ 849              		.loc 1 193 1 view -0
+ 850              		.cfi_startproc
+ 851              		@ args = 0, pretend = 0, frame = 0
+ 852              		@ frame_needed = 0, uses_anonymous_args = 0
+ 853              		@ link register save eliminated.
+ 194:source\i2s/i2s.c ****       DMA_Cmd(DMA1_Stream3,DISABLE);
+ 854              		.loc 1 194 7 view .LVU239
+ 855 0000 0148     		ldr	r0, .L46
+ 856 0002 0021     		movs	r1, #0
+ 857 0004 FFF7FEBF 		b	DMA_Cmd
+ 858              	.LVL66:
+ 859              	.L47:
+ 860              		.align	2
+ 861              	.L46:
+ 862 0008 58600240 		.word	1073897560
+ 863              		.cfi_endproc
+ 864              	.LFE140:
+ 866              		.global	I2S_PSC_TBL
+ 867              		.global	i2s_rx_callback
+ 868              		.global	i2s_tx_callback
+ 869              		.section	.bss.i2s_rx_callback,"aw",%nobits
+ 870              		.align	2
+ 871              		.set	.LANCHOR2,. + 0
+ 874              	i2s_rx_callback:
+ 875 0000 00000000 		.space	4
+ 876              		.section	.bss.i2s_tx_callback,"aw",%nobits
+ 877              		.align	2
+ 878              		.set	.LANCHOR1,. + 0
+ 881              	i2s_tx_callback:
+ 882 0000 00000000 		.space	4
+ 883              		.section	.rodata.I2S_PSC_TBL,"a"
+ 884              		.align	1
+ 885              		.set	.LANCHOR0,. + 0
+ 888              	I2S_PSC_TBL:
+ 889 0000 2003     		.short	800
+ 890 0002 0001     		.short	256
+ 891 0004 0500     		.short	5
+ 892 0006 0C00     		.short	12
+ 893 0008 0100     		.short	1
+ 894 000a 4E04     		.short	1102
+ 895 000c AD01     		.short	429
+ 896 000e 0400     		.short	4
+ 897 0010 1300     		.short	19
+ 898 0012 0000     		.short	0
+ 899 0014 4006     		.short	1600
+ 900 0016 D500     		.short	213
+ 901 0018 0200     		.short	2
+ 902 001a 0D00     		.short	13
+ 903 001c 0000     		.short	0
+ 904 001e 9D08     		.short	2205
+ 905 0020 AD01     		.short	429
+ 906 0022 0400     		.short	4
+ 907 0024 0900     		.short	9
+ 908 0026 0100     		.short	1
+ 909 0028 800C     		.short	3200
+ 910 002a D500     		.short	213
+ 911 002c 0200     		.short	2
+ 912 002e 0600     		.short	6
+ 913 0030 0100     		.short	1
+ 914 0032 3A11     		.short	4410
+ 915 0034 0F01     		.short	271
+ 916 0036 0200     		.short	2
+ 917 0038 0600     		.short	6
+ 918 003a 0000     		.short	0
+ 919 003c C012     		.short	4800
+ 920 003e 0201     		.short	258
+ 921 0040 0300     		.short	3
+ 922 0042 0300     		.short	3
+ 923 0044 0100     		.short	1
+ 924 0046 7422     		.short	8820
+ 925 0048 3C01     		.short	316
+ 926 004a 0200     		.short	2
+ 927 004c 0300     		.short	3
+ 928 004e 0100     		.short	1
+ 929 0050 8025     		.short	9600
+ 930 0052 5801     		.short	344
+ 931 0054 0200     		.short	2
+ 932 0056 0300     		.short	3
+ 933 0058 0100     		.short	1
+ 934 005a E844     		.short	17640
+ 935 005c 6901     		.short	361
+ 936 005e 0200     		.short	2
+ 937 0060 0200     		.short	2
+ 938 0062 0000     		.short	0
+ 939 0064 004B     		.short	19200
+ 940 0066 8901     		.short	393
+ 941 0068 0200     		.short	2
+ 942 006a 0200     		.short	2
+ 943 006c 0000     		.short	0
+ 944              		.text
+ 945              	.Letext0:
+ 946              		.file 2 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 947              		.file 3 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 948              		.file 4 "/project/stm32f4x_iolib/include/cmsis/stm32f4xx.h"
+ 949              		.file 5 "/project/stm32f4x_iolib/include/misc.h"
+ 950              		.file 6 "/project/stm32f4x_iolib/include/stm32f4xx_dma.h"
+ 951              		.file 7 "/project/stm32f4x_iolib/include/stm32f4xx_spi.h"
+ 952              		.file 8 "source\\i2s\\../prototype.h"
+ 953              		.file 9 "/project/stm32f4x_iolib/include/fundefs.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 i2s.c
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:20     .text.I2S2_Init:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:26     .text.I2S2_Init:00000000 I2S2_Init
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:119    .text.I2S2_Init:00000064 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:124    .text.I2S2ext_Init:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:130    .text.I2S2ext_Init:00000000 I2S2ext_Init
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:195    .text.I2S2ext_Init:00000040 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:200    .text.I2S2_SampleRate_Set:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:206    .text.I2S2_SampleRate_Set:00000000 I2S2_SampleRate_Set
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:328    .text.I2S2_SampleRate_Set:00000068 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:335    .text.I2S2_TX_DMA_Init:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:341    .text.I2S2_TX_DMA_Init:00000000 I2S2_TX_DMA_Init
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:487    .text.I2S2_TX_DMA_Init:000000a8 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:494    .text.I2S2ext_RX_DMA_Init:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:500    .text.I2S2ext_RX_DMA_Init:00000000 I2S2ext_RX_DMA_Init
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:642    .text.I2S2ext_RX_DMA_Init:000000a8 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:649    .text.DMA1_Stream4_IRQHandler:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:655    .text.DMA1_Stream4_IRQHandler:00000000 DMA1_Stream4_IRQHandler
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:699    .text.DMA1_Stream4_IRQHandler:00000024 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:706    .text.DMA1_Stream3_IRQHandler:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:712    .text.DMA1_Stream3_IRQHandler:00000000 DMA1_Stream3_IRQHandler
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:756    .text.DMA1_Stream3_IRQHandler:00000024 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:763    .text.I2S_Play_Start:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:769    .text.I2S_Play_Start:00000000 I2S_Play_Start
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:784    .text.I2S_Play_Start:00000008 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:789    .text.I2S_Play_Stop:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:795    .text.I2S_Play_Stop:00000000 I2S_Play_Stop
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:810    .text.I2S_Play_Stop:00000008 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:815    .text.I2S_Rec_Start:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:821    .text.I2S_Rec_Start:00000000 I2S_Rec_Start
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:836    .text.I2S_Rec_Start:00000008 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:841    .text.I2S_Rec_Stop:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:847    .text.I2S_Rec_Stop:00000000 I2S_Rec_Stop
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:862    .text.I2S_Rec_Stop:00000008 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:888    .rodata.I2S_PSC_TBL:00000000 I2S_PSC_TBL
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:874    .bss.i2s_rx_callback:00000000 i2s_rx_callback
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:881    .bss.i2s_tx_callback:00000000 i2s_tx_callback
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:870    .bss.i2s_rx_callback:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:877    .bss.i2s_tx_callback:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccXrmy3d.s:884    .rodata.I2S_PSC_TBL:00000000 $d
+
+UNDEFINED SYMBOLS
+RCC_APB1PeriphClockCmd
+RCC_APB1PeriphResetCmd
+I2S_Init
+SPI_I2S_DMACmd
+I2S_Cmd
+I2S_FullDuplexConfig
+RCC_PLLI2SCmd
+RCC_PLLI2SConfig
+RCC_AHB1PeriphClockCmd
+DMA_DeInit
+DMA_GetCmdStatus
+DMA_ClearITPendingBit
+DMA_Init
+DMA_DoubleBufferModeConfig
+DMA_DoubleBufferModeCmd
+DMA_ITConfig
+NVIC_Init
+DMA_GetITStatus
+DMA_Cmd

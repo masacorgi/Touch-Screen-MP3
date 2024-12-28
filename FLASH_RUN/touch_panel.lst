@@ -1,0 +1,3489 @@
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 4
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"touch_panel.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.rodata.TP_Adj_Info_Show.str1.1,"aMS",%progbits,1
+  20              	.LC0:
+  21 0000 41646A75 		.ascii	"Adjust_Info.\000"
+  21      73745F49 
+  21      6E666F2E 
+  21      00
+  22              	.LC1:
+  23 000d 78303A20 		.ascii	"x0: %d y0:%d\000"
+  23      25642079 
+  23      303A2564 
+  23      00
+  24              	.LC2:
+  25 001a 78313A20 		.ascii	"x1: %d y1:%d\000"
+  25      25642079 
+  25      313A2564 
+  25      00
+  26              	.LC3:
+  27 0027 78323A20 		.ascii	"x2: %d y2:%d\000"
+  27      25642079 
+  27      323A2564 
+  27      00
+  28              	.LC4:
+  29 0034 78333A20 		.ascii	"x3: %d y3:%d\000"
+  29      25642079 
+  29      333A2564 
+  29      00
+  30              	.LC5:
+  31 0041 66616374 		.ascii	"factor: %d \000"
+  31      6F723A20 
+  31      25642000 
+  32              		.section	.text.TP_Adj_Info_Show,"ax",%progbits
+  33              		.align	1
+  34              		.global	TP_Adj_Info_Show
+  35              		.syntax unified
+  36              		.thumb
+  37              		.thumb_func
+  39              	TP_Adj_Info_Show:
+  40              	.LVL0:
+  41              	.LFB130:
+  42              		.file 1 "source\\touch\\touch_panel.c"
+   1:source\touch/touch_panel.c **** /********************************************************************************/
+   2:source\touch/touch_panel.c **** /* touch_panel.c                                                                */
+   3:source\touch/touch_panel.c **** /* STM32F407ZGT6                                                                */
+   4:source\touch/touch_panel.c **** /* (Lee ChangWoo HL2IRW  hl2irw@daum.net 010-8573-6860)                 	*/
+   5:source\touch/touch_panel.c **** /* stm32f4x_test								*/
+   6:source\touch/touch_panel.c **** /********************************************************************************/
+   7:source\touch/touch_panel.c **** #include "../../hwdefs.h"
+   8:source\touch/touch_panel.c **** #include "../prototype.h"
+   9:source\touch/touch_panel.c **** #include "../color.h"
+  10:source\touch/touch_panel.c **** #include <stdlib.h>
+  11:source\touch/touch_panel.c **** #include <math.h>
+  12:source\touch/touch_panel.c **** 
+  13:source\touch/touch_panel.c **** #define PEN				PB_INPUT(1)  	// T_PEN
+  14:source\touch/touch_panel.c **** #define DOUT				PB_INPUT(2)   	// T_MISO
+  15:source\touch/touch_panel.c **** #define TDIN				PF_OUTPUT(11)  	// T_MOSI
+  16:source\touch/touch_panel.c **** #define TCLK				PB_OUTPUT(0)  	// T_SCK
+  17:source\touch/touch_panel.c **** #define TCS				PC_OUTPUT(13)  	// T_CS
+  18:source\touch/touch_panel.c **** 
+  19:source\touch/touch_panel.c **** #define ERR_RANGE			50
+  20:source\touch/touch_panel.c **** #define READ_TIMES			5
+  21:source\touch/touch_panel.c **** #define LOST_VAL			1
+  22:source\touch/touch_panel.c **** #define SAVE_ADDR_BASE 			40
+  23:source\touch/touch_panel.c **** 
+  24:source\touch/touch_panel.c **** 
+  25:source\touch/touch_panel.c **** _m_tp_dev tp_dev;
+  26:source\touch/touch_panel.c **** unsigned char CMD_RDX = 0xD0;
+  27:source\touch/touch_panel.c **** unsigned char CMD_RDY = 0x90;
+  28:source\touch/touch_panel.c **** 
+  29:source\touch/touch_panel.c **** extern volatile unsigned char time_led,rx_led,tx_led;
+  30:source\touch/touch_panel.c **** 
+  31:source\touch/touch_panel.c **** 
+  32:source\touch/touch_panel.c **** 
+  33:source\touch/touch_panel.c **** 
+  34:source\touch/touch_panel.c **** void TP_Adj_Info_Show (unsigned short x0,unsigned short y0,unsigned short x1,unsigned short y1,unsi
+  35:source\touch/touch_panel.c **** {
+  43              		.loc 1 35 1 view -0
+  44              		.cfi_startproc
+  45              		@ args = 20, pretend = 0, frame = 8
+  46              		@ frame_needed = 0, uses_anonymous_args = 0
+  36:source\touch/touch_panel.c ****       set_color(RED);
+  47              		.loc 1 36 7 view .LVU1
+  35:source\touch/touch_panel.c ****       set_color(RED);
+  48              		.loc 1 35 1 is_stmt 0 view .LVU2
+  49 0000 2DE9F04F 		push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+  50              		.cfi_def_cfa_offset 36
+  51              		.cfi_offset 4, -36
+  52              		.cfi_offset 5, -32
+  53              		.cfi_offset 6, -28
+  54              		.cfi_offset 7, -24
+  55              		.cfi_offset 8, -20
+  56              		.cfi_offset 9, -16
+  57              		.cfi_offset 10, -12
+  58              		.cfi_offset 11, -8
+  59              		.cfi_offset 14, -4
+  60 0004 85B0     		sub	sp, sp, #20
+  61              		.cfi_def_cfa_offset 56
+  35:source\touch/touch_panel.c ****       set_color(RED);
+  62              		.loc 1 35 1 view .LVU3
+  63 0006 0546     		mov	r5, r0
+  64              		.loc 1 36 7 view .LVU4
+  65 0008 4FF47840 		mov	r0, #63488
+  66              	.LVL1:
+  35:source\touch/touch_panel.c ****       set_color(RED);
+  67              		.loc 1 35 1 view .LVU5
+  68 000c 0E46     		mov	r6, r1
+  69 000e 1446     		mov	r4, r2
+  70 0010 0393     		str	r3, [sp, #12]
+  71 0012 BDF838A0 		ldrh	r10, [sp, #56]
+  72 0016 BDF83CB0 		ldrh	fp, [sp, #60]
+  73 001a BDF84080 		ldrh	r8, [sp, #64]
+  74 001e BDF84490 		ldrh	r9, [sp, #68]
+  75 0022 BDF84870 		ldrh	r7, [sp, #72]
+  76              		.loc 1 36 7 view .LVU6
+  77 0026 FFF7FEFF 		bl	set_color
+  78              	.LVL2:
+  37:source\touch/touch_panel.c ****       lcd_printf(1,7,"Adjust_Info.");
+  79              		.loc 1 37 7 is_stmt 1 view .LVU7
+  80 002a 164A     		ldr	r2, .L2
+  81 002c 0721     		movs	r1, #7
+  82 002e 0120     		movs	r0, #1
+  83 0030 FFF7FEFF 		bl	lcd_printf
+  84              	.LVL3:
+  38:source\touch/touch_panel.c ****       lcd_printf(1,8,"x0: %d y0:%d",x0,y0);
+  85              		.loc 1 38 7 view .LVU8
+  86 0034 2B46     		mov	r3, r5
+  87 0036 144A     		ldr	r2, .L2+4
+  88 0038 0096     		str	r6, [sp]
+  89 003a 0821     		movs	r1, #8
+  90 003c 0120     		movs	r0, #1
+  91 003e FFF7FEFF 		bl	lcd_printf
+  92              	.LVL4:
+  39:source\touch/touch_panel.c ****       lcd_printf(1,9,"x1: %d y1:%d",x1,y1);
+  93              		.loc 1 39 7 view .LVU9
+  94 0042 039B     		ldr	r3, [sp, #12]
+  95 0044 0093     		str	r3, [sp]
+  96 0046 114A     		ldr	r2, .L2+8
+  97 0048 2346     		mov	r3, r4
+  98 004a 0921     		movs	r1, #9
+  99 004c 0120     		movs	r0, #1
+ 100 004e FFF7FEFF 		bl	lcd_printf
+ 101              	.LVL5:
+  40:source\touch/touch_panel.c ****       lcd_printf(1,10,"x2: %d y2:%d",x2,y2);
+ 102              		.loc 1 40 7 view .LVU10
+ 103 0052 5346     		mov	r3, r10
+ 104 0054 0E4A     		ldr	r2, .L2+12
+ 105 0056 CDF800B0 		str	fp, [sp]
+ 106 005a 0A21     		movs	r1, #10
+ 107 005c 0120     		movs	r0, #1
+ 108 005e FFF7FEFF 		bl	lcd_printf
+ 109              	.LVL6:
+  41:source\touch/touch_panel.c ****       lcd_printf(1,11,"x3: %d y3:%d",x3,y3);
+ 110              		.loc 1 41 7 view .LVU11
+ 111 0062 4346     		mov	r3, r8
+ 112 0064 0B4A     		ldr	r2, .L2+16
+ 113 0066 CDF80090 		str	r9, [sp]
+ 114 006a 0B21     		movs	r1, #11
+ 115 006c 0120     		movs	r0, #1
+ 116 006e FFF7FEFF 		bl	lcd_printf
+ 117              	.LVL7:
+  42:source\touch/touch_panel.c ****       lcd_printf(1,12,"factor: %d ",fac);
+ 118              		.loc 1 42 7 view .LVU12
+ 119 0072 094A     		ldr	r2, .L2+20
+ 120 0074 3B46     		mov	r3, r7
+ 121 0076 0C21     		movs	r1, #12
+ 122 0078 0120     		movs	r0, #1
+  43:source\touch/touch_panel.c **** }
+ 123              		.loc 1 43 1 is_stmt 0 view .LVU13
+ 124 007a 05B0     		add	sp, sp, #20
+ 125              		.cfi_def_cfa_offset 36
+ 126              		@ sp needed
+ 127 007c BDE8F04F 		pop	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 128              		.cfi_restore 14
+ 129              		.cfi_restore 11
+ 130              		.cfi_restore 10
+ 131              		.cfi_restore 9
+ 132              		.cfi_restore 8
+ 133              		.cfi_restore 7
+ 134              		.cfi_restore 6
+ 135              		.cfi_restore 5
+ 136              		.cfi_restore 4
+ 137              		.cfi_def_cfa_offset 0
+ 138              	.LVL8:
+  42:source\touch/touch_panel.c ****       lcd_printf(1,12,"factor: %d ",fac);
+ 139              		.loc 1 42 7 view .LVU14
+ 140 0080 FFF7FEBF 		b	lcd_printf
+ 141              	.LVL9:
+ 142              	.L3:
+ 143              		.align	2
+ 144              	.L2:
+ 145 0084 00000000 		.word	.LC0
+ 146 0088 0D000000 		.word	.LC1
+ 147 008c 1A000000 		.word	.LC2
+ 148 0090 27000000 		.word	.LC3
+ 149 0094 34000000 		.word	.LC4
+ 150 0098 41000000 		.word	.LC5
+ 151              		.cfi_endproc
+ 152              	.LFE130:
+ 154              		.section	.text.TP_Save_Adjdata,"ax",%progbits
+ 155              		.align	1
+ 156              		.global	TP_Save_Adjdata
+ 157              		.syntax unified
+ 158              		.thumb
+ 159              		.thumb_func
+ 161              	TP_Save_Adjdata:
+ 162              	.LFB131:
+  44:source\touch/touch_panel.c **** 
+  45:source\touch/touch_panel.c **** 
+  46:source\touch/touch_panel.c **** void TP_Save_Adjdata (void)
+  47:source\touch/touch_panel.c **** {
+ 163              		.loc 1 47 1 is_stmt 1 view -0
+ 164              		.cfi_startproc
+ 165              		@ args = 0, pretend = 0, frame = 0
+ 166              		@ frame_needed = 0, uses_anonymous_args = 0
+  48:source\touch/touch_panel.c ****       int temp;
+ 167              		.loc 1 48 7 view .LVU16
+  49:source\touch/touch_panel.c ****       U32_REG u32_data;
+ 168              		.loc 1 49 7 view .LVU17
+  50:source\touch/touch_panel.c ****       U16_REG u16_data;
+ 169              		.loc 1 50 7 view .LVU18
+  51:source\touch/touch_panel.c ****       temp = tp_dev.xfac * 100000000;
+ 170              		.loc 1 51 7 view .LVU19
+  47:source\touch/touch_panel.c ****       int temp;
+ 171              		.loc 1 47 1 is_stmt 0 view .LVU20
+ 172 0000 38B5     		push	{r3, r4, r5, lr}
+ 173              		.cfi_def_cfa_offset 16
+ 174              		.cfi_offset 3, -16
+ 175              		.cfi_offset 4, -12
+ 176              		.cfi_offset 5, -8
+ 177              		.cfi_offset 14, -4
+ 178              		.loc 1 51 20 view .LVU21
+ 179 0002 2F4D     		ldr	r5, .L5
+  47:source\touch/touch_panel.c ****       int temp;
+ 180              		.loc 1 47 1 view .LVU22
+ 181 0004 2DED028B 		vpush.64	{d8}
+ 182              		.cfi_def_cfa_offset 24
+ 183              		.cfi_offset 80, -24
+ 184              		.cfi_offset 81, -20
+ 185              		.loc 1 51 26 view .LVU23
+ 186 0008 95ED067A 		vldr.32	s14, [r5, #24]
+ 187 000c 9FED2D8A 		vldr.32	s16, .L5+4
+ 188 0010 27EE087A 		vmul.f32	s14, s14, s16
+  52:source\touch/touch_panel.c ****       u32_data.reg = temp;
+  53:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 0,u32_data.data[0]);
+ 189              		.loc 1 53 7 view .LVU24
+ 190 0014 2820     		movs	r0, #40
+  51:source\touch/touch_panel.c ****       u32_data.reg = temp;
+ 191              		.loc 1 51 12 view .LVU25
+ 192 0016 FDEEC77A 		vcvt.s32.f32	s15, s14
+ 193 001a 17EE904A 		vmov	r4, s15	@ int
+ 194              	.LVL10:
+  52:source\touch/touch_panel.c ****       u32_data.reg = temp;
+ 195              		.loc 1 52 7 is_stmt 1 view .LVU26
+ 196              		.loc 1 53 7 view .LVU27
+ 197 001e E1B2     		uxtb	r1, r4
+ 198 0020 FFF7FEFF 		bl	eeprom_write
+ 199              	.LVL11:
+  54:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 1,u32_data.data[1]);
+ 200              		.loc 1 54 7 view .LVU28
+ 201 0024 C4F30721 		ubfx	r1, r4, #8, #8
+ 202 0028 2920     		movs	r0, #41
+ 203 002a FFF7FEFF 		bl	eeprom_write
+ 204              	.LVL12:
+  55:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 2,u32_data.data[2]);
+ 205              		.loc 1 55 7 view .LVU29
+ 206 002e C4F30741 		ubfx	r1, r4, #16, #8
+ 207 0032 2A20     		movs	r0, #42
+ 208 0034 FFF7FEFF 		bl	eeprom_write
+ 209              	.LVL13:
+  56:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 3,u32_data.data[3]);
+ 210              		.loc 1 56 7 view .LVU30
+ 211 0038 210E     		lsrs	r1, r4, #24
+ 212 003a 2B20     		movs	r0, #43
+ 213 003c FFF7FEFF 		bl	eeprom_write
+ 214              	.LVL14:
+  57:source\touch/touch_panel.c ****       temp = tp_dev.yfac * 100000000;
+ 215              		.loc 1 57 7 view .LVU31
+ 216              		.loc 1 57 26 is_stmt 0 view .LVU32
+ 217 0040 D5ED077A 		vldr.32	s15, [r5, #28]
+ 218 0044 67EE887A 		vmul.f32	s15, s15, s16
+  58:source\touch/touch_panel.c ****       u32_data.reg = temp;
+  59:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 4,u32_data.data[0]);
+ 219              		.loc 1 59 7 view .LVU33
+ 220 0048 2C20     		movs	r0, #44
+  57:source\touch/touch_panel.c ****       temp = tp_dev.yfac * 100000000;
+ 221              		.loc 1 57 12 view .LVU34
+ 222 004a FDEEE77A 		vcvt.s32.f32	s15, s15
+ 223 004e 17EE904A 		vmov	r4, s15	@ int
+ 224              	.LVL15:
+  58:source\touch/touch_panel.c ****       u32_data.reg = temp;
+ 225              		.loc 1 58 7 is_stmt 1 view .LVU35
+ 226              		.loc 1 59 7 view .LVU36
+ 227 0052 E1B2     		uxtb	r1, r4
+ 228 0054 FFF7FEFF 		bl	eeprom_write
+ 229              	.LVL16:
+  60:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 5,u32_data.data[1]);
+ 230              		.loc 1 60 7 view .LVU37
+ 231 0058 C4F30721 		ubfx	r1, r4, #8, #8
+ 232 005c 2D20     		movs	r0, #45
+ 233 005e FFF7FEFF 		bl	eeprom_write
+ 234              	.LVL17:
+  61:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 6,u32_data.data[2]);
+ 235              		.loc 1 61 7 view .LVU38
+ 236 0062 C4F30741 		ubfx	r1, r4, #16, #8
+ 237 0066 2E20     		movs	r0, #46
+ 238 0068 FFF7FEFF 		bl	eeprom_write
+ 239              	.LVL18:
+  62:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 7,u32_data.data[3]);
+ 240              		.loc 1 62 7 view .LVU39
+ 241 006c 210E     		lsrs	r1, r4, #24
+ 242 006e 2F20     		movs	r0, #47
+ 243 0070 FFF7FEFF 		bl	eeprom_write
+ 244              	.LVL19:
+  63:source\touch/touch_panel.c ****       u16_data.reg = tp_dev.xoff;
+ 245              		.loc 1 63 7 view .LVU40
+ 246              		.loc 1 63 28 is_stmt 0 view .LVU41
+ 247 0074 B5F92040 		ldrsh	r4, [r5, #32]
+ 248              	.LVL20:
+  64:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 8,u16_data.data[0]);
+ 249              		.loc 1 64 7 is_stmt 1 view .LVU42
+ 250 0078 95F82010 		ldrb	r1, [r5, #32]	@ zero_extendqisi2
+ 251 007c 3020     		movs	r0, #48
+ 252 007e FFF7FEFF 		bl	eeprom_write
+ 253              	.LVL21:
+  65:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 9,u16_data.data[1]);
+ 254              		.loc 1 65 7 view .LVU43
+ 255 0082 C4F30721 		ubfx	r1, r4, #8, #8
+ 256 0086 3120     		movs	r0, #49
+ 257 0088 FFF7FEFF 		bl	eeprom_write
+ 258              	.LVL22:
+  66:source\touch/touch_panel.c ****       u16_data.reg = tp_dev.yoff;
+ 259              		.loc 1 66 7 view .LVU44
+ 260              		.loc 1 66 28 is_stmt 0 view .LVU45
+ 261 008c B5F92240 		ldrsh	r4, [r5, #34]
+  67:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 10,u16_data.data[0]);
+ 262              		.loc 1 67 7 is_stmt 1 view .LVU46
+ 263 0090 95F82210 		ldrb	r1, [r5, #34]	@ zero_extendqisi2
+ 264 0094 3220     		movs	r0, #50
+ 265 0096 FFF7FEFF 		bl	eeprom_write
+ 266              	.LVL23:
+  68:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 11,u16_data.data[1]);
+ 267              		.loc 1 68 7 view .LVU47
+ 268 009a C4F30721 		ubfx	r1, r4, #8, #8
+ 269 009e 3320     		movs	r0, #51
+ 270 00a0 FFF7FEFF 		bl	eeprom_write
+ 271              	.LVL24:
+  69:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 12,tp_dev.touchtype);
+ 272              		.loc 1 69 7 view .LVU48
+ 273 00a4 95F82410 		ldrb	r1, [r5, #36]	@ zero_extendqisi2
+ 274 00a8 3420     		movs	r0, #52
+ 275 00aa FFF7FEFF 		bl	eeprom_write
+ 276              	.LVL25:
+  70:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 13,0xAA);
+ 277              		.loc 1 70 7 view .LVU49
+  71:source\touch/touch_panel.c **** }
+ 278              		.loc 1 71 1 is_stmt 0 view .LVU50
+ 279 00ae BDEC028B 		vldm	sp!, {d8}
+ 280              		.cfi_restore 80
+ 281              		.cfi_restore 81
+ 282              		.cfi_def_cfa_offset 16
+  70:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 13,0xAA);
+ 283              		.loc 1 70 7 view .LVU51
+ 284 00b2 AA21     		movs	r1, #170
+ 285              		.loc 1 71 1 view .LVU52
+ 286 00b4 BDE83840 		pop	{r3, r4, r5, lr}
+ 287              		.cfi_restore 14
+ 288              		.cfi_restore 5
+ 289              		.cfi_restore 4
+ 290              		.cfi_restore 3
+ 291              		.cfi_def_cfa_offset 0
+  70:source\touch/touch_panel.c ****       eeprom_write(SAVE_ADDR_BASE + 13,0xAA);
+ 292              		.loc 1 70 7 view .LVU53
+ 293 00b8 3520     		movs	r0, #53
+ 294 00ba FFF7FEBF 		b	eeprom_write
+ 295              	.LVL26:
+ 296              	.L6:
+ 297 00be 00BF     		.align	2
+ 298              	.L5:
+ 299 00c0 00000000 		.word	.LANCHOR0
+ 300 00c4 20BCBE4C 		.word	1287568416
+ 301              		.cfi_endproc
+ 302              	.LFE131:
+ 304              		.section	.text.TP_Get_Adjdata,"ax",%progbits
+ 305              		.align	1
+ 306              		.global	TP_Get_Adjdata
+ 307              		.syntax unified
+ 308              		.thumb
+ 309              		.thumb_func
+ 311              	TP_Get_Adjdata:
+ 312              	.LFB132:
+  72:source\touch/touch_panel.c **** 
+  73:source\touch/touch_panel.c **** 
+  74:source\touch/touch_panel.c **** unsigned char TP_Get_Adjdata (void)
+  75:source\touch/touch_panel.c **** {
+ 313              		.loc 1 75 1 is_stmt 1 view -0
+ 314              		.cfi_startproc
+ 315              		@ args = 0, pretend = 0, frame = 0
+ 316              		@ frame_needed = 0, uses_anonymous_args = 0
+  76:source\touch/touch_panel.c ****       int tempfac;
+ 317              		.loc 1 76 7 view .LVU55
+  77:source\touch/touch_panel.c ****       U32_REG u32_data;
+ 318              		.loc 1 77 7 view .LVU56
+  78:source\touch/touch_panel.c ****       U16_REG u16_data;
+ 319              		.loc 1 78 7 view .LVU57
+  79:source\touch/touch_panel.c ****       tempfac = eeprom_read(SAVE_ADDR_BASE + 13);
+ 320              		.loc 1 79 7 view .LVU58
+  75:source\touch/touch_panel.c ****       int tempfac;
+ 321              		.loc 1 75 1 is_stmt 0 view .LVU59
+ 322 0000 38B5     		push	{r3, r4, r5, lr}
+ 323              		.cfi_def_cfa_offset 16
+ 324              		.cfi_offset 3, -16
+ 325              		.cfi_offset 4, -12
+ 326              		.cfi_offset 5, -8
+ 327              		.cfi_offset 14, -4
+ 328              		.loc 1 79 17 view .LVU60
+ 329 0002 3520     		movs	r0, #53
+  75:source\touch/touch_panel.c ****       int tempfac;
+ 330              		.loc 1 75 1 view .LVU61
+ 331 0004 2DED028B 		vpush.64	{d8}
+ 332              		.cfi_def_cfa_offset 24
+ 333              		.cfi_offset 80, -24
+ 334              		.cfi_offset 81, -20
+ 335              		.loc 1 79 17 view .LVU62
+ 336 0008 FFF7FEFF 		bl	eeprom_read
+ 337              	.LVL27:
+  80:source\touch/touch_panel.c ****       if (tempfac == 0xAA) {
+ 338              		.loc 1 80 7 is_stmt 1 view .LVU63
+ 339              		.loc 1 80 10 is_stmt 0 view .LVU64
+ 340 000c AA28     		cmp	r0, #170
+ 341 000e 67D1     		bne	.L11
+ 342              	.LBB4:
+ 343              	.LBI4:
+  74:source\touch/touch_panel.c **** {
+ 344              		.loc 1 74 15 is_stmt 1 view .LVU65
+ 345              	.LBB5:
+  81:source\touch/touch_panel.c ****          u32_data.data[0] = eeprom_read(SAVE_ADDR_BASE + 0);
+ 346              		.loc 1 81 10 view .LVU66
+ 347              		.loc 1 81 29 is_stmt 0 view .LVU67
+ 348 0010 2820     		movs	r0, #40
+ 349              	.LVL28:
+ 350              		.loc 1 81 29 view .LVU68
+ 351 0012 FFF7FEFF 		bl	eeprom_read
+ 352              	.LVL29:
+ 353              		.loc 1 81 27 view .LVU69
+ 354 0016 0024     		movs	r4, #0
+ 355              	.LVL30:
+ 356              		.loc 1 81 27 view .LVU70
+ 357 0018 60F30704 		bfi	r4, r0, #0, #8
+ 358              	.LVL31:
+  82:source\touch/touch_panel.c ****          u32_data.data[1] = eeprom_read(SAVE_ADDR_BASE + 1);
+ 359              		.loc 1 82 10 is_stmt 1 view .LVU71
+ 360              		.loc 1 82 29 is_stmt 0 view .LVU72
+ 361 001c 2920     		movs	r0, #41
+ 362 001e FFF7FEFF 		bl	eeprom_read
+ 363              	.LVL32:
+ 364              		.loc 1 82 27 view .LVU73
+ 365 0022 60F30F24 		bfi	r4, r0, #8, #8
+  83:source\touch/touch_panel.c ****          u32_data.data[2] = eeprom_read(SAVE_ADDR_BASE + 2);
+ 366              		.loc 1 83 10 is_stmt 1 view .LVU74
+ 367              		.loc 1 83 29 is_stmt 0 view .LVU75
+ 368 0026 2A20     		movs	r0, #42
+ 369 0028 FFF7FEFF 		bl	eeprom_read
+ 370              	.LVL33:
+ 371              		.loc 1 83 27 view .LVU76
+ 372 002c 60F31744 		bfi	r4, r0, #16, #8
+  84:source\touch/touch_panel.c ****          u32_data.data[3] = eeprom_read(SAVE_ADDR_BASE + 3);
+ 373              		.loc 1 84 10 is_stmt 1 view .LVU77
+ 374              		.loc 1 84 29 is_stmt 0 view .LVU78
+ 375 0030 2B20     		movs	r0, #43
+ 376 0032 FFF7FEFF 		bl	eeprom_read
+ 377              	.LVL34:
+ 378              		.loc 1 84 27 view .LVU79
+ 379 0036 60F31F64 		bfi	r4, r0, #24, #8
+  85:source\touch/touch_panel.c ****       	 tempfac = u32_data.reg;
+ 380              		.loc 1 85 9 is_stmt 1 view .LVU80
+ 381              	.LVL35:
+  86:source\touch/touch_panel.c **** 	 tp_dev.xfac = (float)tempfac / 100000000;
+ 382              		.loc 1 86 3 view .LVU81
+ 383              		.loc 1 86 17 is_stmt 0 view .LVU82
+ 384 003a 07EE904A 		vmov	s15, r4	@ int
+ 385              		.loc 1 86 32 view .LVU83
+ 386 003e 9FED298A 		vldr.32	s16, .L13
+ 387              		.loc 1 86 15 view .LVU84
+ 388 0042 294D     		ldr	r5, .L13+4
+ 389              		.loc 1 86 17 view .LVU85
+ 390 0044 B8EEE77A 		vcvt.f32.s32	s14, s15
+  87:source\touch/touch_panel.c ****          u32_data.data[0] = eeprom_read(SAVE_ADDR_BASE + 4);
+ 391              		.loc 1 87 29 view .LVU86
+ 392 0048 2C20     		movs	r0, #44
+  86:source\touch/touch_panel.c **** 	 tp_dev.xfac = (float)tempfac / 100000000;
+ 393              		.loc 1 86 32 view .LVU87
+ 394 004a C7EE087A 		vdiv.f32	s15, s14, s16
+  86:source\touch/touch_panel.c **** 	 tp_dev.xfac = (float)tempfac / 100000000;
+ 395              		.loc 1 86 15 view .LVU88
+ 396 004e C5ED067A 		vstr.32	s15, [r5, #24]
+ 397              		.loc 1 87 10 is_stmt 1 view .LVU89
+ 398              		.loc 1 87 29 is_stmt 0 view .LVU90
+ 399 0052 FFF7FEFF 		bl	eeprom_read
+ 400              	.LVL36:
+ 401              		.loc 1 87 27 view .LVU91
+ 402 0056 60F30704 		bfi	r4, r0, #0, #8
+ 403              	.LVL37:
+  88:source\touch/touch_panel.c ****          u32_data.data[1] = eeprom_read(SAVE_ADDR_BASE + 5);
+ 404              		.loc 1 88 10 is_stmt 1 view .LVU92
+ 405              		.loc 1 88 29 is_stmt 0 view .LVU93
+ 406 005a 2D20     		movs	r0, #45
+ 407 005c FFF7FEFF 		bl	eeprom_read
+ 408              	.LVL38:
+ 409              		.loc 1 88 27 view .LVU94
+ 410 0060 60F30F24 		bfi	r4, r0, #8, #8
+  89:source\touch/touch_panel.c ****          u32_data.data[2] = eeprom_read(SAVE_ADDR_BASE + 6);
+ 411              		.loc 1 89 10 is_stmt 1 view .LVU95
+ 412              		.loc 1 89 29 is_stmt 0 view .LVU96
+ 413 0064 2E20     		movs	r0, #46
+ 414 0066 FFF7FEFF 		bl	eeprom_read
+ 415              	.LVL39:
+ 416              		.loc 1 89 27 view .LVU97
+ 417 006a 60F31744 		bfi	r4, r0, #16, #8
+  90:source\touch/touch_panel.c ****          u32_data.data[3] = eeprom_read(SAVE_ADDR_BASE + 7);
+ 418              		.loc 1 90 10 is_stmt 1 view .LVU98
+ 419              		.loc 1 90 29 is_stmt 0 view .LVU99
+ 420 006e 2F20     		movs	r0, #47
+ 421 0070 FFF7FEFF 		bl	eeprom_read
+ 422              	.LVL40:
+ 423              		.loc 1 90 27 view .LVU100
+ 424 0074 60F31F64 		bfi	r4, r0, #24, #8
+  91:source\touch/touch_panel.c ****       	 tempfac = u32_data.reg;
+ 425              		.loc 1 91 9 is_stmt 1 view .LVU101
+ 426              	.LVL41:
+  92:source\touch/touch_panel.c **** 	 tp_dev.yfac = (float)tempfac / 100000000;
+ 427              		.loc 1 92 3 view .LVU102
+ 428              		.loc 1 92 17 is_stmt 0 view .LVU103
+ 429 0078 07EE904A 		vmov	s15, r4	@ int
+ 430 007c F8EEE77A 		vcvt.f32.s32	s15, s15
+  93:source\touch/touch_panel.c ****          u16_data.data[0] = eeprom_read(SAVE_ADDR_BASE + 8);
+ 431              		.loc 1 93 29 view .LVU104
+ 432 0080 3020     		movs	r0, #48
+  92:source\touch/touch_panel.c **** 	 tp_dev.yfac = (float)tempfac / 100000000;
+ 433              		.loc 1 92 32 view .LVU105
+ 434 0082 87EE887A 		vdiv.f32	s14, s15, s16
+ 435              		.loc 1 93 27 view .LVU106
+ 436 0086 4FF00004 		mov	r4, #0	@ movhi
+ 437              	.LVL42:
+  92:source\touch/touch_panel.c **** 	 tp_dev.yfac = (float)tempfac / 100000000;
+ 438              		.loc 1 92 15 view .LVU107
+ 439 008a 85ED077A 		vstr.32	s14, [r5, #28]
+ 440              		.loc 1 93 10 is_stmt 1 view .LVU108
+ 441              		.loc 1 93 29 is_stmt 0 view .LVU109
+ 442 008e FFF7FEFF 		bl	eeprom_read
+ 443              	.LVL43:
+ 444              		.loc 1 93 27 view .LVU110
+ 445 0092 60F30704 		bfi	r4, r0, #0, #8
+ 446              	.LVL44:
+  94:source\touch/touch_panel.c ****          u16_data.data[1] = eeprom_read(SAVE_ADDR_BASE + 9);
+ 447              		.loc 1 94 10 is_stmt 1 view .LVU111
+ 448              		.loc 1 94 29 is_stmt 0 view .LVU112
+ 449 0096 3120     		movs	r0, #49
+ 450 0098 FFF7FEFF 		bl	eeprom_read
+ 451              	.LVL45:
+ 452              		.loc 1 94 27 view .LVU113
+ 453 009c 60F30F24 		bfi	r4, r0, #8, #8
+  95:source\touch/touch_panel.c **** 	 tp_dev.xoff = u16_data.reg;
+ 454              		.loc 1 95 3 is_stmt 1 view .LVU114
+  96:source\touch/touch_panel.c ****          u16_data.data[0] = eeprom_read(SAVE_ADDR_BASE + 10);
+ 455              		.loc 1 96 29 is_stmt 0 view .LVU115
+ 456 00a0 3220     		movs	r0, #50
+  95:source\touch/touch_panel.c **** 	 tp_dev.xoff = u16_data.reg;
+ 457              		.loc 1 95 15 view .LVU116
+ 458 00a2 2C84     		strh	r4, [r5, #32]	@ movhi
+ 459              		.loc 1 96 10 is_stmt 1 view .LVU117
+ 460              		.loc 1 96 29 is_stmt 0 view .LVU118
+ 461 00a4 FFF7FEFF 		bl	eeprom_read
+ 462              	.LVL46:
+ 463              		.loc 1 96 27 view .LVU119
+ 464 00a8 60F30704 		bfi	r4, r0, #0, #8
+  97:source\touch/touch_panel.c ****          u16_data.data[1] = eeprom_read(SAVE_ADDR_BASE + 11);
+ 465              		.loc 1 97 10 is_stmt 1 view .LVU120
+ 466              		.loc 1 97 29 is_stmt 0 view .LVU121
+ 467 00ac 3320     		movs	r0, #51
+ 468 00ae FFF7FEFF 		bl	eeprom_read
+ 469              	.LVL47:
+ 470              		.loc 1 97 27 view .LVU122
+ 471 00b2 60F30F24 		bfi	r4, r0, #8, #8
+  98:source\touch/touch_panel.c **** 	 tp_dev.yoff = u16_data.reg;
+ 472              		.loc 1 98 3 is_stmt 1 view .LVU123
+  99:source\touch/touch_panel.c ****  	 tp_dev.touchtype = eeprom_read(SAVE_ADDR_BASE + 12);
+ 473              		.loc 1 99 23 is_stmt 0 view .LVU124
+ 474 00b6 3420     		movs	r0, #52
+  98:source\touch/touch_panel.c **** 	 tp_dev.yoff = u16_data.reg;
+ 475              		.loc 1 98 15 view .LVU125
+ 476 00b8 6C84     		strh	r4, [r5, #34]	@ movhi
+ 477              		.loc 1 99 4 is_stmt 1 view .LVU126
+ 478              		.loc 1 99 23 is_stmt 0 view .LVU127
+ 479 00ba FFF7FEFF 		bl	eeprom_read
+ 480              	.LVL48:
+ 481 00be 0B4A     		ldr	r2, .L13+8
+ 482 00c0 0B4B     		ldr	r3, .L13+12
+ 483              		.loc 1 99 21 view .LVU128
+ 484 00c2 85F82400 		strb	r0, [r5, #36]
+ 100:source\touch/touch_panel.c **** 	 if (tp_dev.touchtype) {
+ 485              		.loc 1 100 3 is_stmt 1 view .LVU129
+ 486              		.loc 1 100 6 is_stmt 0 view .LVU130
+ 487 00c6 38B1     		cbz	r0, .L9
+ 101:source\touch/touch_panel.c **** 	    CMD_RDX = 0x90;
+ 488              		.loc 1 101 6 is_stmt 1 view .LVU131
+ 489              		.loc 1 101 14 is_stmt 0 view .LVU132
+ 490 00c8 9021     		movs	r1, #144
+ 491 00ca 1170     		strb	r1, [r2]
+ 102:source\touch/touch_panel.c **** 	    CMD_RDY = 0xD0;
+ 492              		.loc 1 102 6 is_stmt 1 view .LVU133
+ 493              		.loc 1 102 14 is_stmt 0 view .LVU134
+ 494 00cc D022     		movs	r2, #208
+ 495              	.L12:
+ 103:source\touch/touch_panel.c **** 	 } else {
+ 104:source\touch/touch_panel.c **** 	    CMD_RDX = 0xD0;
+ 105:source\touch/touch_panel.c **** 	    CMD_RDY = 0x90;
+ 496              		.loc 1 105 14 view .LVU135
+ 497 00ce 1A70     		strb	r2, [r3]
+ 106:source\touch/touch_panel.c **** 	 }
+ 107:source\touch/touch_panel.c ****          return 1;
+ 498              		.loc 1 107 10 is_stmt 1 view .LVU136
+ 499              		.loc 1 107 10 is_stmt 0 view .LVU137
+ 500 00d0 0120     		movs	r0, #1
+ 501              	.L8:
+ 502              	.LBE5:
+ 503              	.LBE4:
+ 108:source\touch/touch_panel.c ****       }
+ 109:source\touch/touch_panel.c ****       return 0;
+ 110:source\touch/touch_panel.c **** }
+ 504              		.loc 1 110 1 view .LVU138
+ 505 00d2 BDEC028B 		vldm	sp!, {d8}
+ 506              		.cfi_remember_state
+ 507              		.cfi_restore 80
+ 508              		.cfi_restore 81
+ 509              		.cfi_def_cfa_offset 16
+ 510 00d6 38BD     		pop	{r3, r4, r5, pc}
+ 511              	.LVL49:
+ 512              	.L9:
+ 513              		.cfi_restore_state
+ 514              	.LBB7:
+ 515              	.LBB6:
+ 104:source\touch/touch_panel.c **** 	    CMD_RDY = 0x90;
+ 516              		.loc 1 104 6 is_stmt 1 view .LVU139
+ 104:source\touch/touch_panel.c **** 	    CMD_RDY = 0x90;
+ 517              		.loc 1 104 14 is_stmt 0 view .LVU140
+ 518 00d8 D021     		movs	r1, #208
+ 519 00da 1170     		strb	r1, [r2]
+ 105:source\touch/touch_panel.c **** 	 }
+ 520              		.loc 1 105 6 is_stmt 1 view .LVU141
+ 105:source\touch/touch_panel.c **** 	 }
+ 521              		.loc 1 105 14 is_stmt 0 view .LVU142
+ 522 00dc 9022     		movs	r2, #144
+ 523 00de F6E7     		b	.L12
+ 524              	.LVL50:
+ 525              	.L11:
+ 105:source\touch/touch_panel.c **** 	 }
+ 526              		.loc 1 105 14 view .LVU143
+ 527              	.LBE6:
+ 528              	.LBE7:
+ 109:source\touch/touch_panel.c **** }
+ 529              		.loc 1 109 14 view .LVU144
+ 530 00e0 0020     		movs	r0, #0
+ 531              	.LVL51:
+ 109:source\touch/touch_panel.c **** }
+ 532              		.loc 1 109 14 view .LVU145
+ 533 00e2 F6E7     		b	.L8
+ 534              	.L14:
+ 535              		.align	2
+ 536              	.L13:
+ 537 00e4 20BCBE4C 		.word	1287568416
+ 538 00e8 00000000 		.word	.LANCHOR0
+ 539 00ec 00000000 		.word	.LANCHOR1
+ 540 00f0 00000000 		.word	.LANCHOR2
+ 541              		.cfi_endproc
+ 542              	.LFE132:
+ 544              		.section	.text.TP_Write_Byte,"ax",%progbits
+ 545              		.align	1
+ 546              		.global	TP_Write_Byte
+ 547              		.syntax unified
+ 548              		.thumb
+ 549              		.thumb_func
+ 551              	TP_Write_Byte:
+ 552              	.LVL52:
+ 553              	.LFB133:
+ 111:source\touch/touch_panel.c **** 
+ 112:source\touch/touch_panel.c **** 
+ 113:source\touch/touch_panel.c **** void TP_Write_Byte (unsigned char num)
+ 114:source\touch/touch_panel.c **** {
+ 554              		.loc 1 114 1 is_stmt 1 view -0
+ 555              		.cfi_startproc
+ 556              		@ args = 0, pretend = 0, frame = 0
+ 557              		@ frame_needed = 0, uses_anonymous_args = 0
+ 115:source\touch/touch_panel.c ****       unsigned char count = 0;
+ 558              		.loc 1 115 7 view .LVU147
+ 116:source\touch/touch_panel.c ****       for (count=0;count<8;count++) {
+ 559              		.loc 1 116 7 view .LVU148
+ 114:source\touch/touch_panel.c ****       unsigned char count = 0;
+ 560              		.loc 1 114 1 is_stmt 0 view .LVU149
+ 561 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 562              		.cfi_def_cfa_offset 24
+ 563              		.cfi_offset 4, -24
+ 564              		.cfi_offset 5, -20
+ 565              		.cfi_offset 6, -16
+ 566              		.cfi_offset 7, -12
+ 567              		.cfi_offset 8, -8
+ 568              		.cfi_offset 14, -4
+ 117:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 118:source\touch/touch_panel.c **** 	  num <<= 1;
+ 119:source\touch/touch_panel.c **** 	  TCLK = 0;
+ 569              		.loc 1 119 9 view .LVU150
+ 570 0004 0E4E     		ldr	r6, .L20
+ 114:source\touch/touch_panel.c ****       unsigned char count = 0;
+ 571              		.loc 1 114 1 view .LVU151
+ 572 0006 0446     		mov	r4, r0
+ 573              	.LVL53:
+ 116:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 574              		.loc 1 116 20 is_stmt 1 view .LVU152
+ 114:source\touch/touch_panel.c ****       unsigned char count = 0;
+ 575              		.loc 1 114 1 is_stmt 0 view .LVU153
+ 576 0008 0825     		movs	r5, #8
+ 117:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 577              		.loc 1 117 39 view .LVU154
+ 578 000a 4FF00008 		mov	r8, #0
+ 117:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 579              		.loc 1 117 25 view .LVU155
+ 580 000e 0127     		movs	r7, #1
+ 581              	.LVL54:
+ 582              	.L18:
+ 117:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 583              		.loc 1 117 4 is_stmt 1 view .LVU156
+ 584 0010 0C4B     		ldr	r3, .L20+4
+ 117:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 585              		.loc 1 117 20 view .LVU157
+ 117:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 586              		.loc 1 117 7 is_stmt 0 view .LVU158
+ 587 0012 14F0800F 		tst	r4, #128
+ 117:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 588              		.loc 1 117 25 view .LVU159
+ 589 0016 14BF     		ite	ne
+ 590 0018 C3F8AC72 		strne	r7, [r3, #684]
+ 117:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 591              		.loc 1 117 34 is_stmt 1 view .LVU160
+ 117:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 592              		.loc 1 117 39 is_stmt 0 view .LVU161
+ 593 001c C3F8AC82 		streq	r8, [r3, #684]
+ 118:source\touch/touch_panel.c **** 	  TCLK = 0;
+ 594              		.loc 1 118 4 is_stmt 1 view .LVU162
+ 120:source\touch/touch_panel.c **** 	  delay_us(1);
+ 595              		.loc 1 120 4 is_stmt 0 view .LVU163
+ 596 0020 0120     		movs	r0, #1
+ 119:source\touch/touch_panel.c **** 	  delay_us(1);
+ 597              		.loc 1 119 9 view .LVU164
+ 598 0022 C6F88082 		str	r8, [r6, #640]
+ 116:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 599              		.loc 1 116 7 view .LVU165
+ 600 0026 013D     		subs	r5, r5, #1
+ 601              	.LVL55:
+ 602              		.loc 1 120 4 view .LVU166
+ 603 0028 FFF7FEFF 		bl	delay_us
+ 604              	.LVL56:
+ 118:source\touch/touch_panel.c **** 	  TCLK = 0;
+ 605              		.loc 1 118 8 view .LVU167
+ 606 002c 6400     		lsls	r4, r4, #1
+ 607              	.LVL57:
+ 116:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 608              		.loc 1 116 7 view .LVU168
+ 609 002e 15F0FF05 		ands	r5, r5, #255
+ 118:source\touch/touch_panel.c **** 	  TCLK = 0;
+ 610              		.loc 1 118 8 view .LVU169
+ 611 0032 E4B2     		uxtb	r4, r4
+ 612              	.LVL58:
+ 119:source\touch/touch_panel.c **** 	  delay_us(1);
+ 613              		.loc 1 119 4 is_stmt 1 view .LVU170
+ 614              		.loc 1 120 4 view .LVU171
+ 121:source\touch/touch_panel.c **** 	  TCLK = 1;
+ 615              		.loc 1 121 4 view .LVU172
+ 616              		.loc 1 121 9 is_stmt 0 view .LVU173
+ 617 0034 C6F88072 		str	r7, [r6, #640]
+ 116:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 618              		.loc 1 116 28 is_stmt 1 view .LVU174
+ 116:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 619              		.loc 1 116 20 view .LVU175
+ 116:source\touch/touch_panel.c **** 	  if (num & 0x80) TDIN = 1;else TDIN = 0;
+ 620              		.loc 1 116 7 is_stmt 0 view .LVU176
+ 621 0038 EAD1     		bne	.L18
+ 122:source\touch/touch_panel.c ****       }
+ 123:source\touch/touch_panel.c **** }
+ 622              		.loc 1 123 1 view .LVU177
+ 623 003a BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 624              	.LVL59:
+ 625              	.L21:
+ 626              		.loc 1 123 1 view .LVU178
+ 627 003e 00BF     		.align	2
+ 628              	.L20:
+ 629 0040 00804042 		.word	1111523328
+ 630 0044 00804242 		.word	1111654400
+ 631              		.cfi_endproc
+ 632              	.LFE133:
+ 634              		.section	.text.TP_Read_AD,"ax",%progbits
+ 635              		.align	1
+ 636              		.global	TP_Read_AD
+ 637              		.syntax unified
+ 638              		.thumb
+ 639              		.thumb_func
+ 641              	TP_Read_AD:
+ 642              	.LVL60:
+ 643              	.LFB134:
+ 124:source\touch/touch_panel.c **** 
+ 125:source\touch/touch_panel.c **** 
+ 126:source\touch/touch_panel.c **** unsigned short TP_Read_AD (unsigned char CMD)
+ 127:source\touch/touch_panel.c **** {
+ 644              		.loc 1 127 1 is_stmt 1 view -0
+ 645              		.cfi_startproc
+ 646              		@ args = 0, pretend = 0, frame = 0
+ 647              		@ frame_needed = 0, uses_anonymous_args = 0
+ 128:source\touch/touch_panel.c ****       unsigned char count = 0;
+ 648              		.loc 1 128 7 view .LVU180
+ 129:source\touch/touch_panel.c ****       unsigned short Num = 0;
+ 649              		.loc 1 129 7 view .LVU181
+ 130:source\touch/touch_panel.c ****       TCLK = 0;
+ 650              		.loc 1 130 7 view .LVU182
+ 127:source\touch/touch_panel.c ****       unsigned char count = 0;
+ 651              		.loc 1 127 1 is_stmt 0 view .LVU183
+ 652 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 653              		.cfi_def_cfa_offset 24
+ 654              		.cfi_offset 4, -24
+ 655              		.cfi_offset 5, -20
+ 656              		.cfi_offset 6, -16
+ 657              		.cfi_offset 7, -12
+ 658              		.cfi_offset 8, -8
+ 659              		.cfi_offset 14, -4
+ 131:source\touch/touch_panel.c ****       TDIN = 0;
+ 660              		.loc 1 131 12 view .LVU184
+ 661 0004 1B4B     		ldr	r3, .L29
+ 130:source\touch/touch_panel.c ****       TCLK = 0;
+ 662              		.loc 1 130 12 view .LVU185
+ 663 0006 1C4D     		ldr	r5, .L29+4
+ 664 0008 0024     		movs	r4, #0
+ 665 000a C5F88042 		str	r4, [r5, #640]
+ 666              		.loc 1 131 7 is_stmt 1 view .LVU186
+ 667              		.loc 1 131 12 is_stmt 0 view .LVU187
+ 668 000e C3F8AC42 		str	r4, [r3, #684]
+ 132:source\touch/touch_panel.c ****       TCS = 0;
+ 669              		.loc 1 132 7 is_stmt 1 view .LVU188
+ 670              		.loc 1 132 11 is_stmt 0 view .LVU189
+ 671 0012 A3F5C033 		sub	r3, r3, #98304
+ 133:source\touch/touch_panel.c ****       TP_Write_Byte(CMD);
+ 134:source\touch/touch_panel.c ****       delay_us(6);	//ADS7846
+ 135:source\touch/touch_panel.c ****       TCLK = 0;
+ 136:source\touch/touch_panel.c ****       delay_us(1);
+ 137:source\touch/touch_panel.c ****       TCLK = 1;
+ 672              		.loc 1 137 12 view .LVU190
+ 673 0016 0127     		movs	r7, #1
+ 132:source\touch/touch_panel.c ****       TCS = 0;
+ 674              		.loc 1 132 11 view .LVU191
+ 675 0018 C3F8B442 		str	r4, [r3, #692]
+ 133:source\touch/touch_panel.c ****       TP_Write_Byte(CMD);
+ 676              		.loc 1 133 7 is_stmt 1 view .LVU192
+ 677 001c FFF7FEFF 		bl	TP_Write_Byte
+ 678              	.LVL61:
+ 134:source\touch/touch_panel.c ****       TCLK = 0;
+ 679              		.loc 1 134 7 view .LVU193
+ 680 0020 0620     		movs	r0, #6
+ 681 0022 FFF7FEFF 		bl	delay_us
+ 682              	.LVL62:
+ 135:source\touch/touch_panel.c ****       delay_us(1);
+ 683              		.loc 1 135 7 view .LVU194
+ 136:source\touch/touch_panel.c ****       TCLK = 1;
+ 684              		.loc 1 136 7 is_stmt 0 view .LVU195
+ 685 0026 0120     		movs	r0, #1
+ 135:source\touch/touch_panel.c ****       delay_us(1);
+ 686              		.loc 1 135 12 view .LVU196
+ 687 0028 C5F88042 		str	r4, [r5, #640]
+ 136:source\touch/touch_panel.c ****       TCLK = 1;
+ 688              		.loc 1 136 7 is_stmt 1 view .LVU197
+ 689 002c FFF7FEFF 		bl	delay_us
+ 690              	.LVL63:
+ 691              		.loc 1 137 7 view .LVU198
+ 692              		.loc 1 137 12 is_stmt 0 view .LVU199
+ 693 0030 C5F88072 		str	r7, [r5, #640]
+ 138:source\touch/touch_panel.c ****       delay_us(1);
+ 694              		.loc 1 138 7 is_stmt 1 view .LVU200
+ 695 0034 3846     		mov	r0, r7
+ 696 0036 FFF7FEFF 		bl	delay_us
+ 697              	.LVL64:
+ 139:source\touch/touch_panel.c ****       TCLK = 0;
+ 698              		.loc 1 139 7 view .LVU201
+ 699              		.loc 1 139 12 is_stmt 0 view .LVU202
+ 700 003a 1026     		movs	r6, #16
+ 701 003c C5F88042 		str	r4, [r5, #640]
+ 140:source\touch/touch_panel.c ****       for (count=0;count<16;count++) {
+ 702              		.loc 1 140 7 is_stmt 1 view .LVU203
+ 703              		.loc 1 140 20 view .LVU204
+ 141:source\touch/touch_panel.c **** 	  Num <<= 1;
+ 142:source\touch/touch_panel.c **** 	  TCLK = 0;
+ 704              		.loc 1 142 9 is_stmt 0 view .LVU205
+ 705 0040 A046     		mov	r8, r4
+ 706              	.LVL65:
+ 707              	.L24:
+ 141:source\touch/touch_panel.c **** 	  Num <<= 1;
+ 708              		.loc 1 141 4 is_stmt 1 view .LVU206
+ 709              		.loc 1 142 9 is_stmt 0 view .LVU207
+ 710 0042 C5F88082 		str	r8, [r5, #640]
+ 143:source\touch/touch_panel.c **** 	  delay_us(1);
+ 711              		.loc 1 143 4 view .LVU208
+ 712 0046 0120     		movs	r0, #1
+ 713 0048 FFF7FEFF 		bl	delay_us
+ 714              	.LVL66:
+ 144:source\touch/touch_panel.c ****  	  TCLK = 1;
+ 715              		.loc 1 144 10 view .LVU209
+ 716 004c C5F88072 		str	r7, [r5, #640]
+ 145:source\touch/touch_panel.c ****  	  if (DOUT) Num++;
+ 717              		.loc 1 145 9 view .LVU210
+ 718 0050 D5F80832 		ldr	r3, [r5, #520]
+ 141:source\touch/touch_panel.c **** 	  TCLK = 0;
+ 719              		.loc 1 141 8 view .LVU211
+ 720 0054 6400     		lsls	r4, r4, #1
+ 721              	.LVL67:
+ 141:source\touch/touch_panel.c **** 	  TCLK = 0;
+ 722              		.loc 1 141 8 view .LVU212
+ 723 0056 A4B2     		uxth	r4, r4
+ 724              	.LVL68:
+ 142:source\touch/touch_panel.c **** 	  delay_us(1);
+ 725              		.loc 1 142 4 is_stmt 1 view .LVU213
+ 143:source\touch/touch_panel.c ****  	  TCLK = 1;
+ 726              		.loc 1 143 4 view .LVU214
+ 144:source\touch/touch_panel.c ****  	  if (DOUT) Num++;
+ 727              		.loc 1 144 5 view .LVU215
+ 728              		.loc 1 145 5 view .LVU216
+ 729              		.loc 1 145 8 is_stmt 0 view .LVU217
+ 730 0058 0BB1     		cbz	r3, .L23
+ 731              		.loc 1 145 15 is_stmt 1 discriminator 1 view .LVU218
+ 732              		.loc 1 145 18 is_stmt 0 discriminator 1 view .LVU219
+ 733 005a 0134     		adds	r4, r4, #1
+ 734              	.LVL69:
+ 735              		.loc 1 145 18 discriminator 1 view .LVU220
+ 736 005c A4B2     		uxth	r4, r4
+ 737              	.LVL70:
+ 738              	.L23:
+ 140:source\touch/touch_panel.c **** 	  Num <<= 1;
+ 739              		.loc 1 140 29 is_stmt 1 discriminator 2 view .LVU221
+ 140:source\touch/touch_panel.c **** 	  Num <<= 1;
+ 740              		.loc 1 140 20 discriminator 2 view .LVU222
+ 140:source\touch/touch_panel.c **** 	  Num <<= 1;
+ 741              		.loc 1 140 7 is_stmt 0 discriminator 2 view .LVU223
+ 742 005e 013E     		subs	r6, r6, #1
+ 743              	.LVL71:
+ 140:source\touch/touch_panel.c **** 	  Num <<= 1;
+ 744              		.loc 1 140 7 discriminator 2 view .LVU224
+ 745 0060 16F0FF06 		ands	r6, r6, #255
+ 746 0064 EDD1     		bne	.L24
+ 146:source\touch/touch_panel.c ****       }
+ 147:source\touch/touch_panel.c ****       Num >>= 4;
+ 747              		.loc 1 147 7 is_stmt 1 view .LVU225
+ 748              	.LVL72:
+ 148:source\touch/touch_panel.c ****       TCS = 1;
+ 749              		.loc 1 148 7 view .LVU226
+ 750              		.loc 1 148 11 is_stmt 0 view .LVU227
+ 751 0066 054B     		ldr	r3, .L29+8
+ 752 0068 0122     		movs	r2, #1
+ 753 006a C3F8B422 		str	r2, [r3, #692]
+ 149:source\touch/touch_panel.c ****       return(Num);
+ 754              		.loc 1 149 7 is_stmt 1 view .LVU228
+ 150:source\touch/touch_panel.c **** }
+ 755              		.loc 1 150 1 is_stmt 0 view .LVU229
+ 756 006e 2009     		lsrs	r0, r4, #4
+ 757 0070 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 758              	.LVL73:
+ 759              	.L30:
+ 760              		.loc 1 150 1 view .LVU230
+ 761              		.align	2
+ 762              	.L29:
+ 763 0074 00804242 		.word	1111654400
+ 764 0078 00804042 		.word	1111523328
+ 765 007c 00004142 		.word	1111556096
+ 766              		.cfi_endproc
+ 767              	.LFE134:
+ 769              		.section	.text.TP_Read_XOY,"ax",%progbits
+ 770              		.align	1
+ 771              		.global	TP_Read_XOY
+ 772              		.syntax unified
+ 773              		.thumb
+ 774              		.thumb_func
+ 776              	TP_Read_XOY:
+ 777              	.LVL74:
+ 778              	.LFB135:
+ 151:source\touch/touch_panel.c **** 
+ 152:source\touch/touch_panel.c **** 
+ 153:source\touch/touch_panel.c **** unsigned short TP_Read_XOY (unsigned char xy)
+ 154:source\touch/touch_panel.c **** {
+ 779              		.loc 1 154 1 is_stmt 1 view -0
+ 780              		.cfi_startproc
+ 781              		@ args = 0, pretend = 0, frame = 16
+ 782              		@ frame_needed = 0, uses_anonymous_args = 0
+ 155:source\touch/touch_panel.c ****       unsigned short i,j;
+ 783              		.loc 1 155 7 view .LVU232
+ 156:source\touch/touch_panel.c ****       unsigned short buf[READ_TIMES];
+ 784              		.loc 1 156 7 view .LVU233
+ 157:source\touch/touch_panel.c ****       unsigned short sum = 0;
+ 785              		.loc 1 157 7 view .LVU234
+ 158:source\touch/touch_panel.c ****       unsigned short temp;
+ 786              		.loc 1 158 7 view .LVU235
+ 159:source\touch/touch_panel.c ****       for (i=0;i<READ_TIMES;i++) buf[i] = TP_Read_AD(xy);
+ 787              		.loc 1 159 7 view .LVU236
+ 788              		.loc 1 159 16 view .LVU237
+ 154:source\touch/touch_panel.c ****       unsigned short i,j;
+ 789              		.loc 1 154 1 is_stmt 0 view .LVU238
+ 790 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 791              		.cfi_def_cfa_offset 20
+ 792              		.cfi_offset 4, -20
+ 793              		.cfi_offset 5, -16
+ 794              		.cfi_offset 6, -12
+ 795              		.cfi_offset 7, -8
+ 796              		.cfi_offset 14, -4
+ 797 0002 85B0     		sub	sp, sp, #20
+ 798              		.cfi_def_cfa_offset 40
+ 799 0004 01AD     		add	r5, sp, #4
+ 154:source\touch/touch_panel.c ****       unsigned short i,j;
+ 800              		.loc 1 154 1 view .LVU239
+ 801 0006 0646     		mov	r6, r0
+ 802 0008 2F46     		mov	r7, r5
+ 803 000a 0524     		movs	r4, #5
+ 804              	.LVL75:
+ 805              	.L32:
+ 806              		.loc 1 159 34 is_stmt 1 discriminator 3 view .LVU240
+ 807              		.loc 1 159 43 is_stmt 0 discriminator 3 view .LVU241
+ 808 000c 3046     		mov	r0, r6
+ 809 000e FFF7FEFF 		bl	TP_Read_AD
+ 810              	.LVL76:
+ 811              		.loc 1 159 7 discriminator 3 view .LVU242
+ 812 0012 013C     		subs	r4, r4, #1
+ 813              	.LVL77:
+ 814              		.loc 1 159 7 discriminator 3 view .LVU243
+ 815 0014 A4B2     		uxth	r4, r4
+ 816              		.loc 1 159 41 discriminator 3 view .LVU244
+ 817 0016 27F8020B 		strh	r0, [r7], #2	@ movhi
+ 818              		.loc 1 159 29 is_stmt 1 discriminator 3 view .LVU245
+ 819              		.loc 1 159 16 discriminator 3 view .LVU246
+ 820              		.loc 1 159 7 is_stmt 0 discriminator 3 view .LVU247
+ 821 001a 002C     		cmp	r4, #0
+ 822 001c F6D1     		bne	.L32
+ 823              	.L35:
+ 824              	.LVL78:
+ 160:source\touch/touch_panel.c ****       for (i=0;i<READ_TIMES-1;i++) {
+ 161:source\touch/touch_panel.c **** 	  for (j=i+1;j<READ_TIMES;j++) {
+ 825              		.loc 1 161 4 is_stmt 1 view .LVU248
+ 826              		.loc 1 161 10 is_stmt 0 view .LVU249
+ 827 001e 0134     		adds	r4, r4, #1
+ 828              	.LVL79:
+ 829              		.loc 1 161 10 view .LVU250
+ 830 0020 A4B2     		uxth	r4, r4
+ 831              	.LVL80:
+ 832              		.loc 1 161 15 is_stmt 1 view .LVU251
+ 833 0022 2946     		mov	r1, r5
+ 834 0024 0235     		adds	r5, r5, #2
+ 835              		.loc 1 161 10 is_stmt 0 view .LVU252
+ 836 0026 2A46     		mov	r2, r5
+ 837 0028 2346     		mov	r3, r4
+ 838              	.LVL81:
+ 839              	.L34:
+ 162:source\touch/touch_panel.c **** 	      if (buf[i] > buf[j]) {
+ 840              		.loc 1 162 8 is_stmt 1 view .LVU253
+ 841              		.loc 1 162 15 is_stmt 0 view .LVU254
+ 842 002a 0888     		ldrh	r0, [r1]
+ 843              		.loc 1 162 24 view .LVU255
+ 844 002c 32F8026B 		ldrh	r6, [r2], #2
+ 161:source\touch/touch_panel.c **** 	      if (buf[i] > buf[j]) {
+ 845              		.loc 1 161 29 view .LVU256
+ 846 0030 0133     		adds	r3, r3, #1
+ 847              	.LVL82:
+ 848              		.loc 1 162 11 view .LVU257
+ 849 0032 B042     		cmp	r0, r6
+ 163:source\touch/touch_panel.c **** 		 temp = buf[i];
+ 850              		.loc 1 163 4 is_stmt 1 view .LVU258
+ 851              	.LVL83:
+ 164:source\touch/touch_panel.c **** 		 buf[i] = buf[j];
+ 852              		.loc 1 164 4 view .LVU259
+ 161:source\touch/touch_panel.c **** 	      if (buf[i] > buf[j]) {
+ 853              		.loc 1 161 29 is_stmt 0 view .LVU260
+ 854 0034 9BB2     		uxth	r3, r3
+ 855              		.loc 1 164 11 view .LVU261
+ 856 0036 84BF     		itt	hi
+ 857 0038 0E80     		strhhi	r6, [r1]	@ movhi
+ 165:source\touch/touch_panel.c **** 		 buf[j] = temp;
+ 858              		.loc 1 165 4 is_stmt 1 view .LVU262
+ 859              		.loc 1 165 11 is_stmt 0 view .LVU263
+ 860 003a 22F8020C 		strhhi	r0, [r2, #-2]	@ movhi
+ 161:source\touch/touch_panel.c **** 	      if (buf[i] > buf[j]) {
+ 861              		.loc 1 161 28 is_stmt 1 view .LVU264
+ 862              	.LVL84:
+ 161:source\touch/touch_panel.c **** 	      if (buf[i] > buf[j]) {
+ 863              		.loc 1 161 15 view .LVU265
+ 161:source\touch/touch_panel.c **** 	      if (buf[i] > buf[j]) {
+ 864              		.loc 1 161 4 is_stmt 0 view .LVU266
+ 865 003e 052B     		cmp	r3, #5
+ 866 0040 F3D1     		bne	.L34
+ 867              	.LVL85:
+ 160:source\touch/touch_panel.c **** 	  for (j=i+1;j<READ_TIMES;j++) {
+ 868              		.loc 1 160 16 is_stmt 1 discriminator 1 view .LVU267
+ 160:source\touch/touch_panel.c **** 	  for (j=i+1;j<READ_TIMES;j++) {
+ 869              		.loc 1 160 7 is_stmt 0 discriminator 1 view .LVU268
+ 870 0042 042C     		cmp	r4, #4
+ 871 0044 EBD1     		bne	.L35
+ 872              	.LVL86:
+ 166:source\touch/touch_panel.c **** 	      }
+ 167:source\touch/touch_panel.c **** 	  }
+ 168:source\touch/touch_panel.c ****       }
+ 169:source\touch/touch_panel.c ****       sum = 0;
+ 170:source\touch/touch_panel.c ****       for (i=LOST_VAL;i<READ_TIMES-LOST_VAL;i++) sum += buf[i];
+ 873              		.loc 1 170 23 is_stmt 1 view .LVU269
+ 874              		.loc 1 170 50 view .LVU270
+ 875              		.loc 1 170 45 view .LVU271
+ 876              		.loc 1 170 23 view .LVU272
+ 877              		.loc 1 170 50 view .LVU273
+ 878              		.loc 1 170 54 is_stmt 0 view .LVU274
+ 879 0046 BDF80800 		ldrh	r0, [sp, #8]
+ 880              	.LVL87:
+ 881              		.loc 1 170 54 view .LVU275
+ 882 004a BDF80630 		ldrh	r3, [sp, #6]
+ 883              	.LVL88:
+ 884              		.loc 1 170 54 view .LVU276
+ 885 004e 0344     		add	r3, r3, r0
+ 886              	.LVL89:
+ 887              		.loc 1 170 45 is_stmt 1 view .LVU277
+ 888              		.loc 1 170 23 view .LVU278
+ 889              		.loc 1 170 50 view .LVU279
+ 890              		.loc 1 170 45 view .LVU280
+ 891              		.loc 1 170 23 view .LVU281
+ 171:source\touch/touch_panel.c ****       temp = sum / (READ_TIMES - 2 * LOST_VAL);
+ 892              		.loc 1 171 7 view .LVU282
+ 170:source\touch/touch_panel.c ****       temp = sum / (READ_TIMES - 2 * LOST_VAL);
+ 893              		.loc 1 170 54 is_stmt 0 view .LVU283
+ 894 0050 BDF80A00 		ldrh	r0, [sp, #10]
+ 895 0054 10FA83F3 		uxtah	r3, r0, r3
+ 896              	.LVL90:
+ 897              		.loc 1 171 12 view .LVU284
+ 898 0058 9BB2     		uxth	r3, r3
+ 899              	.LVL91:
+ 172:source\touch/touch_panel.c ****       return temp;
+ 900              		.loc 1 172 7 is_stmt 1 view .LVU285
+ 173:source\touch/touch_panel.c **** }
+ 901              		.loc 1 173 1 is_stmt 0 view .LVU286
+ 902 005a 0320     		movs	r0, #3
+ 903 005c B3FBF0F0 		udiv	r0, r3, r0
+ 904              	.LVL92:
+ 905              		.loc 1 173 1 view .LVU287
+ 906 0060 05B0     		add	sp, sp, #20
+ 907              		.cfi_def_cfa_offset 20
+ 908              		@ sp needed
+ 909 0062 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 910              		.loc 1 173 1 view .LVU288
+ 911              		.cfi_endproc
+ 912              	.LFE135:
+ 914              		.section	.text.TP_Read_XY,"ax",%progbits
+ 915              		.align	1
+ 916              		.global	TP_Read_XY
+ 917              		.syntax unified
+ 918              		.thumb
+ 919              		.thumb_func
+ 921              	TP_Read_XY:
+ 922              	.LVL93:
+ 923              	.LFB136:
+ 174:source\touch/touch_panel.c **** 
+ 175:source\touch/touch_panel.c **** 
+ 176:source\touch/touch_panel.c **** unsigned char TP_Read_XY (unsigned short *x,unsigned short *y)
+ 177:source\touch/touch_panel.c **** {
+ 924              		.loc 1 177 1 is_stmt 1 view -0
+ 925              		.cfi_startproc
+ 926              		@ args = 0, pretend = 0, frame = 0
+ 927              		@ frame_needed = 0, uses_anonymous_args = 0
+ 178:source\touch/touch_panel.c ****       unsigned short xtemp,ytemp;
+ 928              		.loc 1 178 7 view .LVU290
+ 179:source\touch/touch_panel.c ****       xtemp = TP_Read_XOY(CMD_RDX);
+ 929              		.loc 1 179 7 view .LVU291
+ 177:source\touch/touch_panel.c ****       unsigned short xtemp,ytemp;
+ 930              		.loc 1 177 1 is_stmt 0 view .LVU292
+ 931 0000 70B5     		push	{r4, r5, r6, lr}
+ 932              		.cfi_def_cfa_offset 16
+ 933              		.cfi_offset 4, -16
+ 934              		.cfi_offset 5, -12
+ 935              		.cfi_offset 6, -8
+ 936              		.cfi_offset 14, -4
+ 937              		.loc 1 179 15 view .LVU293
+ 938 0002 074B     		ldr	r3, .L40
+ 177:source\touch/touch_panel.c ****       unsigned short xtemp,ytemp;
+ 939              		.loc 1 177 1 view .LVU294
+ 940 0004 0546     		mov	r5, r0
+ 941              		.loc 1 179 15 view .LVU295
+ 942 0006 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 943              	.LVL94:
+ 177:source\touch/touch_panel.c ****       unsigned short xtemp,ytemp;
+ 944              		.loc 1 177 1 view .LVU296
+ 945 0008 0C46     		mov	r4, r1
+ 946              		.loc 1 179 15 view .LVU297
+ 947 000a FFF7FEFF 		bl	TP_Read_XOY
+ 948              	.LVL95:
+ 180:source\touch/touch_panel.c ****       ytemp = TP_Read_XOY(CMD_RDY);
+ 949              		.loc 1 180 15 view .LVU298
+ 950 000e 054B     		ldr	r3, .L40+4
+ 179:source\touch/touch_panel.c ****       xtemp = TP_Read_XOY(CMD_RDX);
+ 951              		.loc 1 179 15 view .LVU299
+ 952 0010 0646     		mov	r6, r0
+ 953              	.LVL96:
+ 954              		.loc 1 180 7 is_stmt 1 view .LVU300
+ 955              		.loc 1 180 15 is_stmt 0 view .LVU301
+ 956 0012 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 957 0014 FFF7FEFF 		bl	TP_Read_XOY
+ 958              	.LVL97:
+ 181:source\touch/touch_panel.c ****       *x = xtemp;
+ 959              		.loc 1 181 7 is_stmt 1 view .LVU302
+ 960              		.loc 1 181 10 is_stmt 0 view .LVU303
+ 961 0018 2E80     		strh	r6, [r5]	@ movhi
+ 182:source\touch/touch_panel.c ****       *y = ytemp;
+ 962              		.loc 1 182 7 is_stmt 1 view .LVU304
+ 963              		.loc 1 182 10 is_stmt 0 view .LVU305
+ 964 001a 2080     		strh	r0, [r4]	@ movhi
+ 183:source\touch/touch_panel.c ****       return 1;
+ 965              		.loc 1 183 7 is_stmt 1 view .LVU306
+ 184:source\touch/touch_panel.c **** }
+ 966              		.loc 1 184 1 is_stmt 0 view .LVU307
+ 967 001c 0120     		movs	r0, #1
+ 968              	.LVL98:
+ 969              		.loc 1 184 1 view .LVU308
+ 970 001e 70BD     		pop	{r4, r5, r6, pc}
+ 971              	.LVL99:
+ 972              	.L41:
+ 973              		.loc 1 184 1 view .LVU309
+ 974              		.align	2
+ 975              	.L40:
+ 976 0020 00000000 		.word	.LANCHOR1
+ 977 0024 00000000 		.word	.LANCHOR2
+ 978              		.cfi_endproc
+ 979              	.LFE136:
+ 981              		.section	.text.TP_Read_XY2,"ax",%progbits
+ 982              		.align	1
+ 983              		.global	TP_Read_XY2
+ 984              		.syntax unified
+ 985              		.thumb
+ 986              		.thumb_func
+ 988              	TP_Read_XY2:
+ 989              	.LVL100:
+ 990              	.LFB137:
+ 185:source\touch/touch_panel.c **** 
+ 186:source\touch/touch_panel.c **** 
+ 187:source\touch/touch_panel.c **** unsigned char TP_Read_XY2 (unsigned short *x,unsigned short *y)
+ 188:source\touch/touch_panel.c **** {
+ 991              		.loc 1 188 1 is_stmt 1 view -0
+ 992              		.cfi_startproc
+ 993              		@ args = 0, pretend = 0, frame = 8
+ 994              		@ frame_needed = 0, uses_anonymous_args = 0
+ 189:source\touch/touch_panel.c ****       unsigned short x1,y1;
+ 995              		.loc 1 189 7 view .LVU311
+ 190:source\touch/touch_panel.c ****       unsigned short x2,y2;
+ 996              		.loc 1 190 7 view .LVU312
+ 191:source\touch/touch_panel.c ****       unsigned char flag;
+ 997              		.loc 1 191 7 view .LVU313
+ 192:source\touch/touch_panel.c ****       flag = TP_Read_XY(&x1,&y1);
+ 998              		.loc 1 192 7 view .LVU314
+ 188:source\touch/touch_panel.c ****       unsigned short x1,y1;
+ 999              		.loc 1 188 1 is_stmt 0 view .LVU315
+ 1000 0000 73B5     		push	{r0, r1, r4, r5, r6, lr}
+ 1001              		.cfi_def_cfa_offset 24
+ 1002              		.cfi_offset 4, -16
+ 1003              		.cfi_offset 5, -12
+ 1004              		.cfi_offset 6, -8
+ 1005              		.cfi_offset 14, -4
+ 188:source\touch/touch_panel.c ****       unsigned short x1,y1;
+ 1006              		.loc 1 188 1 view .LVU316
+ 1007 0002 0646     		mov	r6, r0
+ 1008 0004 0D46     		mov	r5, r1
+ 1009              		.loc 1 192 14 view .LVU317
+ 1010 0006 6846     		mov	r0, sp
+ 1011              	.LVL101:
+ 1012              		.loc 1 192 14 view .LVU318
+ 1013 0008 0DF10201 		add	r1, sp, #2
+ 1014              	.LVL102:
+ 1015              		.loc 1 192 14 view .LVU319
+ 1016 000c FFF7FEFF 		bl	TP_Read_XY
+ 1017              	.LVL103:
+ 193:source\touch/touch_panel.c ****       if (flag == 0) return(0);
+ 1018              		.loc 1 193 7 is_stmt 1 view .LVU320
+ 1019              		.loc 1 193 10 is_stmt 0 view .LVU321
+ 1020 0010 10B9     		cbnz	r0, .L43
+ 1021              	.LVL104:
+ 1022              	.L45:
+ 1023              		.loc 1 193 28 view .LVU322
+ 1024 0012 0020     		movs	r0, #0
+ 1025              	.L44:
+ 194:source\touch/touch_panel.c ****       flag = TP_Read_XY(&x2,&y2);
+ 195:source\touch/touch_panel.c ****       if (flag == 0) return(0);
+ 196:source\touch/touch_panel.c ****       if (((x2 <= x1 && x1 < x2 + ERR_RANGE) || (x1 <= x2 && x2 < x1 + ERR_RANGE)) && ((y2 <= y1 &&
+ 197:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 198:source\touch/touch_panel.c ****          *y = (y1 + y2) / 2;
+ 199:source\touch/touch_panel.c ****          return 1;
+ 200:source\touch/touch_panel.c ****       } else {
+ 201:source\touch/touch_panel.c ****       	 return 0;
+ 202:source\touch/touch_panel.c ****       }
+ 203:source\touch/touch_panel.c **** }
+ 1026              		.loc 1 203 1 view .LVU323
+ 1027 0014 02B0     		add	sp, sp, #8
+ 1028              		.cfi_remember_state
+ 1029              		.cfi_def_cfa_offset 16
+ 1030              		@ sp needed
+ 1031 0016 70BD     		pop	{r4, r5, r6, pc}
+ 1032              	.LVL105:
+ 1033              	.L43:
+ 1034              		.cfi_restore_state
+ 194:source\touch/touch_panel.c ****       flag = TP_Read_XY(&x2,&y2);
+ 1035              		.loc 1 194 7 is_stmt 1 view .LVU324
+ 194:source\touch/touch_panel.c ****       flag = TP_Read_XY(&x2,&y2);
+ 1036              		.loc 1 194 14 is_stmt 0 view .LVU325
+ 1037 0018 0DF10601 		add	r1, sp, #6
+ 1038 001c 01A8     		add	r0, sp, #4
+ 1039              	.LVL106:
+ 194:source\touch/touch_panel.c ****       flag = TP_Read_XY(&x2,&y2);
+ 1040              		.loc 1 194 14 view .LVU326
+ 1041 001e FFF7FEFF 		bl	TP_Read_XY
+ 1042              	.LVL107:
+ 195:source\touch/touch_panel.c ****       if (((x2 <= x1 && x1 < x2 + ERR_RANGE) || (x1 <= x2 && x2 < x1 + ERR_RANGE)) && ((y2 <= y1 &&
+ 1043              		.loc 1 195 7 is_stmt 1 view .LVU327
+ 195:source\touch/touch_panel.c ****       if (((x2 <= x1 && x1 < x2 + ERR_RANGE) || (x1 <= x2 && x2 < x1 + ERR_RANGE)) && ((y2 <= y1 &&
+ 1044              		.loc 1 195 10 is_stmt 0 view .LVU328
+ 1045 0022 0028     		cmp	r0, #0
+ 1046 0024 F5D0     		beq	.L45
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1047              		.loc 1 196 7 is_stmt 1 view .LVU329
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1048              		.loc 1 196 16 is_stmt 0 view .LVU330
+ 1049 0026 BDF80410 		ldrh	r1, [sp, #4]
+ 1050 002a BDF80020 		ldrh	r2, [sp]
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1051              		.loc 1 196 10 view .LVU331
+ 1052 002e 9142     		cmp	r1, r2
+ 1053 0030 05D8     		bhi	.L46
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1054              		.loc 1 196 28 discriminator 1 view .LVU332
+ 1055 0032 01F13103 		add	r3, r1, #49
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1056              		.loc 1 196 22 discriminator 1 view .LVU333
+ 1057 0036 9342     		cmp	r3, r2
+ 1058 0038 05DA     		bge	.L47
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1059              		.loc 1 196 46 discriminator 4 view .LVU334
+ 1060 003a 9142     		cmp	r1, r2
+ 1061 003c E9D1     		bne	.L45
+ 1062              	.L46:
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1063              		.loc 1 196 65 discriminator 5 view .LVU335
+ 1064 003e 02F13103 		add	r3, r2, #49
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1065              		.loc 1 196 59 discriminator 5 view .LVU336
+ 1066 0042 8B42     		cmp	r3, r1
+ 1067 0044 E5DB     		blt	.L45
+ 1068              	.L47:
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1069              		.loc 1 196 92 discriminator 6 view .LVU337
+ 1070 0046 BDF80640 		ldrh	r4, [sp, #6]
+ 1071 004a BDF80230 		ldrh	r3, [sp, #2]
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1072              		.loc 1 196 84 discriminator 6 view .LVU338
+ 1073 004e 9C42     		cmp	r4, r3
+ 1074 0050 05D8     		bhi	.L48
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1075              		.loc 1 196 104 discriminator 7 view .LVU339
+ 1076 0052 04F13100 		add	r0, r4, #49
+ 1077              	.LVL108:
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1078              		.loc 1 196 98 discriminator 7 view .LVU340
+ 1079 0056 9842     		cmp	r0, r3
+ 1080 0058 05DA     		bge	.L49
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1081              		.loc 1 196 122 discriminator 9 view .LVU341
+ 1082 005a 9C42     		cmp	r4, r3
+ 1083 005c D9D1     		bne	.L45
+ 1084              	.L48:
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1085              		.loc 1 196 141 discriminator 10 view .LVU342
+ 1086 005e 03F13100 		add	r0, r3, #49
+ 196:source\touch/touch_panel.c ****          *x = (x1 + x2) / 2;
+ 1087              		.loc 1 196 135 discriminator 10 view .LVU343
+ 1088 0062 A042     		cmp	r0, r4
+ 1089 0064 D5DB     		blt	.L45
+ 1090              	.L49:
+ 197:source\touch/touch_panel.c ****          *y = (y1 + y2) / 2;
+ 1091              		.loc 1 197 10 is_stmt 1 view .LVU344
+ 197:source\touch/touch_panel.c ****          *y = (y1 + y2) / 2;
+ 1092              		.loc 1 197 19 is_stmt 0 view .LVU345
+ 1093 0066 0A44     		add	r2, r2, r1
+ 198:source\touch/touch_panel.c ****          return 1;
+ 1094              		.loc 1 198 19 view .LVU346
+ 1095 0068 2344     		add	r3, r3, r4
+ 197:source\touch/touch_panel.c ****          *y = (y1 + y2) / 2;
+ 1096              		.loc 1 197 25 view .LVU347
+ 1097 006a 5210     		asrs	r2, r2, #1
+ 198:source\touch/touch_panel.c ****          return 1;
+ 1098              		.loc 1 198 25 view .LVU348
+ 1099 006c 5B10     		asrs	r3, r3, #1
+ 197:source\touch/touch_panel.c ****          *y = (y1 + y2) / 2;
+ 1100              		.loc 1 197 13 view .LVU349
+ 1101 006e 3280     		strh	r2, [r6]	@ movhi
+ 198:source\touch/touch_panel.c ****          return 1;
+ 1102              		.loc 1 198 10 is_stmt 1 view .LVU350
+ 199:source\touch/touch_panel.c ****       } else {
+ 1103              		.loc 1 199 17 is_stmt 0 view .LVU351
+ 1104 0070 0120     		movs	r0, #1
+ 198:source\touch/touch_panel.c ****          return 1;
+ 1105              		.loc 1 198 13 view .LVU352
+ 1106 0072 2B80     		strh	r3, [r5]	@ movhi
+ 199:source\touch/touch_panel.c ****       } else {
+ 1107              		.loc 1 199 10 is_stmt 1 view .LVU353
+ 199:source\touch/touch_panel.c ****       } else {
+ 1108              		.loc 1 199 17 is_stmt 0 view .LVU354
+ 1109 0074 CEE7     		b	.L44
+ 1110              		.cfi_endproc
+ 1111              	.LFE137:
+ 1113              		.section	.text.TP_Scan,"ax",%progbits
+ 1114              		.align	1
+ 1115              		.global	TP_Scan
+ 1116              		.syntax unified
+ 1117              		.thumb
+ 1118              		.thumb_func
+ 1120              	TP_Scan:
+ 1121              	.LVL109:
+ 1122              	.LFB138:
+ 204:source\touch/touch_panel.c **** 
+ 205:source\touch/touch_panel.c **** 
+ 206:source\touch/touch_panel.c **** unsigned char TP_Scan (unsigned char tp)
+ 207:source\touch/touch_panel.c **** {
+ 1123              		.loc 1 207 1 is_stmt 1 view -0
+ 1124              		.cfi_startproc
+ 1125              		@ args = 0, pretend = 0, frame = 0
+ 1126              		@ frame_needed = 0, uses_anonymous_args = 0
+ 208:source\touch/touch_panel.c ****       if (PEN == 0) {
+ 1127              		.loc 1 208 7 view .LVU356
+ 1128              		.loc 1 208 11 is_stmt 0 view .LVU357
+ 1129 0000 2C4B     		ldr	r3, .L62
+ 1130 0002 D3F80432 		ldr	r3, [r3, #516]
+ 207:source\touch/touch_panel.c ****       if (PEN == 0) {
+ 1131              		.loc 1 207 1 view .LVU358
+ 1132 0006 10B5     		push	{r4, lr}
+ 1133              		.cfi_def_cfa_offset 8
+ 1134              		.cfi_offset 4, -8
+ 1135              		.cfi_offset 14, -4
+ 1136 0008 2B4C     		ldr	r4, .L62+4
+ 1137              		.loc 1 208 10 view .LVU359
+ 1138 000a 002B     		cmp	r3, #0
+ 1139 000c 41D1     		bne	.L54
+ 209:source\touch/touch_panel.c **** 	 if (tp) {
+ 1140              		.loc 1 209 3 is_stmt 1 view .LVU360
+ 210:source\touch/touch_panel.c **** 	    TP_Read_XY2(&tp_dev.x[0],&tp_dev.y[0]);
+ 1141              		.loc 1 210 6 is_stmt 0 view .LVU361
+ 1142 000e 04F10A01 		add	r1, r4, #10
+ 209:source\touch/touch_panel.c **** 	 if (tp) {
+ 1143              		.loc 1 209 6 view .LVU362
+ 1144 0012 80B1     		cbz	r0, .L55
+ 1145              		.loc 1 210 6 is_stmt 1 view .LVU363
+ 1146 0014 2046     		mov	r0, r4
+ 1147              	.LVL110:
+ 1148              		.loc 1 210 6 is_stmt 0 view .LVU364
+ 1149 0016 FFF7FEFF 		bl	TP_Read_XY2
+ 1150              	.LVL111:
+ 1151              	.L56:
+ 211:source\touch/touch_panel.c **** 	 } else {
+ 212:source\touch/touch_panel.c **** 	    if (TP_Read_XY2(&tp_dev.x[0],&tp_dev.y[0])) {
+ 213:source\touch/touch_panel.c **** 	       tp_dev.x[0] = tp_dev.xfac * tp_dev.x[0] + tp_dev.xoff;
+ 214:source\touch/touch_panel.c **** 	       tp_dev.y[0] = tp_dev.yfac * tp_dev.y[0] + tp_dev.yoff;
+ 215:source\touch/touch_panel.c **** 	    }
+ 216:source\touch/touch_panel.c **** 	 }
+ 217:source\touch/touch_panel.c **** 	 if ((tp_dev.sta & TP_PRES_DOWN) == 0) {
+ 1152              		.loc 1 217 3 is_stmt 1 view .LVU365
+ 1153              		.loc 1 217 6 is_stmt 0 view .LVU366
+ 1154 001a 94F91430 		ldrsb	r3, [r4, #20]
+ 1155 001e 002B     		cmp	r3, #0
+ 1156 0020 05DB     		blt	.L57
+ 218:source\touch/touch_panel.c **** 	    tp_dev.sta = TP_PRES_DOWN | TP_CATH_PRES;
+ 1157              		.loc 1 218 6 is_stmt 1 view .LVU367
+ 1158              		.loc 1 218 17 is_stmt 0 view .LVU368
+ 1159 0022 C023     		movs	r3, #192
+ 1160 0024 2375     		strb	r3, [r4, #20]
+ 219:source\touch/touch_panel.c **** 	    tp_dev.x[4] = tp_dev.x[0];
+ 1161              		.loc 1 219 6 is_stmt 1 view .LVU369
+ 1162              		.loc 1 219 18 is_stmt 0 view .LVU370
+ 1163 0026 2388     		ldrh	r3, [r4]
+ 1164 0028 2381     		strh	r3, [r4, #8]	@ movhi
+ 220:source\touch/touch_panel.c **** 	    tp_dev.y[4] = tp_dev.y[0];
+ 1165              		.loc 1 220 6 is_stmt 1 view .LVU371
+ 1166              		.loc 1 220 18 is_stmt 0 view .LVU372
+ 1167 002a 6389     		ldrh	r3, [r4, #10]
+ 1168 002c 6382     		strh	r3, [r4, #18]	@ movhi
+ 1169              	.L57:
+ 221:source\touch/touch_panel.c **** 	 }
+ 222:source\touch/touch_panel.c ****       } else {
+ 223:source\touch/touch_panel.c **** 	 if (tp_dev.sta & TP_PRES_DOWN) {
+ 224:source\touch/touch_panel.c **** 	    tp_dev.sta &= ~(1 << 7);
+ 225:source\touch/touch_panel.c **** 	 } else {
+ 226:source\touch/touch_panel.c **** 	    tp_dev.x[4] = 0;
+ 227:source\touch/touch_panel.c **** 	    tp_dev.y[4] = 0;
+ 228:source\touch/touch_panel.c **** 	    tp_dev.x[0] = 0xffff;
+ 229:source\touch/touch_panel.c **** 	    tp_dev.y[0] = 0xffff;
+ 230:source\touch/touch_panel.c **** 	 }
+ 231:source\touch/touch_panel.c ****       }
+ 232:source\touch/touch_panel.c ****       return tp_dev.sta & TP_PRES_DOWN;
+ 1170              		.loc 1 232 7 is_stmt 1 view .LVU373
+ 1171              		.loc 1 232 25 is_stmt 0 view .LVU374
+ 1172 002e 207D     		ldrb	r0, [r4, #20]	@ zero_extendqisi2
+ 233:source\touch/touch_panel.c **** }
+ 1173              		.loc 1 233 1 view .LVU375
+ 1174 0030 00F08000 		and	r0, r0, #128
+ 1175 0034 10BD     		pop	{r4, pc}
+ 1176              	.LVL112:
+ 1177              	.L55:
+ 212:source\touch/touch_panel.c **** 	       tp_dev.x[0] = tp_dev.xfac * tp_dev.x[0] + tp_dev.xoff;
+ 1178              		.loc 1 212 6 is_stmt 1 view .LVU376
+ 212:source\touch/touch_panel.c **** 	       tp_dev.x[0] = tp_dev.xfac * tp_dev.x[0] + tp_dev.xoff;
+ 1179              		.loc 1 212 10 is_stmt 0 view .LVU377
+ 1180 0036 2046     		mov	r0, r4
+ 1181              	.LVL113:
+ 212:source\touch/touch_panel.c **** 	       tp_dev.x[0] = tp_dev.xfac * tp_dev.x[0] + tp_dev.xoff;
+ 1182              		.loc 1 212 10 view .LVU378
+ 1183 0038 FFF7FEFF 		bl	TP_Read_XY2
+ 1184              	.LVL114:
+ 212:source\touch/touch_panel.c **** 	       tp_dev.x[0] = tp_dev.xfac * tp_dev.x[0] + tp_dev.xoff;
+ 1185              		.loc 1 212 9 view .LVU379
+ 1186 003c 0028     		cmp	r0, #0
+ 1187 003e ECD0     		beq	.L56
+ 213:source\touch/touch_panel.c **** 	       tp_dev.y[0] = tp_dev.yfac * tp_dev.y[0] + tp_dev.yoff;
+ 1188              		.loc 1 213 9 is_stmt 1 view .LVU380
+ 213:source\touch/touch_panel.c **** 	       tp_dev.y[0] = tp_dev.yfac * tp_dev.y[0] + tp_dev.yoff;
+ 1189              		.loc 1 213 45 is_stmt 0 view .LVU381
+ 1190 0040 2388     		ldrh	r3, [r4]
+ 213:source\touch/touch_panel.c **** 	       tp_dev.y[0] = tp_dev.yfac * tp_dev.y[0] + tp_dev.yoff;
+ 1191              		.loc 1 213 49 view .LVU382
+ 1192 0042 D4ED066A 		vldr.32	s13, [r4, #24]
+ 213:source\touch/touch_panel.c **** 	       tp_dev.y[0] = tp_dev.yfac * tp_dev.y[0] + tp_dev.yoff;
+ 1193              		.loc 1 213 45 view .LVU383
+ 1194 0046 07EE103A 		vmov	s14, r3	@ int
+ 213:source\touch/touch_panel.c **** 	       tp_dev.y[0] = tp_dev.yfac * tp_dev.y[0] + tp_dev.yoff;
+ 1195              		.loc 1 213 49 view .LVU384
+ 1196 004a B4F92030 		ldrsh	r3, [r4, #32]
+ 1197 004e 07EE903A 		vmov	s15, r3	@ int
+ 213:source\touch/touch_panel.c **** 	       tp_dev.y[0] = tp_dev.yfac * tp_dev.y[0] + tp_dev.yoff;
+ 1198              		.loc 1 213 35 view .LVU385
+ 1199 0052 B8EEC77A 		vcvt.f32.s32	s14, s14
+ 213:source\touch/touch_panel.c **** 	       tp_dev.y[0] = tp_dev.yfac * tp_dev.y[0] + tp_dev.yoff;
+ 1200              		.loc 1 213 49 view .LVU386
+ 1201 0056 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1202 005a E6EE877A 		vfma.f32	s15, s13, s14
+ 214:source\touch/touch_panel.c **** 	    }
+ 1203              		.loc 1 214 49 view .LVU387
+ 1204 005e D4ED076A 		vldr.32	s13, [r4, #28]
+ 213:source\touch/touch_panel.c **** 	       tp_dev.y[0] = tp_dev.yfac * tp_dev.y[0] + tp_dev.yoff;
+ 1205              		.loc 1 213 21 view .LVU388
+ 1206 0062 FCEEE77A 		vcvt.u32.f32	s15, s15
+ 1207 0066 17EE903A 		vmov	r3, s15	@ int
+ 1208 006a 2380     		strh	r3, [r4]	@ movhi
+ 214:source\touch/touch_panel.c **** 	    }
+ 1209              		.loc 1 214 9 is_stmt 1 view .LVU389
+ 214:source\touch/touch_panel.c **** 	    }
+ 1210              		.loc 1 214 45 is_stmt 0 view .LVU390
+ 1211 006c 6389     		ldrh	r3, [r4, #10]
+ 1212 006e 07EE103A 		vmov	s14, r3	@ int
+ 214:source\touch/touch_panel.c **** 	    }
+ 1213              		.loc 1 214 49 view .LVU391
+ 1214 0072 B4F92230 		ldrsh	r3, [r4, #34]
+ 1215 0076 07EE903A 		vmov	s15, r3	@ int
+ 214:source\touch/touch_panel.c **** 	    }
+ 1216              		.loc 1 214 35 view .LVU392
+ 1217 007a B8EEC77A 		vcvt.f32.s32	s14, s14
+ 214:source\touch/touch_panel.c **** 	    }
+ 1218              		.loc 1 214 49 view .LVU393
+ 1219 007e F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1220 0082 E6EE877A 		vfma.f32	s15, s13, s14
+ 214:source\touch/touch_panel.c **** 	    }
+ 1221              		.loc 1 214 21 view .LVU394
+ 1222 0086 FCEEE77A 		vcvt.u32.f32	s15, s15
+ 1223 008a 17EE903A 		vmov	r3, s15	@ int
+ 1224 008e 6381     		strh	r3, [r4, #10]	@ movhi
+ 1225 0090 C3E7     		b	.L56
+ 1226              	.LVL115:
+ 1227              	.L54:
+ 223:source\touch/touch_panel.c **** 	    tp_dev.sta &= ~(1 << 7);
+ 1228              		.loc 1 223 3 is_stmt 1 view .LVU395
+ 223:source\touch/touch_panel.c **** 	    tp_dev.sta &= ~(1 << 7);
+ 1229              		.loc 1 223 6 is_stmt 0 view .LVU396
+ 1230 0092 94F91420 		ldrsb	r2, [r4, #20]
+ 223:source\touch/touch_panel.c **** 	    tp_dev.sta &= ~(1 << 7);
+ 1231              		.loc 1 223 13 view .LVU397
+ 1232 0096 237D     		ldrb	r3, [r4, #20]	@ zero_extendqisi2
+ 223:source\touch/touch_panel.c **** 	    tp_dev.sta &= ~(1 << 7);
+ 1233              		.loc 1 223 6 view .LVU398
+ 1234 0098 002A     		cmp	r2, #0
+ 224:source\touch/touch_panel.c **** 	 } else {
+ 1235              		.loc 1 224 6 is_stmt 1 view .LVU399
+ 227:source\touch/touch_panel.c **** 	    tp_dev.x[0] = 0xffff;
+ 1236              		.loc 1 227 18 is_stmt 0 view .LVU400
+ 1237 009a A3BF     		ittte	ge
+ 1238 009c 0023     		movge	r3, #0
+ 1239 009e 6382     		strhge	r3, [r4, #18]	@ movhi
+ 228:source\touch/touch_panel.c **** 	    tp_dev.y[0] = 0xffff;
+ 1240              		.loc 1 228 18 view .LVU401
+ 1241 00a0 4FF6FF73 		movwge	r3, #65535
+ 224:source\touch/touch_panel.c **** 	 } else {
+ 1242              		.loc 1 224 17 view .LVU402
+ 1243 00a4 03F07F03 		andlt	r3, r3, #127
+ 228:source\touch/touch_panel.c **** 	    tp_dev.y[0] = 0xffff;
+ 1244              		.loc 1 228 18 view .LVU403
+ 1245 00a8 A5BF     		ittet	ge
+ 1246 00aa 2380     		strhge	r3, [r4]	@ movhi
+ 226:source\touch/touch_panel.c **** 	    tp_dev.y[4] = 0;
+ 1247              		.loc 1 226 18 view .LVU404
+ 1248 00ac 034B     		ldrge	r3, .L62+8
+ 224:source\touch/touch_panel.c **** 	 } else {
+ 1249              		.loc 1 224 17 view .LVU405
+ 1250 00ae 2375     		strblt	r3, [r4, #20]
+ 226:source\touch/touch_panel.c **** 	    tp_dev.y[4] = 0;
+ 1251              		.loc 1 226 6 is_stmt 1 view .LVU406
+ 227:source\touch/touch_panel.c **** 	    tp_dev.x[0] = 0xffff;
+ 1252              		.loc 1 227 6 view .LVU407
+ 228:source\touch/touch_panel.c **** 	    tp_dev.y[0] = 0xffff;
+ 1253              		.loc 1 228 6 view .LVU408
+ 229:source\touch/touch_panel.c **** 	 }
+ 1254              		.loc 1 229 6 view .LVU409
+ 226:source\touch/touch_panel.c **** 	    tp_dev.y[4] = 0;
+ 1255              		.loc 1 226 18 is_stmt 0 view .LVU410
+ 1256 00b0 A360     		strge	r3, [r4, #8]
+ 1257 00b2 BCE7     		b	.L57
+ 1258              	.L63:
+ 1259              		.align	2
+ 1260              	.L62:
+ 1261 00b4 00804042 		.word	1111523328
+ 1262 00b8 00000000 		.word	.LANCHOR0
+ 1263 00bc 0000FFFF 		.word	-65536
+ 1264              		.cfi_endproc
+ 1265              	.LFE138:
+ 1267              		.section	.text.TP_Drow_Touch_Point,"ax",%progbits
+ 1268              		.align	1
+ 1269              		.global	TP_Drow_Touch_Point
+ 1270              		.syntax unified
+ 1271              		.thumb
+ 1272              		.thumb_func
+ 1274              	TP_Drow_Touch_Point:
+ 1275              	.LVL116:
+ 1276              	.LFB139:
+ 234:source\touch/touch_panel.c **** 
+ 235:source\touch/touch_panel.c **** 
+ 236:source\touch/touch_panel.c **** void TP_Drow_Touch_Point (unsigned short x,unsigned short y,unsigned short color)
+ 237:source\touch/touch_panel.c **** {
+ 1277              		.loc 1 237 1 is_stmt 1 view -0
+ 1278              		.cfi_startproc
+ 1279              		@ args = 0, pretend = 0, frame = 8
+ 1280              		@ frame_needed = 0, uses_anonymous_args = 0
+ 238:source\touch/touch_panel.c ****       set_color(color);
+ 1281              		.loc 1 238 7 view .LVU412
+ 237:source\touch/touch_panel.c ****       set_color(color);
+ 1282              		.loc 1 237 1 is_stmt 0 view .LVU413
+ 1283 0000 2DE9F341 		push	{r0, r1, r4, r5, r6, r7, r8, lr}
+ 1284              		.cfi_def_cfa_offset 32
+ 1285              		.cfi_offset 4, -24
+ 1286              		.cfi_offset 5, -20
+ 1287              		.cfi_offset 6, -16
+ 1288              		.cfi_offset 7, -12
+ 1289              		.cfi_offset 8, -8
+ 1290              		.cfi_offset 14, -4
+ 237:source\touch/touch_panel.c ****       set_color(color);
+ 1291              		.loc 1 237 1 view .LVU414
+ 1292 0004 0D46     		mov	r5, r1
+ 1293 0006 0446     		mov	r4, r0
+ 1294              		.loc 1 238 7 view .LVU415
+ 1295 0008 1046     		mov	r0, r2
+ 1296              	.LVL117:
+ 1297              		.loc 1 238 7 view .LVU416
+ 1298 000a FFF7FEFF 		bl	set_color
+ 1299              	.LVL118:
+ 239:source\touch/touch_panel.c ****       LCD_DrawLine(x - 12,y,x + 13,y);
+ 1300              		.loc 1 239 7 is_stmt 1 view .LVU417
+ 1301 000e 2FB2     		sxth	r7, r5
+ 1302              		.loc 1 239 31 is_stmt 0 view .LVU418
+ 1303 0010 04F10D02 		add	r2, r4, #13
+ 1304              		.loc 1 239 22 view .LVU419
+ 1305 0014 A4F10C00 		sub	r0, r4, #12
+ 1306              		.loc 1 239 7 view .LVU420
+ 1307 0018 3B46     		mov	r3, r7
+ 1308 001a 3946     		mov	r1, r7
+ 1309 001c 12B2     		sxth	r2, r2
+ 1310 001e 00B2     		sxth	r0, r0
+ 1311 0020 FFF7FEFF 		bl	LCD_DrawLine
+ 1312              	.LVL119:
+ 240:source\touch/touch_panel.c ****       LCD_DrawLine(x,y - 12,x,y + 13);
+ 1313              		.loc 1 240 7 is_stmt 1 view .LVU421
+ 1314 0024 26B2     		sxth	r6, r4
+ 1315              		.loc 1 240 33 is_stmt 0 view .LVU422
+ 1316 0026 05F10D03 		add	r3, r5, #13
+ 1317              		.loc 1 240 24 view .LVU423
+ 1318 002a A5F10C01 		sub	r1, r5, #12
+ 1319              		.loc 1 240 7 view .LVU424
+ 1320 002e 3246     		mov	r2, r6
+ 1321 0030 1BB2     		sxth	r3, r3
+ 1322 0032 3046     		mov	r0, r6
+ 1323 0034 09B2     		sxth	r1, r1
+ 241:source\touch/touch_panel.c ****       LCD_DrawPoint(x + 1,y + 1);
+ 1324              		.loc 1 241 7 view .LVU425
+ 1325 0036 04F10108 		add	r8, r4, #1
+ 240:source\touch/touch_panel.c ****       LCD_DrawLine(x,y - 12,x,y + 13);
+ 1326              		.loc 1 240 7 view .LVU426
+ 1327 003a FFF7FEFF 		bl	LCD_DrawLine
+ 1328              	.LVL120:
+ 1329              		.loc 1 241 7 is_stmt 1 view .LVU427
+ 1330 003e 1FFA88F8 		uxth	r8, r8
+ 1331 0042 691C     		adds	r1, r5, #1
+ 242:source\touch/touch_panel.c ****       LCD_DrawPoint(x - 1,y + 1);
+ 1332              		.loc 1 242 7 is_stmt 0 view .LVU428
+ 1333 0044 013C     		subs	r4, r4, #1
+ 241:source\touch/touch_panel.c ****       LCD_DrawPoint(x + 1,y + 1);
+ 1334              		.loc 1 241 7 view .LVU429
+ 1335 0046 89B2     		uxth	r1, r1
+ 1336 0048 4046     		mov	r0, r8
+ 1337              		.loc 1 242 7 view .LVU430
+ 1338 004a A4B2     		uxth	r4, r4
+ 241:source\touch/touch_panel.c ****       LCD_DrawPoint(x + 1,y + 1);
+ 1339              		.loc 1 241 7 view .LVU431
+ 1340 004c 0191     		str	r1, [sp, #4]
+ 1341 004e FFF7FEFF 		bl	LCD_DrawPoint
+ 1342              	.LVL121:
+ 1343              		.loc 1 242 7 is_stmt 1 view .LVU432
+ 1344 0052 0199     		ldr	r1, [sp, #4]
+ 1345 0054 2046     		mov	r0, r4
+ 1346 0056 FFF7FEFF 		bl	LCD_DrawPoint
+ 1347              	.LVL122:
+ 243:source\touch/touch_panel.c ****       LCD_DrawPoint(x + 1,y - 1);
+ 1348              		.loc 1 243 7 view .LVU433
+ 1349 005a 691E     		subs	r1, r5, #1
+ 1350 005c 89B2     		uxth	r1, r1
+ 1351 005e 4046     		mov	r0, r8
+ 1352 0060 0191     		str	r1, [sp, #4]
+ 1353 0062 FFF7FEFF 		bl	LCD_DrawPoint
+ 1354              	.LVL123:
+ 244:source\touch/touch_panel.c ****       LCD_DrawPoint(x - 1,y - 1);
+ 1355              		.loc 1 244 7 view .LVU434
+ 1356 0066 0199     		ldr	r1, [sp, #4]
+ 1357 0068 2046     		mov	r0, r4
+ 1358 006a FFF7FEFF 		bl	LCD_DrawPoint
+ 1359              	.LVL124:
+ 245:source\touch/touch_panel.c ****       LCD_Draw_Circle(x,y,6);
+ 1360              		.loc 1 245 7 view .LVU435
+ 1361 006e 0622     		movs	r2, #6
+ 1362 0070 3946     		mov	r1, r7
+ 1363 0072 3046     		mov	r0, r6
+ 246:source\touch/touch_panel.c **** }
+ 1364              		.loc 1 246 1 is_stmt 0 view .LVU436
+ 1365 0074 02B0     		add	sp, sp, #8
+ 1366              		.cfi_def_cfa_offset 24
+ 1367              		@ sp needed
+ 1368 0076 BDE8F041 		pop	{r4, r5, r6, r7, r8, lr}
+ 1369              		.cfi_restore 14
+ 1370              		.cfi_restore 8
+ 1371              		.cfi_restore 7
+ 1372              		.cfi_restore 6
+ 1373              		.cfi_restore 5
+ 1374              		.cfi_restore 4
+ 1375              		.cfi_def_cfa_offset 0
+ 245:source\touch/touch_panel.c ****       LCD_Draw_Circle(x,y,6);
+ 1376              		.loc 1 245 7 view .LVU437
+ 1377 007a FFF7FEBF 		b	LCD_Draw_Circle
+ 1378              	.LVL125:
+ 1379              		.cfi_endproc
+ 1380              	.LFE139:
+ 1382              		.section	.rodata.TP_Adjust.str1.1,"aMS",%progbits,1
+ 1383              	.LC6:
+ 1384 0000 20546F75 		.ascii	" Toutch_Adjust\000"
+ 1384      7463685F 
+ 1384      41646A75 
+ 1384      737400
+ 1385              		.global	__aeabi_ui2d
+ 1386              		.global	__aeabi_d2uiz
+ 1387              		.global	__aeabi_f2d
+ 1388              		.global	__aeabi_dcmplt
+ 1389              		.global	__aeabi_dcmpgt
+ 1390              		.global	__aeabi_dmul
+ 1391              	.LC7:
+ 1392 000f 5450204E 		.ascii	"TP Need readjust!\000"
+ 1392      65656420 
+ 1392      72656164 
+ 1392      6A757374 
+ 1392      2100
+ 1393              	.LC8:
+ 1394 0021 546F7563 		.ascii	"Touch Screen Adjust OK!\000"
+ 1394      68205363 
+ 1394      7265656E 
+ 1394      2041646A 
+ 1394      75737420 
+ 1395              	.LC9:
+ 1396 0039 20546F75 		.ascii	" Toutch_Adjust Time out\000"
+ 1396      7463685F 
+ 1396      41646A75 
+ 1396      73742054 
+ 1396      696D6520 
+ 1397              		.section	.text.TP_Adjust,"ax",%progbits
+ 1398              		.align	1
+ 1399              		.global	TP_Adjust
+ 1400              		.syntax unified
+ 1401              		.thumb
+ 1402              		.thumb_func
+ 1404              	TP_Adjust:
+ 1405              	.LFB140:
+ 247:source\touch/touch_panel.c **** 
+ 248:source\touch/touch_panel.c **** 
+ 249:source\touch/touch_panel.c **** void TP_Adjust (void)
+ 250:source\touch/touch_panel.c **** {
+ 1406              		.loc 1 250 1 is_stmt 1 view -0
+ 1407              		.cfi_startproc
+ 1408              		@ args = 0, pretend = 0, frame = 32
+ 1409              		@ frame_needed = 0, uses_anonymous_args = 0
+ 251:source\touch/touch_panel.c ****       unsigned short pos_temp[4][2];
+ 1410              		.loc 1 251 7 view .LVU439
+ 252:source\touch/touch_panel.c ****       unsigned char cnt = 0;
+ 1411              		.loc 1 252 7 view .LVU440
+ 1412              	.LVL126:
+ 253:source\touch/touch_panel.c ****       unsigned short d1,d2;
+ 1413              		.loc 1 253 7 view .LVU441
+ 254:source\touch/touch_panel.c ****       unsigned int tem1,tem2;
+ 1414              		.loc 1 254 7 view .LVU442
+ 255:source\touch/touch_panel.c ****       double fac;
+ 1415              		.loc 1 255 7 view .LVU443
+ 256:source\touch/touch_panel.c ****       unsigned short outtime = 0;
+ 1416              		.loc 1 256 7 view .LVU444
+ 257:source\touch/touch_panel.c ****       cnt = 0;
+ 1417              		.loc 1 257 7 view .LVU445
+ 258:source\touch/touch_panel.c ****       LCD_Clear(background_color);
+ 1418              		.loc 1 258 7 view .LVU446
+ 250:source\touch/touch_panel.c ****       unsigned short pos_temp[4][2];
+ 1419              		.loc 1 250 1 is_stmt 0 view .LVU447
+ 1420 0000 2DE9F04F 		push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 1421              		.cfi_def_cfa_offset 36
+ 1422              		.cfi_offset 4, -36
+ 1423              		.cfi_offset 5, -32
+ 1424              		.cfi_offset 6, -28
+ 1425              		.cfi_offset 7, -24
+ 1426              		.cfi_offset 8, -20
+ 1427              		.cfi_offset 9, -16
+ 1428              		.cfi_offset 10, -12
+ 1429              		.cfi_offset 11, -8
+ 1430              		.cfi_offset 14, -4
+ 1431 0004 2DED028B 		vpush.64	{d8}
+ 1432              		.cfi_def_cfa_offset 44
+ 1433              		.cfi_offset 80, -44
+ 1434              		.cfi_offset 81, -40
+ 1435              		.loc 1 258 7 view .LVU448
+ 1436 0008 A34B     		ldr	r3, .L107+16
+ 250:source\touch/touch_panel.c ****       unsigned short pos_temp[4][2];
+ 1437              		.loc 1 250 1 view .LVU449
+ 1438 000a 8FB0     		sub	sp, sp, #60
+ 1439              		.cfi_def_cfa_offset 104
+ 1440              		.loc 1 258 7 view .LVU450
+ 1441 000c 1888     		ldrh	r0, [r3]
+ 1442 000e FFF7FEFF 		bl	LCD_Clear
+ 1443              	.LVL127:
+ 259:source\touch/touch_panel.c ****       lcd_printf(1,5," Toutch_Adjust");
+ 1444              		.loc 1 259 7 is_stmt 1 view .LVU451
+ 1445 0012 A24A     		ldr	r2, .L107+20
+ 1446 0014 0521     		movs	r1, #5
+ 1447 0016 0120     		movs	r0, #1
+ 1448 0018 FFF7FEFF 		bl	lcd_printf
+ 1449              	.LVL128:
+ 260:source\touch/touch_panel.c ****       TP_Drow_Touch_Point(20,20,RED);
+ 1450              		.loc 1 260 7 view .LVU452
+ 1451 001c 1421     		movs	r1, #20
+ 1452 001e 4FF47842 		mov	r2, #63488
+ 1453 0022 0846     		mov	r0, r1
+ 1454 0024 FFF7FEFF 		bl	TP_Drow_Touch_Point
+ 1455              	.LVL129:
+ 261:source\touch/touch_panel.c ****       tp_dev.sta = 0;
+ 1456              		.loc 1 261 7 view .LVU453
+ 1457              		.loc 1 261 18 is_stmt 0 view .LVU454
+ 1458 0028 9D4B     		ldr	r3, .L107+24
+ 1459 002a 0024     		movs	r4, #0
+ 262:source\touch/touch_panel.c ****       tp_dev.xfac = 0;
+ 1460              		.loc 1 262 19 view .LVU455
+ 1461 002c 0022     		movs	r2, #0
+ 261:source\touch/touch_panel.c ****       tp_dev.sta = 0;
+ 1462              		.loc 1 261 18 view .LVU456
+ 1463 002e 1C75     		strb	r4, [r3, #20]
+ 1464              		.loc 1 262 7 is_stmt 1 view .LVU457
+ 1465              		.loc 1 262 19 is_stmt 0 view .LVU458
+ 1466 0030 9A61     		str	r2, [r3, #24]	@ float
+ 1467              	.L103:
+ 257:source\touch/touch_panel.c ****       LCD_Clear(background_color);
+ 1468              		.loc 1 257 11 view .LVU459
+ 1469 0032 2546     		mov	r5, r4
+ 1470              	.LVL130:
+ 1471              	.L66:
+ 263:source\touch/touch_panel.c ****       while (1)	{
+ 1472              		.loc 1 263 7 is_stmt 1 view .LVU460
+ 264:source\touch/touch_panel.c ****             if (tick) {
+ 1473              		.loc 1 264 13 view .LVU461
+ 1474              		.loc 1 264 17 is_stmt 0 view .LVU462
+ 1475 0034 9B4A     		ldr	r2, .L107+28
+ 1476 0036 1388     		ldrh	r3, [r2]
+ 1477 0038 9BB2     		uxth	r3, r3
+ 1478              		.loc 1 264 16 view .LVU463
+ 1479 003a 2BB3     		cbz	r3, .L67
+ 265:source\touch/touch_panel.c ****                tick = 0;      	
+ 1480              		.loc 1 265 16 is_stmt 1 view .LVU464
+ 1481              		.loc 1 265 21 is_stmt 0 view .LVU465
+ 1482 003c 0026     		movs	r6, #0
+ 1483 003e 1680     		strh	r6, [r2]	@ movhi
+ 266:source\touch/touch_panel.c ****                /* Reload IWDG counter */
+ 267:source\touch/touch_panel.c ****                IWDG_ReloadCounter();  
+ 1484              		.loc 1 267 16 is_stmt 1 view .LVU466
+ 1485 0040 FFF7FEFF 		bl	IWDG_ReloadCounter
+ 1486              	.LVL131:
+ 268:source\touch/touch_panel.c ****                serial_check();
+ 1487              		.loc 1 268 16 view .LVU467
+ 1488 0044 FFF7FEFF 		bl	serial_check
+ 1489              	.LVL132:
+ 269:source\touch/touch_panel.c ****                if (time_led == ON) LED_OUT0 = 0;else LED_OUT0 = 1;
+ 1490              		.loc 1 269 16 view .LVU468
+ 1491              		.loc 1 269 29 is_stmt 0 view .LVU469
+ 1492 0048 974B     		ldr	r3, .L107+32
+ 1493 004a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1494              		.loc 1 269 19 view .LVU470
+ 1495 004c 012B     		cmp	r3, #1
+ 1496 004e 974B     		ldr	r3, .L107+36
+ 1497              		.loc 1 269 36 is_stmt 1 view .LVU471
+ 1498              		.loc 1 269 63 is_stmt 0 view .LVU472
+ 1499 0050 16BF     		itet	ne
+ 1500 0052 0122     		movne	r2, #1
+ 1501              		.loc 1 269 45 view .LVU473
+ 1502 0054 C3F8A462 		streq	r6, [r3, #676]
+ 1503              		.loc 1 269 54 is_stmt 1 view .LVU474
+ 1504              		.loc 1 269 63 is_stmt 0 view .LVU475
+ 1505 0058 C3F8A422 		strne	r2, [r3, #676]
+ 270:source\touch/touch_panel.c ****                if ((tx_led) || (rx_led)) LED_OUT1 = 0;
+ 1506              		.loc 1 270 16 is_stmt 1 view .LVU476
+ 1507              		.loc 1 270 20 is_stmt 0 view .LVU477
+ 1508 005c 944B     		ldr	r3, .L107+40
+ 1509 005e 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 1510              		.loc 1 270 19 view .LVU478
+ 1511 0060 12B9     		cbnz	r2, .L70
+ 1512              		.loc 1 270 29 discriminator 2 view .LVU479
+ 1513 0062 944A     		ldr	r2, .L107+44
+ 1514 0064 1278     		ldrb	r2, [r2]	@ zero_extendqisi2
+ 1515 0066 1AB1     		cbz	r2, .L71
+ 1516              	.L70:
+ 1517              		.loc 1 270 42 is_stmt 1 discriminator 3 view .LVU480
+ 1518              		.loc 1 270 51 is_stmt 0 discriminator 3 view .LVU481
+ 1519 0068 904A     		ldr	r2, .L107+36
+ 1520 006a 0021     		movs	r1, #0
+ 1521 006c C2F8A812 		str	r1, [r2, #680]
+ 1522              	.L71:
+ 271:source\touch/touch_panel.c ****                if ((tx_led == 0) && (rx_led == 0)) LED_OUT1 = 1;                  	
+ 1523              		.loc 1 271 16 is_stmt 1 view .LVU482
+ 1524              		.loc 1 271 28 is_stmt 0 view .LVU483
+ 1525 0070 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1526              		.loc 1 271 19 view .LVU484
+ 1527 0072 33B9     		cbnz	r3, .L72
+ 1528              		.loc 1 271 45 discriminator 1 view .LVU485
+ 1529 0074 8F4B     		ldr	r3, .L107+44
+ 1530 0076 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1531              		.loc 1 271 34 discriminator 1 view .LVU486
+ 1532 0078 1BB9     		cbnz	r3, .L72
+ 1533              		.loc 1 271 52 is_stmt 1 discriminator 2 view .LVU487
+ 1534              		.loc 1 271 61 is_stmt 0 discriminator 2 view .LVU488
+ 1535 007a 8C4B     		ldr	r3, .L107+36
+ 1536 007c 0122     		movs	r2, #1
+ 1537 007e C3F8A822 		str	r2, [r3, #680]
+ 1538              	.L72:
+ 272:source\touch/touch_panel.c ****       	       TP_Scan(1);             
+ 1539              		.loc 1 272 15 is_stmt 1 view .LVU489
+ 1540 0082 0120     		movs	r0, #1
+ 1541 0084 FFF7FEFF 		bl	TP_Scan
+ 1542              	.LVL133:
+ 1543              	.L67:
+ 273:source\touch/touch_panel.c ****             }
+ 274:source\touch/touch_panel.c **** 	    if ((tp_dev.sta & 0xC0) == TP_CATH_PRES) {	
+ 1544              		.loc 1 274 6 view .LVU490
+ 1545              		.loc 1 274 17 is_stmt 0 view .LVU491
+ 1546 0088 854B     		ldr	r3, .L107+24
+ 1547 008a 1A7D     		ldrb	r2, [r3, #20]	@ zero_extendqisi2
+ 1548              		.loc 1 274 9 view .LVU492
+ 1549 008c 02F0C001 		and	r1, r2, #192
+ 1550 0090 4029     		cmp	r1, #64
+ 1551 0092 34D1     		bne	.L73
+ 275:source\touch/touch_panel.c **** 	       outtime = 0;
+ 1552              		.loc 1 275 9 is_stmt 1 view .LVU493
+ 1553              	.LVL134:
+ 276:source\touch/touch_panel.c **** 	       tp_dev.sta &= ~(1 << 6);
+ 1554              		.loc 1 276 9 view .LVU494
+ 1555              		.loc 1 276 20 is_stmt 0 view .LVU495
+ 1556 0094 22F04002 		bic	r2, r2, #64
+ 1557 0098 1A75     		strb	r2, [r3, #20]
+ 277:source\touch/touch_panel.c **** 	       pos_temp[cnt][0] = tp_dev.x[0];
+ 1558              		.loc 1 277 9 is_stmt 1 view .LVU496
+ 1559              		.loc 1 277 26 is_stmt 0 view .LVU497
+ 1560 009a 0EAA     		add	r2, sp, #56
+ 1561 009c 02EB8502 		add	r2, r2, r5, lsl #2
+ 278:source\touch/touch_panel.c **** 	       pos_temp[cnt][1] = tp_dev.y[0];
+ 279:source\touch/touch_panel.c **** 	       cnt++;
+ 1562              		.loc 1 279 12 view .LVU498
+ 1563 00a0 0135     		adds	r5, r5, #1
+ 1564              	.LVL135:
+ 277:source\touch/touch_panel.c **** 	       pos_temp[cnt][0] = tp_dev.x[0];
+ 1565              		.loc 1 277 26 view .LVU499
+ 1566 00a2 1988     		ldrh	r1, [r3]
+ 278:source\touch/touch_panel.c **** 	       pos_temp[cnt][1] = tp_dev.y[0];
+ 1567              		.loc 1 278 26 view .LVU500
+ 1568 00a4 5B89     		ldrh	r3, [r3, #10]
+ 1569 00a6 22F80E3C 		strh	r3, [r2, #-14]	@ movhi
+ 1570              		.loc 1 279 12 view .LVU501
+ 1571 00aa EDB2     		uxtb	r5, r5
+ 280:source\touch/touch_panel.c **** 	       switch (cnt) {
+ 1572              		.loc 1 280 9 view .LVU502
+ 1573 00ac 6B1E     		subs	r3, r5, #1
+ 277:source\touch/touch_panel.c **** 	       pos_temp[cnt][0] = tp_dev.x[0];
+ 1574              		.loc 1 277 26 view .LVU503
+ 1575 00ae 22F8101C 		strh	r1, [r2, #-16]	@ movhi
+ 278:source\touch/touch_panel.c **** 	       pos_temp[cnt][1] = tp_dev.y[0];
+ 1576              		.loc 1 278 9 is_stmt 1 view .LVU504
+ 279:source\touch/touch_panel.c **** 	       switch (cnt) {
+ 1577              		.loc 1 279 9 view .LVU505
+ 1578              	.LVL136:
+ 1579              		.loc 1 280 9 view .LVU506
+ 1580 00b2 032B     		cmp	r3, #3
+ 1581 00b4 22D8     		bhi	.L91
+ 1582 00b6 DFE803F0 		tbb	[pc, r3]
+ 1583              	.L75:
+ 1584 00ba 02       		.byte	(.L78-.L75)/2
+ 1585 00bb 10       		.byte	(.L77-.L75)/2
+ 1586 00bc 45       		.byte	(.L76-.L75)/2
+ 1587 00bd 56       		.byte	(.L74-.L75)/2
+ 1588              		.p2align 1
+ 1589              	.L78:
+ 281:source\touch/touch_panel.c **** 	       	  case 1:
+ 282:source\touch/touch_panel.c **** 		    TP_Drow_Touch_Point(20,20,WHITE);
+ 1590              		.loc 1 282 7 view .LVU507
+ 1591 00be 1421     		movs	r1, #20
+ 1592 00c0 0846     		mov	r0, r1
+ 1593 00c2 4FF6FF72 		movw	r2, #65535
+ 1594 00c6 FFF7FEFF 		bl	TP_Drow_Touch_Point
+ 1595              	.LVL137:
+ 283:source\touch/touch_panel.c **** 		    TP_Drow_Touch_Point(lcddev.width - 20,20,RED);
+ 1596              		.loc 1 283 7 view .LVU508
+ 1597              		.loc 1 283 33 is_stmt 0 view .LVU509
+ 1598 00ca 7B4B     		ldr	r3, .L107+48
+ 1599              		.loc 1 283 7 view .LVU510
+ 1600 00cc 1888     		ldrh	r0, [r3]
+ 1601 00ce 4FF47842 		mov	r2, #63488
+ 1602 00d2 1438     		subs	r0, r0, #20
+ 1603 00d4 1421     		movs	r1, #20
+ 1604              	.L106:
+ 284:source\touch/touch_panel.c **** 		    break;
+ 285:source\touch/touch_panel.c **** 		  case 2:
+ 286:source\touch/touch_panel.c ****  		    TP_Drow_Touch_Point(lcddev.width - 20,20,WHITE);
+ 287:source\touch/touch_panel.c **** 		    TP_Drow_Touch_Point(20,lcddev.height - 20,RED);
+ 288:source\touch/touch_panel.c **** 	            break;
+ 289:source\touch/touch_panel.c **** 		  case 3:
+ 290:source\touch/touch_panel.c ****  		    TP_Drow_Touch_Point(20,lcddev.height - 20,WHITE);
+ 291:source\touch/touch_panel.c ****  		    TP_Drow_Touch_Point(lcddev.width - 20,lcddev.height - 20,RED);
+ 1605              		.loc 1 291 8 view .LVU511
+ 1606 00d6 80B2     		uxth	r0, r0
+ 1607 00d8 0EE0     		b	.L105
+ 1608              	.L77:
+ 286:source\touch/touch_panel.c **** 		    TP_Drow_Touch_Point(20,lcddev.height - 20,RED);
+ 1609              		.loc 1 286 8 is_stmt 1 view .LVU512
+ 286:source\touch/touch_panel.c **** 		    TP_Drow_Touch_Point(20,lcddev.height - 20,RED);
+ 1610              		.loc 1 286 34 is_stmt 0 view .LVU513
+ 1611 00da 774C     		ldr	r4, .L107+48
+ 286:source\touch/touch_panel.c **** 		    TP_Drow_Touch_Point(20,lcddev.height - 20,RED);
+ 1612              		.loc 1 286 8 view .LVU514
+ 1613 00dc 2088     		ldrh	r0, [r4]
+ 1614 00de 1438     		subs	r0, r0, #20
+ 1615 00e0 4FF6FF72 		movw	r2, #65535
+ 1616 00e4 1421     		movs	r1, #20
+ 1617 00e6 80B2     		uxth	r0, r0
+ 1618 00e8 FFF7FEFF 		bl	TP_Drow_Touch_Point
+ 1619              	.LVL138:
+ 287:source\touch/touch_panel.c **** 	            break;
+ 1620              		.loc 1 287 7 is_stmt 1 view .LVU515
+ 1621 00ec 6188     		ldrh	r1, [r4, #2]
+ 1622 00ee 1439     		subs	r1, r1, #20
+ 1623 00f0 4FF47842 		mov	r2, #63488
+ 1624 00f4 89B2     		uxth	r1, r1
+ 1625 00f6 1420     		movs	r0, #20
+ 1626              	.L105:
+ 1627              		.loc 1 291 8 is_stmt 0 view .LVU516
+ 1628 00f8 FFF7FEFF 		bl	TP_Drow_Touch_Point
+ 1629              	.LVL139:
+ 292:source\touch/touch_panel.c **** 		    break;
+ 1630              		.loc 1 292 7 is_stmt 1 view .LVU517
+ 1631              	.L91:
+ 280:source\touch/touch_panel.c **** 	       	  case 1:
+ 1632              		.loc 1 280 9 is_stmt 0 view .LVU518
+ 1633 00fc 0024     		movs	r4, #0
+ 1634              	.LVL140:
+ 1635              	.L73:
+ 293:source\touch/touch_panel.c **** 		  case 4:
+ 294:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[0][0] - pos_temp[1][0]);
+ 295:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[1][1]);
+ 296:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 297:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 298:source\touch/touch_panel.c **** 		    d1 = sqrt(tem1 + tem2);
+ 299:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[2][0] - pos_temp[3][0]);
+ 300:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[2][1] - pos_temp[3][1]);
+ 301:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 302:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 303:source\touch/touch_panel.c **** 		    d2 = sqrt(tem1 + tem2);
+ 304:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 305:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05 || d1 == 0 || d2 == 0) {
+ 306:source\touch/touch_panel.c **** 		       cnt = 0;
+ 307:source\touch/touch_panel.c ****  		       TP_Drow_Touch_Point(lcddev.width - 20,lcddev.height - 20,WHITE);
+ 308:source\touch/touch_panel.c ****    	 	       TP_Drow_Touch_Point(20,20,RED);
+ 309:source\touch/touch_panel.c ****  		       TP_Adj_Info_Show(pos_temp[0][0],pos_temp[0][1],pos_temp[1][0],pos_temp[1][1],pos_temp[2][
+ 310:source\touch/touch_panel.c ****  		       continue;
+ 311:source\touch/touch_panel.c **** 		    }
+ 312:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[0][0] - pos_temp[2][0]);
+ 313:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[2][1]);
+ 314:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 315:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 316:source\touch/touch_panel.c **** 	            d1 = sqrt(tem1 + tem2);
+ 317:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[1][0] - pos_temp[3][0]);
+ 318:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[1][1] - pos_temp[3][1]);
+ 319:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 320:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 321:source\touch/touch_panel.c **** 		    d2 = sqrt(tem1 + tem2);
+ 322:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 323:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 324:source\touch/touch_panel.c **** 		       cnt = 0;
+ 325:source\touch/touch_panel.c ****  		       TP_Drow_Touch_Point(lcddev.width - 20,lcddev.height - 20,WHITE);
+ 326:source\touch/touch_panel.c ****    	 	       TP_Drow_Touch_Point(20,20,RED);
+ 327:source\touch/touch_panel.c ****  		       TP_Adj_Info_Show(pos_temp[0][0],pos_temp[0][1],pos_temp[1][0],pos_temp[1][1],pos_temp[2][
+ 328:source\touch/touch_panel.c **** 		       continue;
+ 329:source\touch/touch_panel.c **** 		    }
+ 330:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[1][0] - pos_temp[2][0]);
+ 331:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[1][1] - pos_temp[2][1]);
+ 332:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 333:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 334:source\touch/touch_panel.c **** 		    d1 = sqrt(tem1 + tem2);
+ 335:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[0][0] - pos_temp[3][0]);
+ 336:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[3][1]);
+ 337:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 338:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 339:source\touch/touch_panel.c **** 		    d2 = sqrt(tem1 + tem2);
+ 340:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 341:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 342:source\touch/touch_panel.c **** 		       cnt = 0;
+ 343:source\touch/touch_panel.c ****  		       TP_Drow_Touch_Point(lcddev.width - 20,lcddev.height - 20,WHITE);
+ 344:source\touch/touch_panel.c ****    	 	       TP_Drow_Touch_Point(20,20,RED);
+ 345:source\touch/touch_panel.c ****  		       TP_Adj_Info_Show(pos_temp[0][0],pos_temp[0][1],pos_temp[1][0],pos_temp[1][1],pos_temp[2][
+ 346:source\touch/touch_panel.c **** 		       continue;
+ 347:source\touch/touch_panel.c **** 		    }
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xfac = (float)(lcddev.width - 40) / (pos_temp[1][0] - pos_temp[0][0]);
+ 349:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 350:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 351:source\touch/touch_panel.c **** 		    tp_dev.yoff = (lcddev.height - tp_dev.yfac * (pos_temp[2][1] + pos_temp[0][1])) / 2;
+ 352:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 353:source\touch/touch_panel.c **** 		       cnt = 0;
+ 354:source\touch/touch_panel.c ****  		       TP_Drow_Touch_Point(lcddev.width - 20,lcddev.height - 20,WHITE);
+ 355:source\touch/touch_panel.c ****    	 	       TP_Drow_Touch_Point(20,20,RED);
+ 356:source\touch/touch_panel.c **** 		       lcd_printf(1,6,"TP Need readjust!");
+ 357:source\touch/touch_panel.c **** 		       tp_dev.touchtype = !tp_dev.touchtype;
+ 358:source\touch/touch_panel.c **** 		       if (tp_dev.touchtype) {
+ 359:source\touch/touch_panel.c **** 			  CMD_RDX = 0x90;
+ 360:source\touch/touch_panel.c **** 			  CMD_RDY = 0xD0;
+ 361:source\touch/touch_panel.c **** 		       } else {
+ 362:source\touch/touch_panel.c **** 			  CMD_RDX = 0xD0;
+ 363:source\touch/touch_panel.c **** 			  CMD_RDY = 0x90;
+ 364:source\touch/touch_panel.c **** 		       }
+ 365:source\touch/touch_panel.c **** 		       continue;
+ 366:source\touch/touch_panel.c **** 		    }
+ 367:source\touch/touch_panel.c **** 		    LCD_Clear(background_color);
+ 368:source\touch/touch_panel.c **** 		    lcd_printf(1,6,"Touch Screen Adjust OK!");
+ 369:source\touch/touch_panel.c **** 		    wait_ms(500);
+ 370:source\touch/touch_panel.c **** 		    TP_Save_Adjdata();
+ 371:source\touch/touch_panel.c ****  		    LCD_Clear(background_color);
+ 372:source\touch/touch_panel.c **** 		    return;
+ 373:source\touch/touch_panel.c **** 	       }
+ 374:source\touch/touch_panel.c **** 	    }
+ 375:source\touch/touch_panel.c **** 	    wait_ms(10);
+ 1636              		.loc 1 375 6 is_stmt 1 view .LVU519
+ 376:source\touch/touch_panel.c **** 	    outtime++;
+ 1637              		.loc 1 376 13 is_stmt 0 view .LVU520
+ 1638 00fe 0134     		adds	r4, r4, #1
+ 1639              	.LVL141:
+ 375:source\touch/touch_panel.c **** 	    outtime++;
+ 1640              		.loc 1 375 6 view .LVU521
+ 1641 0100 0A20     		movs	r0, #10
+ 1642              		.loc 1 376 13 view .LVU522
+ 1643 0102 A4B2     		uxth	r4, r4
+ 375:source\touch/touch_panel.c **** 	    outtime++;
+ 1644              		.loc 1 375 6 view .LVU523
+ 1645 0104 FFF7FEFF 		bl	wait_ms
+ 1646              	.LVL142:
+ 1647              		.loc 1 376 6 is_stmt 1 view .LVU524
+ 377:source\touch/touch_panel.c **** 	    if (outtime > 1000) {
+ 1648              		.loc 1 377 6 view .LVU525
+ 1649              		.loc 1 377 9 is_stmt 0 view .LVU526
+ 1650 0108 B4F57A7F 		cmp	r4, #1000
+ 1651 010c 92D9     		bls	.L66
+ 378:source\touch/touch_panel.c **** 	       outtime = 0;	
+ 1652              		.loc 1 378 9 is_stmt 1 view .LVU527
+ 1653              	.LVL143:
+ 379:source\touch/touch_panel.c ****                lcd_printf(1,5," Toutch_Adjust Time out");	       
+ 1654              		.loc 1 379 16 view .LVU528
+ 1655 010e 6B4A     		ldr	r2, .L107+52
+ 1656 0110 0521     		movs	r1, #5
+ 1657 0112 0120     		movs	r0, #1
+ 1658 0114 FFF7FEFF 		bl	lcd_printf
+ 1659              	.LVL144:
+ 380:source\touch/touch_panel.c **** 	       wait_ms(500);	       
+ 1660              		.loc 1 380 9 view .LVU529
+ 1661 0118 4FF4FA70 		mov	r0, #500
+ 1662 011c FFF7FEFF 		bl	wait_ms
+ 1663              	.LVL145:
+ 381:source\touch/touch_panel.c ****                set_color(WHITE);
+ 1664              		.loc 1 381 16 view .LVU530
+ 1665 0120 4FF6FF70 		movw	r0, #65535
+ 1666 0124 FFF7FEFF 		bl	set_color
+ 1667              	.LVL146:
+ 382:source\touch/touch_panel.c ****                set_background_color(BLACK);
+ 1668              		.loc 1 382 16 view .LVU531
+ 1669 0128 0020     		movs	r0, #0
+ 1670 012a FFF7FEFF 		bl	set_background_color
+ 1671              	.LVL147:
+ 383:source\touch/touch_panel.c **** 	       LCD_Clear(background_color);		       
+ 1672              		.loc 1 383 9 view .LVU532
+ 1673 012e 5A4B     		ldr	r3, .L107+16
+ 1674 0130 1888     		ldrh	r0, [r3]
+ 1675 0132 FFF7FEFF 		bl	LCD_Clear
+ 1676              	.LVL148:
+ 384:source\touch/touch_panel.c **** 	       TP_Get_Adjdata();
+ 1677              		.loc 1 384 9 view .LVU533
+ 385:source\touch/touch_panel.c **** 	       break;
+ 386:source\touch/touch_panel.c **** 	    }
+ 387:source\touch/touch_panel.c ****       }
+ 388:source\touch/touch_panel.c **** }
+ 1678              		.loc 1 388 1 is_stmt 0 view .LVU534
+ 1679 0136 0FB0     		add	sp, sp, #60
+ 1680              		.cfi_remember_state
+ 1681              		.cfi_def_cfa_offset 44
+ 1682              		@ sp needed
+ 1683 0138 BDEC028B 		vldm	sp!, {d8}
+ 1684              		.cfi_restore 80
+ 1685              		.cfi_restore 81
+ 1686              		.cfi_def_cfa_offset 36
+ 1687 013c BDE8F04F 		pop	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 1688              		.cfi_restore 14
+ 1689              		.cfi_restore 11
+ 1690              		.cfi_restore 10
+ 1691              		.cfi_restore 9
+ 1692              		.cfi_restore 8
+ 1693              		.cfi_restore 7
+ 1694              		.cfi_restore 6
+ 1695              		.cfi_restore 5
+ 1696              		.cfi_restore 4
+ 1697              		.cfi_def_cfa_offset 0
+ 1698              	.LVL149:
+ 384:source\touch/touch_panel.c **** 	       TP_Get_Adjdata();
+ 1699              		.loc 1 384 9 view .LVU535
+ 1700 0140 FFF7FEBF 		b	TP_Get_Adjdata
+ 1701              	.LVL150:
+ 1702              	.L76:
+ 1703              		.cfi_restore_state
+ 290:source\touch/touch_panel.c ****  		    TP_Drow_Touch_Point(lcddev.width - 20,lcddev.height - 20,RED);
+ 1704              		.loc 1 290 8 is_stmt 1 view .LVU536
+ 290:source\touch/touch_panel.c ****  		    TP_Drow_Touch_Point(lcddev.width - 20,lcddev.height - 20,RED);
+ 1705              		.loc 1 290 37 is_stmt 0 view .LVU537
+ 1706 0144 5C4C     		ldr	r4, .L107+48
+ 290:source\touch/touch_panel.c ****  		    TP_Drow_Touch_Point(lcddev.width - 20,lcddev.height - 20,RED);
+ 1707              		.loc 1 290 8 view .LVU538
+ 1708 0146 6188     		ldrh	r1, [r4, #2]
+ 1709 0148 1439     		subs	r1, r1, #20
+ 1710 014a 4FF6FF72 		movw	r2, #65535
+ 1711 014e 89B2     		uxth	r1, r1
+ 1712 0150 1420     		movs	r0, #20
+ 1713 0152 FFF7FEFF 		bl	TP_Drow_Touch_Point
+ 1714              	.LVL151:
+ 291:source\touch/touch_panel.c **** 		    break;
+ 1715              		.loc 1 291 8 is_stmt 1 view .LVU539
+ 1716 0156 6188     		ldrh	r1, [r4, #2]
+ 1717 0158 2088     		ldrh	r0, [r4]
+ 1718 015a 1439     		subs	r1, r1, #20
+ 1719 015c 1438     		subs	r0, r0, #20
+ 1720 015e 4FF47842 		mov	r2, #63488
+ 1721 0162 89B2     		uxth	r1, r1
+ 1722 0164 B7E7     		b	.L106
+ 1723              	.L74:
+ 294:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[1][1]);
+ 1724              		.loc 1 294 7 view .LVU540
+ 294:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[1][1]);
+ 1725              		.loc 1 294 29 is_stmt 0 view .LVU541
+ 1726 0166 BDF82850 		ldrh	r5, [sp, #40]
+ 1727              	.LVL152:
+ 294:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[1][1]);
+ 1728              		.loc 1 294 46 view .LVU542
+ 1729 016a BDF82CA0 		ldrh	r10, [sp, #44]
+ 295:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1730              		.loc 1 295 29 view .LVU543
+ 1731 016e BDF82A40 		ldrh	r4, [sp, #42]
+ 295:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1732              		.loc 1 295 46 view .LVU544
+ 1733 0172 BDF82EB0 		ldrh	fp, [sp, #46]
+ 294:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[1][1]);
+ 1734              		.loc 1 294 33 view .LVU545
+ 1735 0176 A5EB0A00 		sub	r0, r5, r10
+ 294:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[1][1]);
+ 1736              		.loc 1 294 14 view .LVU546
+ 1737 017a 0028     		cmp	r0, #0
+ 295:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1738              		.loc 1 295 33 view .LVU547
+ 1739 017c A4EB0B03 		sub	r3, r4, fp
+ 1740              	.LVL153:
+ 294:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[1][1]);
+ 1741              		.loc 1 294 14 view .LVU548
+ 1742 0180 B8BF     		it	lt
+ 1743 0182 4042     		rsblt	r0, r0, #0
+ 1744              	.LVL154:
+ 295:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1745              		.loc 1 295 7 is_stmt 1 view .LVU549
+ 295:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1746              		.loc 1 295 14 is_stmt 0 view .LVU550
+ 1747 0184 002B     		cmp	r3, #0
+ 1748 0186 B8BF     		it	lt
+ 1749 0188 5B42     		rsblt	r3, r3, #0
+ 1750              	.LVL155:
+ 296:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 1751              		.loc 1 296 7 is_stmt 1 view .LVU551
+ 297:source\touch/touch_panel.c **** 		    d1 = sqrt(tem1 + tem2);
+ 1752              		.loc 1 297 7 view .LVU552
+ 298:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[2][0] - pos_temp[3][0]);
+ 1753              		.loc 1 298 7 view .LVU553
+ 297:source\touch/touch_panel.c **** 		    d1 = sqrt(tem1 + tem2);
+ 1754              		.loc 1 297 12 is_stmt 0 view .LVU554
+ 1755 018a 5B43     		muls	r3, r3, r3
+ 1756              	.LVL156:
+ 298:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[2][0] - pos_temp[3][0]);
+ 1757              		.loc 1 298 12 view .LVU555
+ 1758 018c 00FB0030 		mla	r0, r0, r0, r3
+ 1759              	.LVL157:
+ 298:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[2][0] - pos_temp[3][0]);
+ 1760              		.loc 1 298 12 view .LVU556
+ 1761 0190 FFF7FEFF 		bl	__aeabi_ui2d
+ 1762              	.LVL158:
+ 298:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[2][0] - pos_temp[3][0]);
+ 1763              		.loc 1 298 12 view .LVU557
+ 1764 0194 41EC100B 		vmov	d0, r0, r1
+ 1765 0198 FFF7FEFF 		bl	sqrt
+ 1766              	.LVL159:
+ 1767 019c 51EC100B 		vmov	r0, r1, d0
+ 298:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[2][0] - pos_temp[3][0]);
+ 1768              		.loc 1 298 10 view .LVU558
+ 1769 01a0 FFF7FEFF 		bl	__aeabi_d2uiz
+ 1770              	.LVL160:
+ 1771 01a4 83B2     		uxth	r3, r0
+ 1772 01a6 08EE903A 		vmov	s17, r3	@ int
+ 1773              	.LVL161:
+ 299:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[2][1] - pos_temp[3][1]);
+ 1774              		.loc 1 299 7 is_stmt 1 view .LVU559
+ 299:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[2][1] - pos_temp[3][1]);
+ 1775              		.loc 1 299 29 is_stmt 0 view .LVU560
+ 1776 01aa BDF83080 		ldrh	r8, [sp, #48]
+ 299:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[2][1] - pos_temp[3][1]);
+ 1777              		.loc 1 299 46 view .LVU561
+ 1778 01ae BDF83430 		ldrh	r3, [sp, #52]
+ 300:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1779              		.loc 1 300 29 view .LVU562
+ 1780 01b2 BDF83290 		ldrh	r9, [sp, #50]
+ 299:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[2][1] - pos_temp[3][1]);
+ 1781              		.loc 1 299 46 view .LVU563
+ 1782 01b6 0693     		str	r3, [sp, #24]
+ 299:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[2][1] - pos_temp[3][1]);
+ 1783              		.loc 1 299 33 view .LVU564
+ 1784 01b8 A8EB0300 		sub	r0, r8, r3
+ 300:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1785              		.loc 1 300 46 view .LVU565
+ 1786 01bc BDF83630 		ldrh	r3, [sp, #54]
+ 1787 01c0 0793     		str	r3, [sp, #28]
+ 299:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[2][1] - pos_temp[3][1]);
+ 1788              		.loc 1 299 14 view .LVU566
+ 1789 01c2 0028     		cmp	r0, #0
+ 300:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1790              		.loc 1 300 33 view .LVU567
+ 1791 01c4 A9EB0303 		sub	r3, r9, r3
+ 299:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[2][1] - pos_temp[3][1]);
+ 1792              		.loc 1 299 14 view .LVU568
+ 1793 01c8 B8BF     		it	lt
+ 1794 01ca 4042     		rsblt	r0, r0, #0
+ 1795              	.LVL162:
+ 300:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1796              		.loc 1 300 7 is_stmt 1 view .LVU569
+ 300:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1797              		.loc 1 300 14 is_stmt 0 view .LVU570
+ 1798 01cc 002B     		cmp	r3, #0
+ 1799 01ce B8BF     		it	lt
+ 1800 01d0 5B42     		rsblt	r3, r3, #0
+ 1801              	.LVL163:
+ 301:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 1802              		.loc 1 301 7 is_stmt 1 view .LVU571
+ 302:source\touch/touch_panel.c **** 		    d2 = sqrt(tem1 + tem2);
+ 1803              		.loc 1 302 7 view .LVU572
+ 303:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 1804              		.loc 1 303 7 view .LVU573
+ 302:source\touch/touch_panel.c **** 		    d2 = sqrt(tem1 + tem2);
+ 1805              		.loc 1 302 12 is_stmt 0 view .LVU574
+ 1806 01d2 5B43     		muls	r3, r3, r3
+ 1807              	.LVL164:
+ 303:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 1808              		.loc 1 303 12 view .LVU575
+ 1809 01d4 00FB0030 		mla	r0, r0, r0, r3
+ 1810              	.LVL165:
+ 303:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 1811              		.loc 1 303 12 view .LVU576
+ 1812 01d8 FFF7FEFF 		bl	__aeabi_ui2d
+ 1813              	.LVL166:
+ 303:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 1814              		.loc 1 303 12 view .LVU577
+ 1815 01dc 41EC100B 		vmov	d0, r0, r1
+ 1816 01e0 FFF7FEFF 		bl	sqrt
+ 1817              	.LVL167:
+ 1818 01e4 51EC100B 		vmov	r0, r1, d0
+ 303:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 1819              		.loc 1 303 10 view .LVU578
+ 1820 01e8 FFF7FEFF 		bl	__aeabi_d2uiz
+ 1821              	.LVL168:
+ 1822 01ec 83B2     		uxth	r3, r0
+ 1823 01ee 08EE103A 		vmov	s16, r3	@ int
+ 1824              	.LVL169:
+ 304:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05 || d1 == 0 || d2 == 0) {
+ 1825              		.loc 1 304 7 is_stmt 1 view .LVU579
+ 304:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05 || d1 == 0 || d2 == 0) {
+ 1826              		.loc 1 304 13 is_stmt 0 view .LVU580
+ 1827 01f2 B8EE687A 		vcvt.f32.u32	s14, s17
+ 304:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05 || d1 == 0 || d2 == 0) {
+ 1828              		.loc 1 304 23 view .LVU581
+ 1829 01f6 F8EEC87A 		vcvt.f32.s32	s15, s16
+ 304:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05 || d1 == 0 || d2 == 0) {
+ 1830              		.loc 1 304 11 view .LVU582
+ 1831 01fa C7EE277A 		vdiv.f32	s15, s14, s15
+ 1832 01fe 17EE900A 		vmov	r0, s15
+ 1833 0202 FFF7FEFF 		bl	__aeabi_f2d
+ 1834              	.LVL170:
+ 305:source\touch/touch_panel.c **** 		       cnt = 0;
+ 1835              		.loc 1 305 10 view .LVU583
+ 1836 0206 20A3     		adr	r3, .L107
+ 1837 0208 D3E90023 		ldrd	r2, [r3]
+ 304:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05 || d1 == 0 || d2 == 0) {
+ 1838              		.loc 1 304 11 view .LVU584
+ 1839 020c 0646     		mov	r6, r0
+ 1840 020e 0F46     		mov	r7, r1
+ 1841              	.LVL171:
+ 305:source\touch/touch_panel.c **** 		       cnt = 0;
+ 1842              		.loc 1 305 7 is_stmt 1 view .LVU585
+ 305:source\touch/touch_panel.c **** 		       cnt = 0;
+ 1843              		.loc 1 305 10 is_stmt 0 view .LVU586
+ 1844 0210 FFF7FEFF 		bl	__aeabi_dcmplt
+ 1845              	.LVL172:
+ 1846 0214 70B9     		cbnz	r0, .L85
+ 305:source\touch/touch_panel.c **** 		       cnt = 0;
+ 1847              		.loc 1 305 22 discriminator 1 view .LVU587
+ 1848 0216 1EA3     		adr	r3, .L107+8
+ 1849 0218 D3E90023 		ldrd	r2, [r3]
+ 1850 021c 3046     		mov	r0, r6
+ 1851 021e 3946     		mov	r1, r7
+ 1852 0220 FFF7FEFF 		bl	__aeabi_dcmpgt
+ 1853              	.LVL173:
+ 1854 0224 30B9     		cbnz	r0, .L85
+ 305:source\touch/touch_panel.c **** 		       cnt = 0;
+ 1855              		.loc 1 305 36 discriminator 2 view .LVU588
+ 1856 0226 18EE903A 		vmov	r3, s17	@ int
+ 1857 022a 1BB1     		cbz	r3, .L85
+ 305:source\touch/touch_panel.c **** 		       cnt = 0;
+ 1858              		.loc 1 305 47 discriminator 3 view .LVU589
+ 1859 022c 18EE103A 		vmov	r3, s16	@ int
+ 1860 0230 002B     		cmp	r3, #0
+ 1861 0232 47D1     		bne	.L80
+ 1862              	.LVL174:
+ 1863              	.L85:
+ 342:source\touch/touch_panel.c ****  		       TP_Drow_Touch_Point(lcddev.width - 20,lcddev.height - 20,WHITE);
+ 1864              		.loc 1 342 10 is_stmt 1 view .LVU590
+ 343:source\touch/touch_panel.c ****    	 	       TP_Drow_Touch_Point(20,20,RED);
+ 1865              		.loc 1 343 11 view .LVU591
+ 1866 0234 204B     		ldr	r3, .L107+48
+ 1867 0236 5988     		ldrh	r1, [r3, #2]
+ 1868 0238 1888     		ldrh	r0, [r3]
+ 1869 023a 1439     		subs	r1, r1, #20
+ 1870 023c 1438     		subs	r0, r0, #20
+ 1871 023e 4FF6FF72 		movw	r2, #65535
+ 1872 0242 89B2     		uxth	r1, r1
+ 1873 0244 80B2     		uxth	r0, r0
+ 1874 0246 FFF7FEFF 		bl	TP_Drow_Touch_Point
+ 1875              	.LVL175:
+ 344:source\touch/touch_panel.c ****  		       TP_Adj_Info_Show(pos_temp[0][0],pos_temp[0][1],pos_temp[1][0],pos_temp[1][1],pos_temp[2][
+ 1876              		.loc 1 344 14 view .LVU592
+ 1877 024a 1421     		movs	r1, #20
+ 1878 024c 0846     		mov	r0, r1
+ 1879 024e 4FF47842 		mov	r2, #63488
+ 1880 0252 FFF7FEFF 		bl	TP_Drow_Touch_Point
+ 1881              	.LVL176:
+ 345:source\touch/touch_panel.c **** 		       continue;
+ 1882              		.loc 1 345 11 view .LVU593
+ 345:source\touch/touch_panel.c **** 		       continue;
+ 1883              		.loc 1 345 152 is_stmt 0 view .LVU594
+ 1884 0256 1A4B     		ldr	r3, .L107+56
+ 1885 0258 0022     		movs	r2, #0
+ 1886 025a 3046     		mov	r0, r6
+ 1887 025c 3946     		mov	r1, r7
+ 1888 025e FFF7FEFF 		bl	__aeabi_dmul
+ 1889              	.LVL177:
+ 345:source\touch/touch_panel.c **** 		       continue;
+ 1890              		.loc 1 345 11 view .LVU595
+ 1891 0262 FFF7FEFF 		bl	__aeabi_d2uiz
+ 1892              	.LVL178:
+ 1893 0266 079B     		ldr	r3, [sp, #28]
+ 1894 0268 0393     		str	r3, [sp, #12]
+ 1895 026a 069B     		ldr	r3, [sp, #24]
+ 1896 026c CDF80080 		str	r8, [sp]
+ 1897 0270 80B2     		uxth	r0, r0
+ 1898 0272 CDE90193 		strd	r9, r3, [sp, #4]
+ 1899 0276 0490     		str	r0, [sp, #16]
+ 1900 0278 5B46     		mov	r3, fp
+ 1901 027a 5246     		mov	r2, r10
+ 1902 027c 2146     		mov	r1, r4
+ 1903 027e 2846     		mov	r0, r5
+ 1904 0280 FFF7FEFF 		bl	TP_Adj_Info_Show
+ 1905              	.LVL179:
+ 346:source\touch/touch_panel.c **** 		    }
+ 1906              		.loc 1 346 10 is_stmt 1 view .LVU596
+ 1907              	.L104:
+ 275:source\touch/touch_panel.c **** 	       tp_dev.sta &= ~(1 << 6);
+ 1908              		.loc 1 275 17 is_stmt 0 view .LVU597
+ 1909 0284 0024     		movs	r4, #0
+ 1910 0286 D4E6     		b	.L103
+ 1911              	.L108:
+ 1912              		.align	3
+ 1913              	.L107:
+ 1914 0288 66666666 		.word	1717986918
+ 1915 028c 6666EE3F 		.word	1072588390
+ 1916 0290 CDCCCCCC 		.word	-858993459
+ 1917 0294 CCCCF03F 		.word	1072745676
+ 1918 0298 00000000 		.word	background_color
+ 1919 029c 00000000 		.word	.LC6
+ 1920 02a0 00000000 		.word	.LANCHOR0
+ 1921 02a4 00000000 		.word	tick
+ 1922 02a8 00000000 		.word	time_led
+ 1923 02ac 00804242 		.word	1111654400
+ 1924 02b0 00000000 		.word	tx_led
+ 1925 02b4 00000000 		.word	rx_led
+ 1926 02b8 00000000 		.word	lcddev
+ 1927 02bc 39000000 		.word	.LC9
+ 1928 02c0 00005940 		.word	1079574528
+ 1929              	.LVL180:
+ 1930              	.L80:
+ 312:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[2][1]);
+ 1931              		.loc 1 312 7 is_stmt 1 view .LVU598
+ 312:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[2][1]);
+ 1932              		.loc 1 312 33 is_stmt 0 view .LVU599
+ 1933 02c4 A5EB0800 		sub	r0, r5, r8
+ 312:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[2][1]);
+ 1934              		.loc 1 312 14 view .LVU600
+ 1935 02c8 0028     		cmp	r0, #0
+ 313:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1936              		.loc 1 313 33 view .LVU601
+ 1937 02ca A4EB0903 		sub	r3, r4, r9
+ 312:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[2][1]);
+ 1938              		.loc 1 312 14 view .LVU602
+ 1939 02ce B8BF     		it	lt
+ 1940 02d0 4042     		rsblt	r0, r0, #0
+ 1941              	.LVL181:
+ 313:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1942              		.loc 1 313 7 is_stmt 1 view .LVU603
+ 313:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1943              		.loc 1 313 14 is_stmt 0 view .LVU604
+ 1944 02d2 002B     		cmp	r3, #0
+ 1945 02d4 B8BF     		it	lt
+ 1946 02d6 5B42     		rsblt	r3, r3, #0
+ 1947              	.LVL182:
+ 314:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 1948              		.loc 1 314 7 is_stmt 1 view .LVU605
+ 315:source\touch/touch_panel.c **** 	            d1 = sqrt(tem1 + tem2);
+ 1949              		.loc 1 315 7 view .LVU606
+ 316:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[1][0] - pos_temp[3][0]);
+ 1950              		.loc 1 316 14 view .LVU607
+ 315:source\touch/touch_panel.c **** 	            d1 = sqrt(tem1 + tem2);
+ 1951              		.loc 1 315 12 is_stmt 0 view .LVU608
+ 1952 02d8 5B43     		muls	r3, r3, r3
+ 1953              	.LVL183:
+ 316:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[1][0] - pos_temp[3][0]);
+ 1954              		.loc 1 316 19 view .LVU609
+ 1955 02da 00FB0030 		mla	r0, r0, r0, r3
+ 1956              	.LVL184:
+ 316:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[1][0] - pos_temp[3][0]);
+ 1957              		.loc 1 316 19 view .LVU610
+ 1958 02de FFF7FEFF 		bl	__aeabi_ui2d
+ 1959              	.LVL185:
+ 316:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[1][0] - pos_temp[3][0]);
+ 1960              		.loc 1 316 19 view .LVU611
+ 1961 02e2 41EC100B 		vmov	d0, r0, r1
+ 1962 02e6 FFF7FEFF 		bl	sqrt
+ 1963              	.LVL186:
+ 317:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[1][1] - pos_temp[3][1]);
+ 1964              		.loc 1 317 33 view .LVU612
+ 1965 02ea 069B     		ldr	r3, [sp, #24]
+ 1966 02ec AAEB0300 		sub	r0, r10, r3
+ 318:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1967              		.loc 1 318 33 view .LVU613
+ 1968 02f0 079B     		ldr	r3, [sp, #28]
+ 317:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[1][1] - pos_temp[3][1]);
+ 1969              		.loc 1 317 14 view .LVU614
+ 1970 02f2 0028     		cmp	r0, #0
+ 318:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1971              		.loc 1 318 33 view .LVU615
+ 1972 02f4 ABEB0303 		sub	r3, fp, r3
+ 317:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[1][1] - pos_temp[3][1]);
+ 1973              		.loc 1 317 14 view .LVU616
+ 1974 02f8 B8BF     		it	lt
+ 1975 02fa 4042     		rsblt	r0, r0, #0
+ 318:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1976              		.loc 1 318 14 view .LVU617
+ 1977 02fc 002B     		cmp	r3, #0
+ 1978 02fe B8BF     		it	lt
+ 1979 0300 5B42     		rsblt	r3, r3, #0
+ 320:source\touch/touch_panel.c **** 		    d2 = sqrt(tem1 + tem2);
+ 1980              		.loc 1 320 12 view .LVU618
+ 1981 0302 5B43     		muls	r3, r3, r3
+ 321:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 1982              		.loc 1 321 12 view .LVU619
+ 1983 0304 00FB0030 		mla	r0, r0, r0, r3
+ 316:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[1][0] - pos_temp[3][0]);
+ 1984              		.loc 1 316 19 view .LVU620
+ 1985 0308 8DED080B 		vstr.64	d0, [sp, #32]
+ 1986              	.LVL187:
+ 317:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[1][1] - pos_temp[3][1]);
+ 1987              		.loc 1 317 7 is_stmt 1 view .LVU621
+ 318:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 1988              		.loc 1 318 7 view .LVU622
+ 319:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 1989              		.loc 1 319 7 view .LVU623
+ 320:source\touch/touch_panel.c **** 		    d2 = sqrt(tem1 + tem2);
+ 1990              		.loc 1 320 7 view .LVU624
+ 321:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 1991              		.loc 1 321 7 view .LVU625
+ 321:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 1992              		.loc 1 321 12 is_stmt 0 view .LVU626
+ 1993 030c FFF7FEFF 		bl	__aeabi_ui2d
+ 1994              	.LVL188:
+ 321:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 1995              		.loc 1 321 12 view .LVU627
+ 1996 0310 41EC100B 		vmov	d0, r0, r1
+ 1997 0314 FFF7FEFF 		bl	sqrt
+ 1998              	.LVL189:
+ 316:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[1][0] - pos_temp[3][0]);
+ 1999              		.loc 1 316 17 view .LVU628
+ 2000 0318 DDE90801 		ldrd	r0, [sp, #32]
+ 321:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 2001              		.loc 1 321 12 view .LVU629
+ 2002 031c 57EC106B 		vmov	r6, r7, d0
+ 2003              	.LVL190:
+ 322:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2004              		.loc 1 322 7 is_stmt 1 view .LVU630
+ 316:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[1][0] - pos_temp[3][0]);
+ 2005              		.loc 1 316 17 is_stmt 0 view .LVU631
+ 2006 0320 FFF7FEFF 		bl	__aeabi_d2uiz
+ 2007              	.LVL191:
+ 322:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2008              		.loc 1 322 13 view .LVU632
+ 2009 0324 80B2     		uxth	r0, r0
+ 2010 0326 07EE900A 		vmov	s15, r0	@ int
+ 321:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 2011              		.loc 1 321 10 view .LVU633
+ 2012 032a 3946     		mov	r1, r7
+ 2013 032c 3046     		mov	r0, r6
+ 322:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2014              		.loc 1 322 13 view .LVU634
+ 2015 032e B8EE678A 		vcvt.f32.u32	s16, s15
+ 321:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 2016              		.loc 1 321 10 view .LVU635
+ 2017 0332 FFF7FEFF 		bl	__aeabi_d2uiz
+ 2018              	.LVL192:
+ 322:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2019              		.loc 1 322 23 view .LVU636
+ 2020 0336 80B2     		uxth	r0, r0
+ 2021 0338 07EE900A 		vmov	s15, r0	@ int
+ 2022 033c F8EEE77A 		vcvt.f32.s32	s15, s15
+ 322:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2023              		.loc 1 322 11 view .LVU637
+ 2024 0340 C8EE277A 		vdiv.f32	s15, s16, s15
+ 2025 0344 17EE900A 		vmov	r0, s15
+ 2026 0348 FFF7FEFF 		bl	__aeabi_f2d
+ 2027              	.LVL193:
+ 323:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2028              		.loc 1 323 10 view .LVU638
+ 2029 034c 8BA3     		adr	r3, .L109+28
+ 2030 034e D3E90023 		ldrd	r2, [r3]
+ 322:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2031              		.loc 1 322 11 view .LVU639
+ 2032 0352 0646     		mov	r6, r0
+ 2033              	.LVL194:
+ 322:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2034              		.loc 1 322 11 view .LVU640
+ 2035 0354 0F46     		mov	r7, r1
+ 2036              	.LVL195:
+ 323:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2037              		.loc 1 323 7 is_stmt 1 view .LVU641
+ 323:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2038              		.loc 1 323 10 is_stmt 0 view .LVU642
+ 2039 0356 FFF7FEFF 		bl	__aeabi_dcmplt
+ 2040              	.LVL196:
+ 2041 035a 0028     		cmp	r0, #0
+ 2042 035c 7FF46AAF 		bne	.L85
+ 323:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2043              		.loc 1 323 22 discriminator 1 view .LVU643
+ 2044 0360 88A3     		adr	r3, .L109+36
+ 2045 0362 D3E90023 		ldrd	r2, [r3]
+ 2046 0366 3046     		mov	r0, r6
+ 2047 0368 3946     		mov	r1, r7
+ 2048 036a FFF7FEFF 		bl	__aeabi_dcmpgt
+ 2049              	.LVL197:
+ 2050 036e 0028     		cmp	r0, #0
+ 2051 0370 7FF460AF 		bne	.L85
+ 330:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[1][1] - pos_temp[2][1]);
+ 2052              		.loc 1 330 7 is_stmt 1 view .LVU644
+ 330:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[1][1] - pos_temp[2][1]);
+ 2053              		.loc 1 330 33 is_stmt 0 view .LVU645
+ 2054 0374 AAEB0800 		sub	r0, r10, r8
+ 330:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[1][1] - pos_temp[2][1]);
+ 2055              		.loc 1 330 14 view .LVU646
+ 2056 0378 0028     		cmp	r0, #0
+ 331:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 2057              		.loc 1 331 33 view .LVU647
+ 2058 037a ABEB0903 		sub	r3, fp, r9
+ 330:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[1][1] - pos_temp[2][1]);
+ 2059              		.loc 1 330 14 view .LVU648
+ 2060 037e B8BF     		it	lt
+ 2061 0380 4042     		rsblt	r0, r0, #0
+ 2062              	.LVL198:
+ 331:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 2063              		.loc 1 331 7 is_stmt 1 view .LVU649
+ 331:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 2064              		.loc 1 331 14 is_stmt 0 view .LVU650
+ 2065 0382 002B     		cmp	r3, #0
+ 2066 0384 B8BF     		it	lt
+ 2067 0386 5B42     		rsblt	r3, r3, #0
+ 2068              	.LVL199:
+ 332:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 2069              		.loc 1 332 7 is_stmt 1 view .LVU651
+ 333:source\touch/touch_panel.c **** 		    d1 = sqrt(tem1 + tem2);
+ 2070              		.loc 1 333 7 view .LVU652
+ 334:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[0][0] - pos_temp[3][0]);
+ 2071              		.loc 1 334 7 view .LVU653
+ 333:source\touch/touch_panel.c **** 		    d1 = sqrt(tem1 + tem2);
+ 2072              		.loc 1 333 12 is_stmt 0 view .LVU654
+ 2073 0388 5B43     		muls	r3, r3, r3
+ 2074              	.LVL200:
+ 334:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[0][0] - pos_temp[3][0]);
+ 2075              		.loc 1 334 12 view .LVU655
+ 2076 038a 00FB0030 		mla	r0, r0, r0, r3
+ 2077              	.LVL201:
+ 334:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[0][0] - pos_temp[3][0]);
+ 2078              		.loc 1 334 12 view .LVU656
+ 2079 038e FFF7FEFF 		bl	__aeabi_ui2d
+ 2080              	.LVL202:
+ 334:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[0][0] - pos_temp[3][0]);
+ 2081              		.loc 1 334 12 view .LVU657
+ 2082 0392 41EC100B 		vmov	d0, r0, r1
+ 2083 0396 FFF7FEFF 		bl	sqrt
+ 2084              	.LVL203:
+ 335:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[3][1]);
+ 2085              		.loc 1 335 33 view .LVU658
+ 2086 039a 069B     		ldr	r3, [sp, #24]
+ 2087 039c E81A     		subs	r0, r5, r3
+ 336:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 2088              		.loc 1 336 33 view .LVU659
+ 2089 039e 079B     		ldr	r3, [sp, #28]
+ 335:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[3][1]);
+ 2090              		.loc 1 335 14 view .LVU660
+ 2091 03a0 0028     		cmp	r0, #0
+ 336:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 2092              		.loc 1 336 33 view .LVU661
+ 2093 03a2 A4EB0303 		sub	r3, r4, r3
+ 335:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[3][1]);
+ 2094              		.loc 1 335 14 view .LVU662
+ 2095 03a6 B8BF     		it	lt
+ 2096 03a8 4042     		rsblt	r0, r0, #0
+ 336:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 2097              		.loc 1 336 14 view .LVU663
+ 2098 03aa 002B     		cmp	r3, #0
+ 2099 03ac B8BF     		it	lt
+ 2100 03ae 5B42     		rsblt	r3, r3, #0
+ 338:source\touch/touch_panel.c **** 		    d2 = sqrt(tem1 + tem2);
+ 2101              		.loc 1 338 12 view .LVU664
+ 2102 03b0 5B43     		muls	r3, r3, r3
+ 339:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 2103              		.loc 1 339 12 view .LVU665
+ 2104 03b2 00FB0030 		mla	r0, r0, r0, r3
+ 334:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[0][0] - pos_temp[3][0]);
+ 2105              		.loc 1 334 12 view .LVU666
+ 2106 03b6 8DED080B 		vstr.64	d0, [sp, #32]
+ 2107              	.LVL204:
+ 335:source\touch/touch_panel.c **** 		    tem2 = abs(pos_temp[0][1] - pos_temp[3][1]);
+ 2108              		.loc 1 335 7 is_stmt 1 view .LVU667
+ 336:source\touch/touch_panel.c **** 		    tem1 *= tem1;
+ 2109              		.loc 1 336 7 view .LVU668
+ 337:source\touch/touch_panel.c **** 		    tem2 *= tem2;
+ 2110              		.loc 1 337 7 view .LVU669
+ 338:source\touch/touch_panel.c **** 		    d2 = sqrt(tem1 + tem2);
+ 2111              		.loc 1 338 7 view .LVU670
+ 339:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 2112              		.loc 1 339 7 view .LVU671
+ 339:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 2113              		.loc 1 339 12 is_stmt 0 view .LVU672
+ 2114 03ba FFF7FEFF 		bl	__aeabi_ui2d
+ 2115              	.LVL205:
+ 339:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 2116              		.loc 1 339 12 view .LVU673
+ 2117 03be 41EC100B 		vmov	d0, r0, r1
+ 2118 03c2 FFF7FEFF 		bl	sqrt
+ 2119              	.LVL206:
+ 334:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[0][0] - pos_temp[3][0]);
+ 2120              		.loc 1 334 10 view .LVU674
+ 2121 03c6 DDE90801 		ldrd	r0, [sp, #32]
+ 339:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 2122              		.loc 1 339 12 view .LVU675
+ 2123 03ca 57EC106B 		vmov	r6, r7, d0
+ 2124              	.LVL207:
+ 340:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2125              		.loc 1 340 7 is_stmt 1 view .LVU676
+ 334:source\touch/touch_panel.c **** 		    tem1 = abs(pos_temp[0][0] - pos_temp[3][0]);
+ 2126              		.loc 1 334 10 is_stmt 0 view .LVU677
+ 2127 03ce FFF7FEFF 		bl	__aeabi_d2uiz
+ 2128              	.LVL208:
+ 340:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2129              		.loc 1 340 13 view .LVU678
+ 2130 03d2 80B2     		uxth	r0, r0
+ 2131 03d4 07EE900A 		vmov	s15, r0	@ int
+ 339:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 2132              		.loc 1 339 10 view .LVU679
+ 2133 03d8 3946     		mov	r1, r7
+ 2134 03da 3046     		mov	r0, r6
+ 340:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2135              		.loc 1 340 13 view .LVU680
+ 2136 03dc B8EE678A 		vcvt.f32.u32	s16, s15
+ 339:source\touch/touch_panel.c **** 		    fac = (float)d1 / d2;
+ 2137              		.loc 1 339 10 view .LVU681
+ 2138 03e0 FFF7FEFF 		bl	__aeabi_d2uiz
+ 2139              	.LVL209:
+ 340:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2140              		.loc 1 340 23 view .LVU682
+ 2141 03e4 80B2     		uxth	r0, r0
+ 2142 03e6 07EE900A 		vmov	s15, r0	@ int
+ 2143 03ea F8EEE77A 		vcvt.f32.s32	s15, s15
+ 340:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2144              		.loc 1 340 11 view .LVU683
+ 2145 03ee C8EE277A 		vdiv.f32	s15, s16, s15
+ 2146 03f2 17EE900A 		vmov	r0, s15
+ 2147 03f6 FFF7FEFF 		bl	__aeabi_f2d
+ 2148              	.LVL210:
+ 341:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2149              		.loc 1 341 10 view .LVU684
+ 2150 03fa 60A3     		adr	r3, .L109+28
+ 2151 03fc D3E90023 		ldrd	r2, [r3]
+ 340:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2152              		.loc 1 340 11 view .LVU685
+ 2153 0400 0646     		mov	r6, r0
+ 2154              	.LVL211:
+ 340:source\touch/touch_panel.c **** 		    if (fac < 0.95 || fac > 1.05) {
+ 2155              		.loc 1 340 11 view .LVU686
+ 2156 0402 0F46     		mov	r7, r1
+ 2157              	.LVL212:
+ 341:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2158              		.loc 1 341 7 is_stmt 1 view .LVU687
+ 341:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2159              		.loc 1 341 10 is_stmt 0 view .LVU688
+ 2160 0404 FFF7FEFF 		bl	__aeabi_dcmplt
+ 2161              	.LVL213:
+ 2162 0408 0028     		cmp	r0, #0
+ 2163 040a 7FF413AF 		bne	.L85
+ 341:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2164              		.loc 1 341 22 discriminator 1 view .LVU689
+ 2165 040e 5DA3     		adr	r3, .L109+36
+ 2166 0410 D3E90023 		ldrd	r2, [r3]
+ 2167 0414 3046     		mov	r0, r6
+ 2168 0416 3946     		mov	r1, r7
+ 2169 0418 FFF7FEFF 		bl	__aeabi_dcmpgt
+ 2170              	.LVL214:
+ 2171 041c 0028     		cmp	r0, #0
+ 2172 041e 7FF409AF 		bne	.L85
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 2173              		.loc 1 348 35 view .LVU690
+ 2174 0422 4F4B     		ldr	r3, .L109
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 2175              		.loc 1 348 19 view .LVU691
+ 2176 0424 4F4E     		ldr	r6, .L109+4
+ 2177              	.LVL215:
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 2178              		.loc 1 348 35 view .LVU692
+ 2179 0426 1888     		ldrh	r0, [r3]
+ 350:source\touch/touch_panel.c **** 		    tp_dev.yoff = (lcddev.height - tp_dev.yfac * (pos_temp[2][1] + pos_temp[0][1])) / 2;
+ 2180              		.loc 1 350 35 view .LVU693
+ 2181 0428 5988     		ldrh	r1, [r3, #2]
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 2182              		.loc 1 348 7 is_stmt 1 view .LVU694
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 2183              		.loc 1 348 42 is_stmt 0 view .LVU695
+ 2184 042a A0F12803 		sub	r3, r0, #40
+ 2185 042e 07EE103A 		vmov	s14, r3	@ int
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 2186              		.loc 1 348 66 view .LVU696
+ 2187 0432 AAEB0503 		sub	r3, r10, r5
+ 2188 0436 07EE903A 		vmov	s15, r3	@ int
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 2189              		.loc 1 348 21 view .LVU697
+ 2190 043a B8EEC77A 		vcvt.f32.s32	s14, s14
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 2191              		.loc 1 348 48 view .LVU698
+ 2192 043e F8EEE77A 		vcvt.f32.s32	s15, s15
+ 349:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 2193              		.loc 1 349 67 view .LVU699
+ 2194 0442 5544     		add	r5, r5, r10
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 2195              		.loc 1 348 48 view .LVU700
+ 2196 0444 C7EE276A 		vdiv.f32	s13, s14, s15
+ 349:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 2197              		.loc 1 349 49 view .LVU701
+ 2198 0448 07EE905A 		vmov	s15, r5	@ int
+ 349:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 2199              		.loc 1 349 35 view .LVU702
+ 2200 044c 07EE100A 		vmov	s14, r0	@ int
+ 349:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 2201              		.loc 1 349 49 view .LVU703
+ 2202 0450 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 349:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 2203              		.loc 1 349 35 view .LVU704
+ 2204 0454 B8EEC77A 		vcvt.f32.s32	s14, s14
+ 349:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 2205              		.loc 1 349 86 view .LVU705
+ 2206 0458 B6EE005A 		vmov.f32	s10, #5.0e-1
+ 349:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 2207              		.loc 1 349 35 view .LVU706
+ 2208 045c A6EEE77A 		vfms.f32	s14, s13, s15
+ 348:source\touch/touch_panel.c **** 		    tp_dev.xoff = (lcddev.width - tp_dev.xfac * (pos_temp[1][0] + pos_temp[0][0])) / 2;
+ 2209              		.loc 1 348 19 view .LVU707
+ 2210 0460 C6ED066A 		vstr.32	s13, [r6, #24]
+ 349:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 2211              		.loc 1 349 7 is_stmt 1 view .LVU708
+ 349:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 2212              		.loc 1 349 86 is_stmt 0 view .LVU709
+ 2213 0464 27EE057A 		vmul.f32	s14, s14, s10
+ 349:source\touch/touch_panel.c **** 		    tp_dev.yfac = (float)(lcddev.height - 40) / (pos_temp[2][1] - pos_temp[0][1]);
+ 2214              		.loc 1 349 19 view .LVU710
+ 2215 0468 BDEEC77A 		vcvt.s32.f32	s14, s14
+ 2216 046c 17EE103A 		vmov	r3, s14	@ int
+ 2217 0470 3384     		strh	r3, [r6, #32]	@ movhi
+ 350:source\touch/touch_panel.c **** 		    tp_dev.yoff = (lcddev.height - tp_dev.yfac * (pos_temp[2][1] + pos_temp[0][1])) / 2;
+ 2218              		.loc 1 350 7 is_stmt 1 view .LVU711
+ 350:source\touch/touch_panel.c **** 		    tp_dev.yoff = (lcddev.height - tp_dev.yfac * (pos_temp[2][1] + pos_temp[0][1])) / 2;
+ 2219              		.loc 1 350 43 is_stmt 0 view .LVU712
+ 2220 0472 A1F12803 		sub	r3, r1, #40
+ 2221 0476 05EE903A 		vmov	s11, r3	@ int
+ 350:source\touch/touch_panel.c **** 		    tp_dev.yoff = (lcddev.height - tp_dev.yfac * (pos_temp[2][1] + pos_temp[0][1])) / 2;
+ 2222              		.loc 1 350 67 view .LVU713
+ 2223 047a A9EB0403 		sub	r3, r9, r4
+ 2224 047e 06EE103A 		vmov	s12, r3	@ int
+ 350:source\touch/touch_panel.c **** 		    tp_dev.yoff = (lcddev.height - tp_dev.yfac * (pos_temp[2][1] + pos_temp[0][1])) / 2;
+ 2225              		.loc 1 350 21 view .LVU714
+ 2226 0482 F8EEE55A 		vcvt.f32.s32	s11, s11
+ 350:source\touch/touch_panel.c **** 		    tp_dev.yoff = (lcddev.height - tp_dev.yfac * (pos_temp[2][1] + pos_temp[0][1])) / 2;
+ 2227              		.loc 1 350 49 view .LVU715
+ 2228 0486 B8EEC66A 		vcvt.f32.s32	s12, s12
+ 351:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 2229              		.loc 1 351 68 view .LVU716
+ 2230 048a 4C44     		add	r4, r4, r9
+ 350:source\touch/touch_panel.c **** 		    tp_dev.yoff = (lcddev.height - tp_dev.yfac * (pos_temp[2][1] + pos_temp[0][1])) / 2;
+ 2231              		.loc 1 350 49 view .LVU717
+ 2232 048c 85EE867A 		vdiv.f32	s14, s11, s12
+ 351:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 2233              		.loc 1 351 50 view .LVU718
+ 2234 0490 07EE904A 		vmov	s15, r4	@ int
+ 351:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 2235              		.loc 1 351 36 view .LVU719
+ 2236 0494 06EE101A 		vmov	s12, r1	@ int
+ 351:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 2237              		.loc 1 351 50 view .LVU720
+ 2238 0498 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 351:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 2239              		.loc 1 351 36 view .LVU721
+ 2240 049c B8EEC66A 		vcvt.f32.s32	s12, s12
+ 350:source\touch/touch_panel.c **** 		    tp_dev.yoff = (lcddev.height - tp_dev.yfac * (pos_temp[2][1] + pos_temp[0][1])) / 2;
+ 2241              		.loc 1 350 19 view .LVU722
+ 2242 04a0 86ED077A 		vstr.32	s14, [r6, #28]
+ 351:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 2243              		.loc 1 351 7 is_stmt 1 view .LVU723
+ 351:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 2244              		.loc 1 351 36 is_stmt 0 view .LVU724
+ 2245 04a4 A7EE676A 		vfms.f32	s12, s14, s15
+ 351:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 2246              		.loc 1 351 87 view .LVU725
+ 2247 04a8 66EE057A 		vmul.f32	s15, s12, s10
+ 351:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 2248              		.loc 1 351 19 view .LVU726
+ 2249 04ac FDEEE77A 		vcvt.s32.f32	s15, s15
+ 2250 04b0 17EE903A 		vmov	r3, s15	@ int
+ 352:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2251              		.loc 1 352 15 view .LVU727
+ 2252 04b4 FDEEE67A 		vcvt.s32.f32	s15, s13
+ 351:source\touch/touch_panel.c **** 		    if (abs((int)tp_dev.xfac) > 2 || abs((int)tp_dev.yfac) > 2) {
+ 2253              		.loc 1 351 19 view .LVU728
+ 2254 04b8 7384     		strh	r3, [r6, #34]	@ movhi
+ 352:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2255              		.loc 1 352 7 is_stmt 1 view .LVU729
+ 352:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2256              		.loc 1 352 15 is_stmt 0 view .LVU730
+ 2257 04ba 17EE903A 		vmov	r3, s15	@ int
+ 352:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2258              		.loc 1 352 11 view .LVU731
+ 2259 04be 002B     		cmp	r3, #0
+ 2260 04c0 B8BF     		it	lt
+ 2261 04c2 5B42     		rsblt	r3, r3, #0
+ 352:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2262              		.loc 1 352 10 view .LVU732
+ 2263 04c4 022B     		cmp	r3, #2
+ 2264 04c6 08DC     		bgt	.L88
+ 352:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2265              		.loc 1 352 44 discriminator 1 view .LVU733
+ 2266 04c8 FDEEC77A 		vcvt.s32.f32	s15, s14
+ 2267 04cc 17EE903A 		vmov	r3, s15	@ int
+ 352:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2268              		.loc 1 352 40 discriminator 1 view .LVU734
+ 2269 04d0 002B     		cmp	r3, #0
+ 2270 04d2 B8BF     		it	lt
+ 2271 04d4 5B42     		rsblt	r3, r3, #0
+ 352:source\touch/touch_panel.c **** 		       cnt = 0;
+ 2272              		.loc 1 352 37 discriminator 1 view .LVU735
+ 2273 04d6 022B     		cmp	r3, #2
+ 2274 04d8 28DD     		ble	.L89
+ 2275              	.L88:
+ 353:source\touch/touch_panel.c ****  		       TP_Drow_Touch_Point(lcddev.width - 20,lcddev.height - 20,WHITE);
+ 2276              		.loc 1 353 10 is_stmt 1 view .LVU736
+ 2277              	.LVL216:
+ 354:source\touch/touch_panel.c ****    	 	       TP_Drow_Touch_Point(20,20,RED);
+ 2278              		.loc 1 354 11 view .LVU737
+ 2279 04da 1439     		subs	r1, r1, #20
+ 2280 04dc 1438     		subs	r0, r0, #20
+ 2281 04de 4FF6FF72 		movw	r2, #65535
+ 2282 04e2 89B2     		uxth	r1, r1
+ 2283 04e4 80B2     		uxth	r0, r0
+ 2284 04e6 FFF7FEFF 		bl	TP_Drow_Touch_Point
+ 2285              	.LVL217:
+ 355:source\touch/touch_panel.c **** 		       lcd_printf(1,6,"TP Need readjust!");
+ 2286              		.loc 1 355 14 view .LVU738
+ 2287 04ea 1421     		movs	r1, #20
+ 2288 04ec 0846     		mov	r0, r1
+ 2289 04ee 4FF47842 		mov	r2, #63488
+ 2290 04f2 FFF7FEFF 		bl	TP_Drow_Touch_Point
+ 2291              	.LVL218:
+ 356:source\touch/touch_panel.c **** 		       tp_dev.touchtype = !tp_dev.touchtype;
+ 2292              		.loc 1 356 10 view .LVU739
+ 2293 04f6 1C4A     		ldr	r2, .L109+8
+ 2294 04f8 0621     		movs	r1, #6
+ 2295 04fa 0120     		movs	r0, #1
+ 2296 04fc FFF7FEFF 		bl	lcd_printf
+ 2297              	.LVL219:
+ 357:source\touch/touch_panel.c **** 		       if (tp_dev.touchtype) {
+ 2298              		.loc 1 357 10 view .LVU740
+ 357:source\touch/touch_panel.c **** 		       if (tp_dev.touchtype) {
+ 2299              		.loc 1 357 36 is_stmt 0 view .LVU741
+ 2300 0500 96F82450 		ldrb	r5, [r6, #36]	@ zero_extendqisi2
+ 2301 0504 194A     		ldr	r2, .L109+12
+ 357:source\touch/touch_panel.c **** 		       if (tp_dev.touchtype) {
+ 2302              		.loc 1 357 29 view .LVU742
+ 2303 0506 002D     		cmp	r5, #0
+ 2304 0508 0CBF     		ite	eq
+ 2305 050a 0123     		moveq	r3, #1
+ 2306 050c 0023     		movne	r3, #0
+ 2307 050e 86F82430 		strb	r3, [r6, #36]
+ 358:source\touch/touch_panel.c **** 			  CMD_RDX = 0x90;
+ 2308              		.loc 1 358 10 is_stmt 1 view .LVU743
+ 2309 0512 174B     		ldr	r3, .L109+16
+ 358:source\touch/touch_panel.c **** 			  CMD_RDX = 0x90;
+ 2310              		.loc 1 358 13 is_stmt 0 view .LVU744
+ 2311 0514 05D1     		bne	.L90
+ 359:source\touch/touch_panel.c **** 			  CMD_RDY = 0xD0;
+ 2312              		.loc 1 359 6 is_stmt 1 view .LVU745
+ 359:source\touch/touch_panel.c **** 			  CMD_RDY = 0xD0;
+ 2313              		.loc 1 359 14 is_stmt 0 view .LVU746
+ 2314 0516 9021     		movs	r1, #144
+ 2315 0518 1170     		strb	r1, [r2]
+ 360:source\touch/touch_panel.c **** 		       } else {
+ 2316              		.loc 1 360 6 is_stmt 1 view .LVU747
+ 360:source\touch/touch_panel.c **** 		       } else {
+ 2317              		.loc 1 360 14 is_stmt 0 view .LVU748
+ 2318 051a D022     		movs	r2, #208
+ 2319 051c 1A70     		strb	r2, [r3]
+ 275:source\touch/touch_panel.c **** 	       tp_dev.sta &= ~(1 << 6);
+ 2320              		.loc 1 275 17 view .LVU749
+ 2321 051e 2C46     		mov	r4, r5
+ 2322 0520 88E5     		b	.L66
+ 2323              	.L90:
+ 362:source\touch/touch_panel.c **** 			  CMD_RDY = 0x90;
+ 2324              		.loc 1 362 6 is_stmt 1 view .LVU750
+ 362:source\touch/touch_panel.c **** 			  CMD_RDY = 0x90;
+ 2325              		.loc 1 362 14 is_stmt 0 view .LVU751
+ 2326 0522 D021     		movs	r1, #208
+ 2327 0524 1170     		strb	r1, [r2]
+ 363:source\touch/touch_panel.c **** 		       }
+ 2328              		.loc 1 363 6 is_stmt 1 view .LVU752
+ 363:source\touch/touch_panel.c **** 		       }
+ 2329              		.loc 1 363 14 is_stmt 0 view .LVU753
+ 2330 0526 9022     		movs	r2, #144
+ 2331 0528 1A70     		strb	r2, [r3]
+ 2332 052a ABE6     		b	.L104
+ 2333              	.LVL220:
+ 2334              	.L89:
+ 367:source\touch/touch_panel.c **** 		    lcd_printf(1,6,"Touch Screen Adjust OK!");
+ 2335              		.loc 1 367 7 is_stmt 1 view .LVU754
+ 2336 052c 114C     		ldr	r4, .L109+20
+ 2337 052e 2088     		ldrh	r0, [r4]
+ 2338 0530 FFF7FEFF 		bl	LCD_Clear
+ 2339              	.LVL221:
+ 368:source\touch/touch_panel.c **** 		    wait_ms(500);
+ 2340              		.loc 1 368 7 view .LVU755
+ 2341 0534 104A     		ldr	r2, .L109+24
+ 2342 0536 0621     		movs	r1, #6
+ 2343 0538 0120     		movs	r0, #1
+ 2344 053a FFF7FEFF 		bl	lcd_printf
+ 2345              	.LVL222:
+ 369:source\touch/touch_panel.c **** 		    TP_Save_Adjdata();
+ 2346              		.loc 1 369 7 view .LVU756
+ 2347 053e 4FF4FA70 		mov	r0, #500
+ 2348 0542 FFF7FEFF 		bl	wait_ms
+ 2349              	.LVL223:
+ 370:source\touch/touch_panel.c ****  		    LCD_Clear(background_color);
+ 2350              		.loc 1 370 7 view .LVU757
+ 2351 0546 FFF7FEFF 		bl	TP_Save_Adjdata
+ 2352              	.LVL224:
+ 371:source\touch/touch_panel.c **** 		    return;
+ 2353              		.loc 1 371 8 view .LVU758
+ 2354 054a 2088     		ldrh	r0, [r4]
+ 2355              		.loc 1 388 1 is_stmt 0 view .LVU759
+ 2356 054c 0FB0     		add	sp, sp, #60
+ 2357              		.cfi_def_cfa_offset 44
+ 2358              		@ sp needed
+ 2359 054e BDEC028B 		vldm	sp!, {d8}
+ 2360              		.cfi_restore 80
+ 2361              		.cfi_restore 81
+ 2362              		.cfi_def_cfa_offset 36
+ 2363 0552 BDE8F04F 		pop	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 2364              		.cfi_restore 14
+ 2365              		.cfi_restore 11
+ 2366              		.cfi_restore 10
+ 2367              		.cfi_restore 9
+ 2368              		.cfi_restore 8
+ 2369              		.cfi_restore 7
+ 2370              		.cfi_restore 6
+ 2371              		.cfi_restore 5
+ 2372              		.cfi_restore 4
+ 2373              		.cfi_def_cfa_offset 0
+ 2374              	.LVL225:
+ 371:source\touch/touch_panel.c **** 		    return;
+ 2375              		.loc 1 371 8 view .LVU760
+ 2376 0556 FFF7FEBF 		b	LCD_Clear
+ 2377              	.LVL226:
+ 2378              	.L110:
+ 2379 055a 00BFAFF3 		.align	3
+ 2379      0080
+ 2380              	.L109:
+ 2381 0560 00000000 		.word	lcddev
+ 2382 0564 00000000 		.word	.LANCHOR0
+ 2383 0568 0F000000 		.word	.LC7
+ 2384 056c 00000000 		.word	.LANCHOR1
+ 2385 0570 00000000 		.word	.LANCHOR2
+ 2386 0574 00000000 		.word	background_color
+ 2387 0578 21000000 		.word	.LC8
+ 2388 057c 66666666 		.word	1717986918
+ 2389 0580 6666EE3F 		.word	1072588390
+ 2390 0584 CDCCCCCC 		.word	-858993459
+ 2391 0588 CCCCF03F 		.word	1072745676
+ 2392              		.cfi_endproc
+ 2393              	.LFE140:
+ 2395              		.section	.text.TP_Init,"ax",%progbits
+ 2396              		.align	1
+ 2397              		.global	TP_Init
+ 2398              		.syntax unified
+ 2399              		.thumb
+ 2400              		.thumb_func
+ 2402              	TP_Init:
+ 2403              	.LFB141:
+ 389:source\touch/touch_panel.c **** 
+ 390:source\touch/touch_panel.c **** 
+ 391:source\touch/touch_panel.c **** unsigned char TP_Init (void)
+ 392:source\touch/touch_panel.c **** {
+ 2404              		.loc 1 392 1 is_stmt 1 view -0
+ 2405              		.cfi_startproc
+ 2406              		@ args = 0, pretend = 0, frame = 0
+ 2407              		@ frame_needed = 0, uses_anonymous_args = 0
+ 393:source\touch/touch_panel.c ****       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOF, EN
+ 2408              		.loc 1 393 7 view .LVU762
+ 392:source\touch/touch_panel.c ****       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOF, EN
+ 2409              		.loc 1 392 1 is_stmt 0 view .LVU763
+ 2410 0000 10B5     		push	{r4, lr}
+ 2411              		.cfi_def_cfa_offset 8
+ 2412              		.cfi_offset 4, -8
+ 2413              		.cfi_offset 14, -4
+ 2414              		.loc 1 393 7 view .LVU764
+ 2415 0002 0121     		movs	r1, #1
+ 2416 0004 2620     		movs	r0, #38
+ 2417 0006 FFF7FEFF 		bl	RCC_AHB1PeriphClockCmd
+ 2418              	.LVL227:
+ 394:source\touch/touch_panel.c ****       GPIO_Init_Pin(GPIOB,GPIO_Pin_1,GPIO_Speed_100MHz,GPIO_Mode_IPU);
+ 2419              		.loc 1 394 7 is_stmt 1 view .LVU765
+ 2420 000a 2148     		ldr	r0, .L114
+ 2421 000c 1023     		movs	r3, #16
+ 2422 000e 0322     		movs	r2, #3
+ 2423 0010 0221     		movs	r1, #2
+ 2424 0012 FFF7FEFF 		bl	GPIO_Init_Pin
+ 2425              	.LVL228:
+ 395:source\touch/touch_panel.c ****       GPIO_Init_Pin(GPIOB,GPIO_Pin_2,GPIO_Speed_100MHz,GPIO_Mode_IPU);
+ 2426              		.loc 1 395 7 view .LVU766
+ 2427 0016 1E48     		ldr	r0, .L114
+ 2428 0018 1023     		movs	r3, #16
+ 2429 001a 0322     		movs	r2, #3
+ 2430 001c 0421     		movs	r1, #4
+ 2431 001e FFF7FEFF 		bl	GPIO_Init_Pin
+ 2432              	.LVL229:
+ 396:source\touch/touch_panel.c ****       GPIO_Init_Pin(GPIOB,GPIO_Pin_0,GPIO_Speed_100MHz,GPIO_Mode_Out_PP);
+ 2433              		.loc 1 396 7 view .LVU767
+ 2434 0022 0123     		movs	r3, #1
+ 2435 0024 1946     		mov	r1, r3
+ 2436 0026 1A48     		ldr	r0, .L114
+ 2437 0028 0322     		movs	r2, #3
+ 2438 002a FFF7FEFF 		bl	GPIO_Init_Pin
+ 2439              	.LVL230:
+ 397:source\touch/touch_panel.c ****       GPIO_Init_Pin(GPIOC,GPIO_Pin_13,GPIO_Speed_100MHz,GPIO_Mode_Out_PP);
+ 2440              		.loc 1 397 7 view .LVU768
+ 2441 002e 1948     		ldr	r0, .L114+4
+ 2442 0030 0123     		movs	r3, #1
+ 2443 0032 0322     		movs	r2, #3
+ 2444 0034 4FF40051 		mov	r1, #8192
+ 2445 0038 FFF7FEFF 		bl	GPIO_Init_Pin
+ 2446              	.LVL231:
+ 398:source\touch/touch_panel.c ****       GPIO_Init_Pin(GPIOF,GPIO_Pin_11,GPIO_Speed_100MHz,GPIO_Mode_Out_PP);
+ 2447              		.loc 1 398 7 view .LVU769
+ 2448 003c 1648     		ldr	r0, .L114+8
+ 2449 003e 0123     		movs	r3, #1
+ 2450 0040 0322     		movs	r2, #3
+ 2451 0042 4FF40061 		mov	r1, #2048
+ 2452 0046 FFF7FEFF 		bl	GPIO_Init_Pin
+ 2453              	.LVL232:
+ 399:source\touch/touch_panel.c ****       tp_dev.x[0] = 0;
+ 2454              		.loc 1 399 7 view .LVU770
+ 400:source\touch/touch_panel.c ****       tp_dev.x[1] = 0;
+ 2455              		.loc 1 400 7 view .LVU771
+ 401:source\touch/touch_panel.c ****       tp_dev.x[2] = 0;
+ 2456              		.loc 1 401 7 view .LVU772
+ 402:source\touch/touch_panel.c ****       tp_dev.x[3] = 0;
+ 2457              		.loc 1 402 7 view .LVU773
+ 403:source\touch/touch_panel.c ****       tp_dev.x[4] = 0;
+ 2458              		.loc 1 403 7 view .LVU774
+ 404:source\touch/touch_panel.c ****       tp_dev.y[0] = 0;
+ 2459              		.loc 1 404 7 view .LVU775
+ 405:source\touch/touch_panel.c ****       tp_dev.y[1] = 0;
+ 2460              		.loc 1 405 7 view .LVU776
+ 406:source\touch/touch_panel.c ****       tp_dev.y[2] = 0;
+ 2461              		.loc 1 406 7 view .LVU777
+ 407:source\touch/touch_panel.c ****       tp_dev.y[3] = 0;
+ 2462              		.loc 1 407 7 view .LVU778
+ 408:source\touch/touch_panel.c ****       tp_dev.y[4] = 0;
+ 2463              		.loc 1 408 7 view .LVU779
+ 409:source\touch/touch_panel.c ****       tp_dev.sta = 0;
+ 2464              		.loc 1 409 7 view .LVU780
+ 399:source\touch/touch_panel.c ****       tp_dev.x[1] = 0;
+ 2465              		.loc 1 399 19 is_stmt 0 view .LVU781
+ 2466 004a 1448     		ldr	r0, .L114+12
+ 2467 004c 0024     		movs	r4, #0
+ 410:source\touch/touch_panel.c ****       tp_dev.xfac = 0.0;
+ 2468              		.loc 1 410 19 view .LVU782
+ 2469 004e 0023     		movs	r3, #0
+ 411:source\touch/touch_panel.c ****       tp_dev.yfac = 0.0;
+ 412:source\touch/touch_panel.c ****       tp_dev.xoff = 0;
+ 413:source\touch/touch_panel.c ****       tp_dev.yoff = 0;
+ 414:source\touch/touch_panel.c ****       tp_dev.touchtype = 0;
+ 415:source\touch/touch_panel.c ****       TP_Read_XY(&tp_dev.x[0],&tp_dev.y[0]);
+ 2470              		.loc 1 415 7 view .LVU783
+ 2471 0050 00F10A01 		add	r1, r0, #10
+ 401:source\touch/touch_panel.c ****       tp_dev.x[3] = 0;
+ 2472              		.loc 1 401 19 view .LVU784
+ 2473 0054 C0E90044 		strd	r4, r4, [r0]
+ 405:source\touch/touch_panel.c ****       tp_dev.y[2] = 0;
+ 2474              		.loc 1 405 19 view .LVU785
+ 2475 0058 C0E90244 		strd	r4, r4, [r0, #8]
+ 407:source\touch/touch_panel.c ****       tp_dev.y[4] = 0;
+ 2476              		.loc 1 407 19 view .LVU786
+ 2477 005c 0461     		str	r4, [r0, #16]
+ 412:source\touch/touch_panel.c ****       tp_dev.yoff = 0;
+ 2478              		.loc 1 412 19 view .LVU787
+ 2479 005e 0462     		str	r4, [r0, #32]
+ 410:source\touch/touch_panel.c ****       tp_dev.yfac = 0.0;
+ 2480              		.loc 1 410 19 view .LVU788
+ 2481 0060 8361     		str	r3, [r0, #24]	@ float
+ 411:source\touch/touch_panel.c ****       tp_dev.xoff = 0;
+ 2482              		.loc 1 411 19 view .LVU789
+ 2483 0062 C361     		str	r3, [r0, #28]	@ float
+ 409:source\touch/touch_panel.c ****       tp_dev.xfac = 0.0;
+ 2484              		.loc 1 409 18 view .LVU790
+ 2485 0064 0475     		strb	r4, [r0, #20]
+ 410:source\touch/touch_panel.c ****       tp_dev.yfac = 0.0;
+ 2486              		.loc 1 410 7 is_stmt 1 view .LVU791
+ 411:source\touch/touch_panel.c ****       tp_dev.xoff = 0;
+ 2487              		.loc 1 411 7 view .LVU792
+ 412:source\touch/touch_panel.c ****       tp_dev.yoff = 0;
+ 2488              		.loc 1 412 7 view .LVU793
+ 413:source\touch/touch_panel.c ****       tp_dev.touchtype = 0;
+ 2489              		.loc 1 413 7 view .LVU794
+ 414:source\touch/touch_panel.c ****       TP_Read_XY(&tp_dev.x[0],&tp_dev.y[0]);
+ 2490              		.loc 1 414 7 view .LVU795
+ 414:source\touch/touch_panel.c ****       TP_Read_XY(&tp_dev.x[0],&tp_dev.y[0]);
+ 2491              		.loc 1 414 24 is_stmt 0 view .LVU796
+ 2492 0066 80F82440 		strb	r4, [r0, #36]
+ 2493              		.loc 1 415 7 is_stmt 1 view .LVU797
+ 2494 006a FFF7FEFF 		bl	TP_Read_XY
+ 2495              	.LVL233:
+ 416:source\touch/touch_panel.c ****       if (TP_Get_Adjdata()) {///////////////////////////////주석처리///////////////////////////////
+ 2496              		.loc 1 416 7 view .LVU798
+ 2497              		.loc 1 416 11 is_stmt 0 view .LVU799
+ 2498 006e FFF7FEFF 		bl	TP_Get_Adjdata
+ 2499              	.LVL234:
+ 2500              		.loc 1 416 10 view .LVU800
+ 2501 0072 58B9     		cbnz	r0, .L113
+ 417:source\touch/touch_panel.c ****          return 0;
+ 418:source\touch/touch_panel.c ****       } else {
+ 419:source\touch/touch_panel.c **** 	 LCD_Clear(background_color);
+ 2502              		.loc 1 419 3 is_stmt 1 view .LVU801
+ 2503 0074 0A4B     		ldr	r3, .L114+16
+ 2504 0076 1888     		ldrh	r0, [r3]
+ 2505 0078 FFF7FEFF 		bl	LCD_Clear
+ 2506              	.LVL235:
+ 420:source\touch/touch_panel.c **** 	 TP_Adjust();
+ 2507              		.loc 1 420 3 view .LVU802
+ 2508 007c FFF7FEFF 		bl	TP_Adjust
+ 2509              	.LVL236:
+ 421:source\touch/touch_panel.c ****  	 TP_Save_Adjdata();
+ 2510              		.loc 1 421 4 view .LVU803
+ 2511 0080 FFF7FEFF 		bl	TP_Save_Adjdata
+ 2512              	.LVL237:
+ 422:source\touch/touch_panel.c ****       }
+ 423:source\touch/touch_panel.c ****       TP_Get_Adjdata();
+ 2513              		.loc 1 423 7 view .LVU804
+ 2514 0084 FFF7FEFF 		bl	TP_Get_Adjdata
+ 2515              	.LVL238:
+ 424:source\touch/touch_panel.c ****       return 1;
+ 2516              		.loc 1 424 7 view .LVU805
+ 2517              		.loc 1 424 14 is_stmt 0 view .LVU806
+ 2518 0088 0120     		movs	r0, #1
+ 2519              	.L112:
+ 425:source\touch/touch_panel.c **** }
+ 2520              		.loc 1 425 1 view .LVU807
+ 2521 008a 10BD     		pop	{r4, pc}
+ 2522              	.L113:
+ 417:source\touch/touch_panel.c ****       } else {
+ 2523              		.loc 1 417 17 view .LVU808
+ 2524 008c 2046     		mov	r0, r4
+ 2525 008e FCE7     		b	.L112
+ 2526              	.L115:
+ 2527              		.align	2
+ 2528              	.L114:
+ 2529 0090 00040240 		.word	1073873920
+ 2530 0094 00080240 		.word	1073874944
+ 2531 0098 00140240 		.word	1073878016
+ 2532 009c 00000000 		.word	.LANCHOR0
+ 2533 00a0 00000000 		.word	background_color
+ 2534              		.cfi_endproc
+ 2535              	.LFE141:
+ 2537              		.global	CMD_RDY
+ 2538              		.global	CMD_RDX
+ 2539              		.global	tp_dev
+ 2540              		.section	.bss.tp_dev,"aw",%nobits
+ 2541              		.align	2
+ 2542              		.set	.LANCHOR0,. + 0
+ 2545              	tp_dev:
+ 2546 0000 00000000 		.space	40
+ 2546      00000000 
+ 2546      00000000 
+ 2546      00000000 
+ 2546      00000000 
+ 2547              		.section	.data.CMD_RDX,"aw"
+ 2548              		.set	.LANCHOR1,. + 0
+ 2551              	CMD_RDX:
+ 2552 0000 D0       		.byte	-48
+ 2553              		.section	.data.CMD_RDY,"aw"
+ 2554              		.set	.LANCHOR2,. + 0
+ 2557              	CMD_RDY:
+ 2558 0000 90       		.byte	-112
+ 2559              		.text
+ 2560              	.Letext0:
+ 2561              		.file 2 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 2562              		.file 3 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 2563              		.file 4 "/project/stm32f4x_iolib/include/cmsis/stm32f4xx.h"
+ 2564              		.file 5 "/project/stm32f4x_iolib/include/stm32f4xx_gpio.h"
+ 2565              		.file 6 "source\\touch\\../../userdefs.h"
+ 2566              		.file 7 "source\\touch\\../prototype.h"
+ 2567              		.file 8 "/project/stm32f4x_iolib/include/fundefs.h"
+ 2568              		.file 9 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+DEFINED SYMBOLS
+                            *ABS*:00000000 touch_panel.c
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:33     .text.TP_Adj_Info_Show:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:39     .text.TP_Adj_Info_Show:00000000 TP_Adj_Info_Show
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:145    .text.TP_Adj_Info_Show:00000084 $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:155    .text.TP_Save_Adjdata:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:161    .text.TP_Save_Adjdata:00000000 TP_Save_Adjdata
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:299    .text.TP_Save_Adjdata:000000c0 $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:305    .text.TP_Get_Adjdata:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:311    .text.TP_Get_Adjdata:00000000 TP_Get_Adjdata
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:537    .text.TP_Get_Adjdata:000000e4 $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:545    .text.TP_Write_Byte:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:551    .text.TP_Write_Byte:00000000 TP_Write_Byte
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:629    .text.TP_Write_Byte:00000040 $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:635    .text.TP_Read_AD:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:641    .text.TP_Read_AD:00000000 TP_Read_AD
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:763    .text.TP_Read_AD:00000074 $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:770    .text.TP_Read_XOY:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:776    .text.TP_Read_XOY:00000000 TP_Read_XOY
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:915    .text.TP_Read_XY:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:921    .text.TP_Read_XY:00000000 TP_Read_XY
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:976    .text.TP_Read_XY:00000020 $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:982    .text.TP_Read_XY2:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:988    .text.TP_Read_XY2:00000000 TP_Read_XY2
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1114   .text.TP_Scan:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1120   .text.TP_Scan:00000000 TP_Scan
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1261   .text.TP_Scan:000000b4 $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1268   .text.TP_Drow_Touch_Point:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1274   .text.TP_Drow_Touch_Point:00000000 TP_Drow_Touch_Point
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1398   .text.TP_Adjust:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1404   .text.TP_Adjust:00000000 TP_Adjust
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1584   .text.TP_Adjust:000000ba $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1588   .text.TP_Adjust:000000be $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1914   .text.TP_Adjust:00000288 $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:1933   .text.TP_Adjust:000002c4 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:2381   .text.TP_Adjust:00000560 $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:2396   .text.TP_Init:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:2402   .text.TP_Init:00000000 TP_Init
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:2529   .text.TP_Init:00000090 $d
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:2557   .data.CMD_RDY:00000000 CMD_RDY
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:2551   .data.CMD_RDX:00000000 CMD_RDX
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:2545   .bss.tp_dev:00000000 tp_dev
+C:\Users\dinot\AppData\Local\Temp\ccodGXLy.s:2541   .bss.tp_dev:00000000 $d
+
+UNDEFINED SYMBOLS
+set_color
+lcd_printf
+eeprom_write
+eeprom_read
+delay_us
+LCD_DrawLine
+LCD_DrawPoint
+LCD_Draw_Circle
+__aeabi_ui2d
+__aeabi_d2uiz
+__aeabi_f2d
+__aeabi_dcmplt
+__aeabi_dcmpgt
+__aeabi_dmul
+LCD_Clear
+IWDG_ReloadCounter
+serial_check
+wait_ms
+set_background_color
+sqrt
+background_color
+tick
+time_led
+tx_led
+rx_led
+lcddev
+RCC_AHB1PeriphClockCmd
+GPIO_Init_Pin

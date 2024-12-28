@@ -1,0 +1,2095 @@
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 4
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"i2c_app.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.I2C_LowLevel_Init,"ax",%progbits
+  20              		.align	1
+  21              		.global	I2C_LowLevel_Init
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	I2C_LowLevel_Init:
+  27              	.LFB132:
+  28              		.file 1 "source\\i2c\\i2c_app.c"
+   1:source\i2c/i2c_app.c **** /********************************************************************************/
+   2:source\i2c/i2c_app.c **** /* i2c_app.c                                                                    */
+   3:source\i2c/i2c_app.c **** /* STM32F407ZGT6                                                                */
+   4:source\i2c/i2c_app.c **** /* (Lee ChangWoo HL2IRW  hl2irw@daum.net 010-8573-6860)                 	*/
+   5:source\i2c/i2c_app.c **** /* stm32f4x_test								*/
+   6:source\i2c/i2c_app.c **** /********************************************************************************/
+   7:source\i2c/i2c_app.c **** #include "../../hwdefs.h"
+   8:source\i2c/i2c_app.c **** #include "../prototype.h"
+   9:source\i2c/i2c_app.c **** 
+  10:source\i2c/i2c_app.c **** #define ClockSpeed			200000
+  11:source\i2c/i2c_app.c **** 
+  12:source\i2c/i2c_app.c **** #define OwnAddress1			0x58
+  13:source\i2c/i2c_app.c **** #define OwnAddress2			0x60
+  14:source\i2c/i2c_app.c **** 
+  15:source\i2c/i2c_app.c **** #define SEEP_PAGE0			0xA0
+  16:source\i2c/i2c_app.c **** #define SEEP_PAGE1			0xA2
+  17:source\i2c/i2c_app.c **** 
+  18:source\i2c/i2c_app.c **** 
+  19:source\i2c/i2c_app.c **** unsigned char I2C1_PORT = 1,I2C_CHANNEL = 0,i2c_error;
+  20:source\i2c/i2c_app.c **** unsigned short i2c_temp;
+  21:source\i2c/i2c_app.c **** unsigned int time_out;
+  22:source\i2c/i2c_app.c **** 
+  23:source\i2c/i2c_app.c **** 
+  24:source\i2c/i2c_app.c **** void i2c_write (I2C_TypeDef *I2Cx, unsigned char device, unsigned char address, unsigned char buffe
+  25:source\i2c/i2c_app.c **** {
+  26:source\i2c/i2c_app.c ****       i2c_error	= 0;
+  27:source\i2c/i2c_app.c ****       time_out = 0;
+  28:source\i2c/i2c_app.c ****       while (I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)) {
+  29:source\i2c/i2c_app.c ****       	    time_out++;
+  30:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+  31:source\i2c/i2c_app.c ****       }
+  32:source\i2c/i2c_app.c **** restart_w1:
+  33:source\i2c/i2c_app.c ****       I2C_GenerateSTART(I2Cx,ENABLE);
+  34:source\i2c/i2c_app.c ****       time_out = 0;
+  35:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_MODE_SELECT)) {
+  36:source\i2c/i2c_app.c ****       	    time_out++;
+  37:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+  38:source\i2c/i2c_app.c ****       	       i2c_error = 1;
+  39:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+  40:source\i2c/i2c_app.c ****       	       return;
+  41:source\i2c/i2c_app.c ****       	    }
+  42:source\i2c/i2c_app.c ****       }
+  43:source\i2c/i2c_app.c ****       device = device & 0xFFFE;
+  44:source\i2c/i2c_app.c ****       I2C_Send7bitAddress(I2Cx,device, I2C_Direction_Transmitter);
+  45:source\i2c/i2c_app.c ****       time_out = 0;
+  46:source\i2c/i2c_app.c ****       while ((I2Cx->SR1 & 0x0002) != 0x0002) {
+  47:source\i2c/i2c_app.c ****       	    time_out++;
+  48:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+  49:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+  50:source\i2c/i2c_app.c ****                goto restart_w1;
+  51:source\i2c/i2c_app.c ****       	    }
+  52:source\i2c/i2c_app.c ****       }
+  53:source\i2c/i2c_app.c ****       device = I2Cx->SR2;
+  54:source\i2c/i2c_app.c ****       I2C_SendData(I2Cx,address);
+  55:source\i2c/i2c_app.c ****       time_out = 0;
+  56:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
+  57:source\i2c/i2c_app.c ****       	    time_out++;
+  58:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+  59:source\i2c/i2c_app.c ****       	       i2c_error = 2;
+  60:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+  61:source\i2c/i2c_app.c ****       	       return;
+  62:source\i2c/i2c_app.c ****       	    }
+  63:source\i2c/i2c_app.c ****       }
+  64:source\i2c/i2c_app.c ****       I2C_SendData(I2Cx,buffer);
+  65:source\i2c/i2c_app.c ****       time_out = 0;
+  66:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
+  67:source\i2c/i2c_app.c ****       	    time_out++;
+  68:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+  69:source\i2c/i2c_app.c ****       	       i2c_error = 3;
+  70:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+  71:source\i2c/i2c_app.c ****       	       return;
+  72:source\i2c/i2c_app.c ****       	    }
+  73:source\i2c/i2c_app.c ****       }
+  74:source\i2c/i2c_app.c ****       I2C_GenerateSTOP(I2Cx,ENABLE);
+  75:source\i2c/i2c_app.c ****       while (I2Cx->CR1 & 0x0200) {
+  76:source\i2c/i2c_app.c ****       	    time_out++;
+  77:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+  78:source\i2c/i2c_app.c ****       }
+  79:source\i2c/i2c_app.c **** }
+  80:source\i2c/i2c_app.c **** 
+  81:source\i2c/i2c_app.c **** 
+  82:source\i2c/i2c_app.c **** unsigned char i2c_read (I2C_TypeDef *I2Cx, unsigned char device, unsigned char address)
+  83:source\i2c/i2c_app.c **** {
+  84:source\i2c/i2c_app.c ****       unsigned char data;
+  85:source\i2c/i2c_app.c ****       i2c_error	= 0;
+  86:source\i2c/i2c_app.c ****       time_out = 0;
+  87:source\i2c/i2c_app.c ****       while (I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)) {
+  88:source\i2c/i2c_app.c ****       	    time_out++;
+  89:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+  90:source\i2c/i2c_app.c ****       }
+  91:source\i2c/i2c_app.c **** restart_r1:
+  92:source\i2c/i2c_app.c ****       I2C_GenerateSTART(I2Cx,ENABLE);
+  93:source\i2c/i2c_app.c ****       time_out = 0;
+  94:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_MODE_SELECT)) {
+  95:source\i2c/i2c_app.c ****       	    time_out++;
+  96:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+  97:source\i2c/i2c_app.c ****       	       i2c_error = 1;
+  98:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+  99:source\i2c/i2c_app.c ****       	       return 0;
+ 100:source\i2c/i2c_app.c ****       	    }
+ 101:source\i2c/i2c_app.c ****       }
+ 102:source\i2c/i2c_app.c ****       device = device & 0xFFFE;
+ 103:source\i2c/i2c_app.c ****       I2C_Send7bitAddress(I2Cx,device, I2C_Direction_Transmitter);
+ 104:source\i2c/i2c_app.c ****       time_out = 0;
+ 105:source\i2c/i2c_app.c ****       while ((I2Cx->SR1 & 0x0002) != 0x0002) {
+ 106:source\i2c/i2c_app.c ****       	    time_out++;
+ 107:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 108:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 109:source\i2c/i2c_app.c ****                goto restart_r1;
+ 110:source\i2c/i2c_app.c ****       	    }
+ 111:source\i2c/i2c_app.c ****       }
+ 112:source\i2c/i2c_app.c ****       i2c_temp = I2Cx->SR2;
+ 113:source\i2c/i2c_app.c ****       I2C_SendData(I2Cx,address);
+ 114:source\i2c/i2c_app.c ****       time_out = 0;
+ 115:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
+ 116:source\i2c/i2c_app.c ****       	    time_out++;
+ 117:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 118:source\i2c/i2c_app.c ****       	       i2c_error = 2;
+ 119:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 120:source\i2c/i2c_app.c ****       	       return 0;
+ 121:source\i2c/i2c_app.c ****       	    }
+ 122:source\i2c/i2c_app.c ****       }
+ 123:source\i2c/i2c_app.c ****       I2C_AcknowledgeConfig(I2Cx,DISABLE);
+ 124:source\i2c/i2c_app.c **** restart_r2:
+ 125:source\i2c/i2c_app.c ****       I2C_GenerateSTART(I2Cx,ENABLE);
+ 126:source\i2c/i2c_app.c ****       time_out = 0;
+ 127:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_MODE_SELECT)) {
+ 128:source\i2c/i2c_app.c ****       	    time_out++;
+ 129:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 130:source\i2c/i2c_app.c ****       	       i2c_error = 3;
+ 131:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 132:source\i2c/i2c_app.c ****       	       return 0;
+ 133:source\i2c/i2c_app.c ****       	    }
+ 134:source\i2c/i2c_app.c ****       }
+ 135:source\i2c/i2c_app.c ****       I2C_Send7bitAddress(I2Cx,device,I2C_Direction_Receiver);
+ 136:source\i2c/i2c_app.c ****       time_out = 0;
+ 137:source\i2c/i2c_app.c ****       while (!I2C_GetFlagStatus(I2Cx,I2C_FLAG_ADDR)) {
+ 138:source\i2c/i2c_app.c ****       	    time_out++;
+ 139:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 140:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 141:source\i2c/i2c_app.c ****                goto restart_r2;
+ 142:source\i2c/i2c_app.c ****       	    }
+ 143:source\i2c/i2c_app.c ****       }
+ 144:source\i2c/i2c_app.c ****       I2C_AcknowledgeConfig(I2Cx,DISABLE);
+ 145:source\i2c/i2c_app.c ****       __disable_irq();
+ 146:source\i2c/i2c_app.c ****       device = I2Cx->SR2;
+ 147:source\i2c/i2c_app.c ****       I2C_GenerateSTOP(I2Cx,ENABLE);
+ 148:source\i2c/i2c_app.c ****       __enable_irq();
+ 149:source\i2c/i2c_app.c ****       time_out = 0;
+ 150:source\i2c/i2c_app.c ****       while ((I2C_GetLastEvent(I2Cx) & 0x0040) != 0x0040) {
+ 151:source\i2c/i2c_app.c ****       	    time_out++;
+ 152:source\i2c/i2c_app.c ****       	    if (time_out >= 5000) {
+ 153:source\i2c/i2c_app.c ****       	       i2c_error = 4;
+ 154:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 155:source\i2c/i2c_app.c ****       	       return 0;
+ 156:source\i2c/i2c_app.c ****       	    }
+ 157:source\i2c/i2c_app.c ****       }
+ 158:source\i2c/i2c_app.c ****       data = I2C_ReceiveData(I2Cx);
+ 159:source\i2c/i2c_app.c ****       time_out = 0;
+ 160:source\i2c/i2c_app.c ****       while ((I2Cx->CR1 & 0x200) == 0x200) {
+ 161:source\i2c/i2c_app.c ****       	    time_out++;
+ 162:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) break;
+ 163:source\i2c/i2c_app.c ****       }
+ 164:source\i2c/i2c_app.c ****       I2C_AcknowledgeConfig(I2Cx,ENABLE);
+ 165:source\i2c/i2c_app.c ****       return data;
+ 166:source\i2c/i2c_app.c **** }
+ 167:source\i2c/i2c_app.c **** 
+ 168:source\i2c/i2c_app.c **** 
+ 169:source\i2c/i2c_app.c **** void I2C_LowLevel_Init (void)
+ 170:source\i2c/i2c_app.c **** {
+  29              		.loc 1 170 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 16
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+ 171:source\i2c/i2c_app.c ****       I2C_InitTypeDef I2C_InitStructure;
+  33              		.loc 1 171 7 view .LVU1
+ 172:source\i2c/i2c_app.c ****       if (I2C_CHANNEL == 0) {
+  34              		.loc 1 172 7 view .LVU2
+ 170:source\i2c/i2c_app.c ****       I2C_InitTypeDef I2C_InitStructure;
+  35              		.loc 1 170 1 is_stmt 0 view .LVU3
+  36 0000 1FB5     		push	{r0, r1, r2, r3, r4, lr}
+  37              		.cfi_def_cfa_offset 24
+  38              		.cfi_offset 14, -4
+  39              		.loc 1 172 23 view .LVU4
+  40 0002 3B4B     		ldr	r3, .L8
+  41              		.loc 1 172 10 view .LVU5
+  42 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 173:source\i2c/i2c_app.c ****          /* Enable I2C1 clock */
+ 174:source\i2c/i2c_app.c ****          RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+  43              		.loc 1 174 10 view .LVU6
+  44 0006 0121     		movs	r1, #1
+ 172:source\i2c/i2c_app.c ****          /* Enable I2C1 clock */
+  45              		.loc 1 172 10 view .LVU7
+  46 0008 002B     		cmp	r3, #0
+  47 000a 45D1     		bne	.L2
+  48              		.loc 1 174 10 is_stmt 1 view .LVU8
+  49 000c 4FF40010 		mov	r0, #2097152
+  50 0010 FFF7FEFF 		bl	RCC_APB1PeriphClockCmd
+  51              	.LVL0:
+ 175:source\i2c/i2c_app.c ****          if (I2C1_PORT == 0) {
+  52              		.loc 1 175 10 view .LVU9
+  53              		.loc 1 175 24 is_stmt 0 view .LVU10
+  54 0014 374B     		ldr	r3, .L8+4
+  55              		.loc 1 175 13 view .LVU11
+  56 0016 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 176:source\i2c/i2c_app.c ****             GPIO_PinAFConfig(GPIOB,GPIO_PinSource6,GPIO_AF_I2C1);
+  57              		.loc 1 176 13 view .LVU12
+  58 0018 0422     		movs	r2, #4
+ 175:source\i2c/i2c_app.c ****          if (I2C1_PORT == 0) {
+  59              		.loc 1 175 13 view .LVU13
+  60 001a 43BB     		cbnz	r3, .L3
+  61              		.loc 1 176 13 is_stmt 1 view .LVU14
+  62 001c 3648     		ldr	r0, .L8+8
+  63 001e 0621     		movs	r1, #6
+  64 0020 FFF7FEFF 		bl	GPIO_PinAFConfig
+  65              	.LVL1:
+ 177:source\i2c/i2c_app.c ****             GPIO_PinAFConfig(GPIOB,GPIO_PinSource7,GPIO_AF_I2C1);
+  66              		.loc 1 177 13 view .LVU15
+  67 0024 3448     		ldr	r0, .L8+8
+  68 0026 0422     		movs	r2, #4
+  69 0028 0721     		movs	r1, #7
+  70 002a FFF7FEFF 		bl	GPIO_PinAFConfig
+  71              	.LVL2:
+ 178:source\i2c/i2c_app.c ****             /* I2C1 SDA and SCL configuration */
+ 179:source\i2c/i2c_app.c ****             GPIO_Init_Pin(GPIOB,GPIO_Pin_6,GPIO_Speed_100MHz,GPIO_Mode_AF_OD);
+  72              		.loc 1 179 13 view .LVU16
+  73 002e 4223     		movs	r3, #66
+  74 0030 0322     		movs	r2, #3
+  75 0032 4021     		movs	r1, #64
+  76 0034 3048     		ldr	r0, .L8+8
+  77 0036 FFF7FEFF 		bl	GPIO_Init_Pin
+  78              	.LVL3:
+ 180:source\i2c/i2c_app.c ****             GPIO_Init_Pin(GPIOB,GPIO_Pin_7,GPIO_Speed_100MHz,GPIO_Mode_AF_OD);
+  79              		.loc 1 180 13 view .LVU17
+  80 003a 4223     		movs	r3, #66
+  81 003c 0322     		movs	r2, #3
+  82 003e 8021     		movs	r1, #128
+  83              	.L6:
+ 181:source\i2c/i2c_app.c ****          } else {
+ 182:source\i2c/i2c_app.c ****             GPIO_PinAFConfig(GPIOB,GPIO_PinSource8,GPIO_AF_I2C1);
+ 183:source\i2c/i2c_app.c ****             GPIO_PinAFConfig(GPIOB,GPIO_PinSource9,GPIO_AF_I2C1);
+ 184:source\i2c/i2c_app.c ****             /* I2C1 SDA and SCL configuration */
+ 185:source\i2c/i2c_app.c ****             GPIO_Init_Pin(GPIOB,GPIO_Pin_8,GPIO_Speed_100MHz,GPIO_Mode_AF_OD);
+ 186:source\i2c/i2c_app.c ****             GPIO_Init_Pin(GPIOB,GPIO_Pin_9,GPIO_Speed_100MHz,GPIO_Mode_AF_OD);
+  84              		.loc 1 186 13 is_stmt 0 view .LVU18
+  85 0040 2D48     		ldr	r0, .L8+8
+  86 0042 FFF7FEFF 		bl	GPIO_Init_Pin
+  87              	.LVL4:
+ 187:source\i2c/i2c_app.c ****          }
+ 188:source\i2c/i2c_app.c ****          I2C_DeInit(I2C1);
+  88              		.loc 1 188 10 is_stmt 1 view .LVU19
+  89 0046 2D48     		ldr	r0, .L8+12
+  90 0048 FFF7FEFF 		bl	I2C_DeInit
+  91              	.LVL5:
+ 189:source\i2c/i2c_app.c ****          /* I2C1 configuration */
+ 190:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
+  92              		.loc 1 190 10 view .LVU20
+ 191:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+  93              		.loc 1 191 10 view .LVU21
+ 192:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_OwnAddress1 = OwnAddress1;
+  94              		.loc 1 192 10 view .LVU22
+ 193:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
+  95              		.loc 1 193 10 view .LVU23
+ 194:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
+  96              		.loc 1 194 10 view .LVU24
+ 195:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_ClockSpeed = ClockSpeed;
+  97              		.loc 1 195 10 view .LVU25
+ 190:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+  98              		.loc 1 190 37 is_stmt 0 view .LVU26
+  99 004c 2C49     		ldr	r1, .L8+16
+ 100 004e 2D4B     		ldr	r3, .L8+20
+ 196:source\i2c/i2c_app.c ****          I2C_Init(I2C1, &I2C_InitStructure);
+ 101              		.loc 1 196 10 view .LVU27
+ 102 0050 2A48     		ldr	r0, .L8+12
+ 190:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+ 103              		.loc 1 190 37 view .LVU28
+ 104 0052 CDE90013 		strd	r1, r3, [sp]
+ 192:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
+ 105              		.loc 1 192 44 view .LVU29
+ 106 0056 2C4B     		ldr	r3, .L8+24
+ 107 0058 0293     		str	r3, [sp, #8]
+ 194:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_ClockSpeed = ClockSpeed;
+ 108              		.loc 1 194 52 view .LVU30
+ 109 005a 4FF48043 		mov	r3, #16384
+ 110 005e ADF80C30 		strh	r3, [sp, #12]	@ movhi
+ 111              		.loc 1 196 10 is_stmt 1 view .LVU31
+ 112 0062 6946     		mov	r1, sp
+ 113              	.L7:
+ 197:source\i2c/i2c_app.c ****       } else {
+ 198:source\i2c/i2c_app.c ****          /* Enable I2C2 clock */
+ 199:source\i2c/i2c_app.c ****          RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE);
+ 200:source\i2c/i2c_app.c ****          /* I2C2 SDA and SCL configuration */
+ 201:source\i2c/i2c_app.c ****          GPIO_PinAFConfig(GPIOB,GPIO_PinSource10,GPIO_AF_I2C2);
+ 202:source\i2c/i2c_app.c ****          GPIO_PinAFConfig(GPIOB,GPIO_PinSource11,GPIO_AF_I2C2);
+ 203:source\i2c/i2c_app.c ****          GPIO_Init_Pin(GPIOB,GPIO_Pin_10,GPIO_Speed_100MHz,GPIO_Mode_AF_OD);
+ 204:source\i2c/i2c_app.c ****          GPIO_Init_Pin(GPIOB,GPIO_Pin_11,GPIO_Speed_100MHz,GPIO_Mode_AF_OD);
+ 205:source\i2c/i2c_app.c ****          I2C_DeInit(I2C2);
+ 206:source\i2c/i2c_app.c ****          /* I2C2 configuration */
+ 207:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
+ 208:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+ 209:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_OwnAddress1 = OwnAddress2;
+ 210:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
+ 211:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
+ 212:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_ClockSpeed = ClockSpeed;
+ 213:source\i2c/i2c_app.c ****          I2C_Init(I2C2, &I2C_InitStructure);
+ 114              		.loc 1 213 10 is_stmt 0 view .LVU32
+ 115 0064 FFF7FEFF 		bl	I2C_Init
+ 116              	.LVL6:
+ 214:source\i2c/i2c_app.c ****       }
+ 215:source\i2c/i2c_app.c **** }
+ 117              		.loc 1 215 1 view .LVU33
+ 118 0068 05B0     		add	sp, sp, #20
+ 119              		.cfi_remember_state
+ 120              		.cfi_def_cfa_offset 4
+ 121              		@ sp needed
+ 122 006a 5DF804FB 		ldr	pc, [sp], #4
+ 123              	.L3:
+ 124              		.cfi_restore_state
+ 182:source\i2c/i2c_app.c ****             GPIO_PinAFConfig(GPIOB,GPIO_PinSource9,GPIO_AF_I2C1);
+ 125              		.loc 1 182 13 is_stmt 1 view .LVU34
+ 126 006e 2248     		ldr	r0, .L8+8
+ 127 0070 0821     		movs	r1, #8
+ 128 0072 FFF7FEFF 		bl	GPIO_PinAFConfig
+ 129              	.LVL7:
+ 183:source\i2c/i2c_app.c ****             /* I2C1 SDA and SCL configuration */
+ 130              		.loc 1 183 13 view .LVU35
+ 131 0076 2048     		ldr	r0, .L8+8
+ 132 0078 0422     		movs	r2, #4
+ 133 007a 0921     		movs	r1, #9
+ 134 007c FFF7FEFF 		bl	GPIO_PinAFConfig
+ 135              	.LVL8:
+ 185:source\i2c/i2c_app.c ****             GPIO_Init_Pin(GPIOB,GPIO_Pin_9,GPIO_Speed_100MHz,GPIO_Mode_AF_OD);
+ 136              		.loc 1 185 13 view .LVU36
+ 137 0080 4223     		movs	r3, #66
+ 138 0082 0322     		movs	r2, #3
+ 139 0084 4FF48071 		mov	r1, #256
+ 140 0088 1B48     		ldr	r0, .L8+8
+ 141 008a FFF7FEFF 		bl	GPIO_Init_Pin
+ 142              	.LVL9:
+ 186:source\i2c/i2c_app.c ****          }
+ 143              		.loc 1 186 13 view .LVU37
+ 144 008e 4223     		movs	r3, #66
+ 145 0090 0322     		movs	r2, #3
+ 146 0092 4FF40071 		mov	r1, #512
+ 147 0096 D3E7     		b	.L6
+ 148              	.L2:
+ 199:source\i2c/i2c_app.c ****          /* I2C2 SDA and SCL configuration */
+ 149              		.loc 1 199 10 view .LVU38
+ 150 0098 4FF48000 		mov	r0, #4194304
+ 151 009c FFF7FEFF 		bl	RCC_APB1PeriphClockCmd
+ 152              	.LVL10:
+ 201:source\i2c/i2c_app.c ****          GPIO_PinAFConfig(GPIOB,GPIO_PinSource11,GPIO_AF_I2C2);
+ 153              		.loc 1 201 10 view .LVU39
+ 154 00a0 1548     		ldr	r0, .L8+8
+ 155 00a2 0422     		movs	r2, #4
+ 156 00a4 0A21     		movs	r1, #10
+ 157 00a6 FFF7FEFF 		bl	GPIO_PinAFConfig
+ 158              	.LVL11:
+ 202:source\i2c/i2c_app.c ****          GPIO_Init_Pin(GPIOB,GPIO_Pin_10,GPIO_Speed_100MHz,GPIO_Mode_AF_OD);
+ 159              		.loc 1 202 10 view .LVU40
+ 160 00aa 1348     		ldr	r0, .L8+8
+ 161 00ac 0422     		movs	r2, #4
+ 162 00ae 0B21     		movs	r1, #11
+ 163 00b0 FFF7FEFF 		bl	GPIO_PinAFConfig
+ 164              	.LVL12:
+ 203:source\i2c/i2c_app.c ****          GPIO_Init_Pin(GPIOB,GPIO_Pin_11,GPIO_Speed_100MHz,GPIO_Mode_AF_OD);
+ 165              		.loc 1 203 10 view .LVU41
+ 166 00b4 1048     		ldr	r0, .L8+8
+ 167 00b6 4223     		movs	r3, #66
+ 168 00b8 0322     		movs	r2, #3
+ 169 00ba 4FF48061 		mov	r1, #1024
+ 170 00be FFF7FEFF 		bl	GPIO_Init_Pin
+ 171              	.LVL13:
+ 204:source\i2c/i2c_app.c ****          I2C_DeInit(I2C2);
+ 172              		.loc 1 204 10 view .LVU42
+ 173 00c2 4223     		movs	r3, #66
+ 174 00c4 0322     		movs	r2, #3
+ 175 00c6 4FF40061 		mov	r1, #2048
+ 176 00ca 0B48     		ldr	r0, .L8+8
+ 177 00cc FFF7FEFF 		bl	GPIO_Init_Pin
+ 178              	.LVL14:
+ 205:source\i2c/i2c_app.c ****          /* I2C2 configuration */
+ 179              		.loc 1 205 10 view .LVU43
+ 180 00d0 0E48     		ldr	r0, .L8+28
+ 181 00d2 FFF7FEFF 		bl	I2C_DeInit
+ 182              	.LVL15:
+ 207:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+ 183              		.loc 1 207 10 view .LVU44
+ 208:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_OwnAddress1 = OwnAddress2;
+ 184              		.loc 1 208 10 view .LVU45
+ 209:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
+ 185              		.loc 1 209 10 view .LVU46
+ 210:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
+ 186              		.loc 1 210 10 view .LVU47
+ 211:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_ClockSpeed = ClockSpeed;
+ 187              		.loc 1 211 10 view .LVU48
+ 212:source\i2c/i2c_app.c ****          I2C_Init(I2C2, &I2C_InitStructure);
+ 188              		.loc 1 212 10 view .LVU49
+ 207:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+ 189              		.loc 1 207 37 is_stmt 0 view .LVU50
+ 190 00d6 0B4B     		ldr	r3, .L8+20
+ 191 00d8 094A     		ldr	r2, .L8+16
+ 213:source\i2c/i2c_app.c ****       }
+ 192              		.loc 1 213 10 view .LVU51
+ 193 00da 0C48     		ldr	r0, .L8+28
+ 207:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+ 194              		.loc 1 207 37 view .LVU52
+ 195 00dc CDE90023 		strd	r2, r3, [sp]
+ 209:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
+ 196              		.loc 1 209 44 view .LVU53
+ 197 00e0 0B4B     		ldr	r3, .L8+32
+ 198 00e2 0293     		str	r3, [sp, #8]
+ 211:source\i2c/i2c_app.c ****          I2C_InitStructure.I2C_ClockSpeed = ClockSpeed;
+ 199              		.loc 1 211 52 view .LVU54
+ 200 00e4 4FF48043 		mov	r3, #16384
+ 201 00e8 ADF80C30 		strh	r3, [sp, #12]	@ movhi
+ 213:source\i2c/i2c_app.c ****       }
+ 202              		.loc 1 213 10 is_stmt 1 view .LVU55
+ 203 00ec 6946     		mov	r1, sp
+ 204 00ee B9E7     		b	.L7
+ 205              	.L9:
+ 206              		.align	2
+ 207              	.L8:
+ 208 00f0 00000000 		.word	.LANCHOR0
+ 209 00f4 00000000 		.word	.LANCHOR1
+ 210 00f8 00040240 		.word	1073873920
+ 211 00fc 00540040 		.word	1073763328
+ 212 0100 400D0300 		.word	200000
+ 213 0104 0000FFBF 		.word	-1073807360
+ 214 0108 58000004 		.word	67108952
+ 215 010c 00580040 		.word	1073764352
+ 216 0110 60000004 		.word	67108960
+ 217              		.cfi_endproc
+ 218              	.LFE132:
+ 220              		.section	.text.init_i2c_24xx,"ax",%progbits
+ 221              		.align	1
+ 222              		.global	init_i2c_24xx
+ 223              		.syntax unified
+ 224              		.thumb
+ 225              		.thumb_func
+ 227              	init_i2c_24xx:
+ 228              	.LFB137:
+ 216:source\i2c/i2c_app.c **** 
+ 217:source\i2c/i2c_app.c **** 
+ 218:source\i2c/i2c_app.c **** void u8_write (unsigned char device,unsigned char address,unsigned char data)
+ 219:source\i2c/i2c_app.c **** {
+ 220:source\i2c/i2c_app.c ****       /* Reload IWDG counter */
+ 221:source\i2c/i2c_app.c ****       IWDG_ReloadCounter();
+ 222:source\i2c/i2c_app.c ****       if (I2C_CHANNEL == 0) {
+ 223:source\i2c/i2c_app.c ****          i2c_write(I2C1,device,address,data);
+ 224:source\i2c/i2c_app.c ****       } else {
+ 225:source\i2c/i2c_app.c ****          i2c_write(I2C2,device,address,data);
+ 226:source\i2c/i2c_app.c ****       }
+ 227:source\i2c/i2c_app.c ****       wait_ms(4);
+ 228:source\i2c/i2c_app.c **** }
+ 229:source\i2c/i2c_app.c **** 
+ 230:source\i2c/i2c_app.c **** 
+ 231:source\i2c/i2c_app.c **** unsigned char u8_read (unsigned char device,unsigned char address)
+ 232:source\i2c/i2c_app.c **** {
+ 233:source\i2c/i2c_app.c ****       unsigned char ret_value;
+ 234:source\i2c/i2c_app.c ****       /* Reload IWDG counter */
+ 235:source\i2c/i2c_app.c ****       IWDG_ReloadCounter();
+ 236:source\i2c/i2c_app.c ****       if (I2C_CHANNEL == 0) {
+ 237:source\i2c/i2c_app.c ****          ret_value = i2c_read(I2C1,device,address);
+ 238:source\i2c/i2c_app.c ****       } else {
+ 239:source\i2c/i2c_app.c ****          ret_value = i2c_read(I2C2,device,address);
+ 240:source\i2c/i2c_app.c ****       }
+ 241:source\i2c/i2c_app.c ****       return ret_value;
+ 242:source\i2c/i2c_app.c **** }
+ 243:source\i2c/i2c_app.c **** 
+ 244:source\i2c/i2c_app.c **** 
+ 245:source\i2c/i2c_app.c **** unsigned char eeprom_read (unsigned char address)
+ 246:source\i2c/i2c_app.c **** {
+ 247:source\i2c/i2c_app.c ****       return u8_read(SEEP_PAGE0,address);
+ 248:source\i2c/i2c_app.c **** }
+ 249:source\i2c/i2c_app.c **** 
+ 250:source\i2c/i2c_app.c **** 
+ 251:source\i2c/i2c_app.c **** void eeprom_write (unsigned char address,unsigned char data)
+ 252:source\i2c/i2c_app.c **** {
+ 253:source\i2c/i2c_app.c ****       u8_write(SEEP_PAGE0,address,data);
+ 254:source\i2c/i2c_app.c **** }
+ 255:source\i2c/i2c_app.c **** 
+ 256:source\i2c/i2c_app.c **** 
+ 257:source\i2c/i2c_app.c **** void init_i2c_24xx (void)
+ 258:source\i2c/i2c_app.c **** {
+ 229              		.loc 1 258 1 view -0
+ 230              		.cfi_startproc
+ 231              		@ args = 0, pretend = 0, frame = 0
+ 232              		@ frame_needed = 0, uses_anonymous_args = 0
+ 259:source\i2c/i2c_app.c ****       I2C_LowLevel_Init();
+ 233              		.loc 1 259 7 view .LVU57
+ 258:source\i2c/i2c_app.c ****       I2C_LowLevel_Init();
+ 234              		.loc 1 258 1 is_stmt 0 view .LVU58
+ 235 0000 38B5     		push	{r3, r4, r5, lr}
+ 236              		.cfi_def_cfa_offset 16
+ 237              		.cfi_offset 3, -16
+ 238              		.cfi_offset 4, -12
+ 239              		.cfi_offset 5, -8
+ 240              		.cfi_offset 14, -4
+ 260:source\i2c/i2c_app.c ****       if (I2C_CHANNEL == 0) {
+ 241              		.loc 1 260 23 view .LVU59
+ 242 0002 084C     		ldr	r4, .L13
+ 259:source\i2c/i2c_app.c ****       I2C_LowLevel_Init();
+ 243              		.loc 1 259 7 view .LVU60
+ 244 0004 FFF7FEFF 		bl	I2C_LowLevel_Init
+ 245              	.LVL16:
+ 246              		.loc 1 260 7 is_stmt 1 view .LVU61
+ 247              		.loc 1 260 10 is_stmt 0 view .LVU62
+ 248 0008 2578     		ldrb	r5, [r4]	@ zero_extendqisi2
+ 249              	.LBB8:
+ 250              	.LBB9:
+ 261:source\i2c/i2c_app.c ****          I2C_Cmd(I2C1, ENABLE);
+ 251              		.loc 1 261 10 view .LVU63
+ 252 000a 0121     		movs	r1, #1
+ 253              	.LBE9:
+ 254              	.LBE8:
+ 260:source\i2c/i2c_app.c ****       if (I2C_CHANNEL == 0) {
+ 255              		.loc 1 260 10 view .LVU64
+ 256 000c 25B9     		cbnz	r5, .L11
+ 257              	.LBB11:
+ 258              	.LBI8:
+ 257:source\i2c/i2c_app.c **** {
+ 259              		.loc 1 257 6 is_stmt 1 view .LVU65
+ 260              	.LBB10:
+ 261              		.loc 1 261 10 view .LVU66
+ 262 000e 0648     		ldr	r0, .L13+4
+ 263 0010 FFF7FEFF 		bl	I2C_Cmd
+ 264              	.LVL17:
+ 262:source\i2c/i2c_app.c ****          I2C_CHANNEL = 0;
+ 265              		.loc 1 262 10 view .LVU67
+ 266              		.loc 1 262 22 is_stmt 0 view .LVU68
+ 267 0014 2570     		strb	r5, [r4]
+ 268              	.L10:
+ 269              	.LBE10:
+ 270              	.LBE11:
+ 263:source\i2c/i2c_app.c ****       } else {
+ 264:source\i2c/i2c_app.c ****          I2C_Cmd(I2C2, ENABLE);
+ 265:source\i2c/i2c_app.c ****          I2C_CHANNEL = 1;
+ 266:source\i2c/i2c_app.c ****       }
+ 267:source\i2c/i2c_app.c **** }
+ 271              		.loc 1 267 1 view .LVU69
+ 272 0016 38BD     		pop	{r3, r4, r5, pc}
+ 273              	.L11:
+ 264:source\i2c/i2c_app.c ****          I2C_CHANNEL = 1;
+ 274              		.loc 1 264 10 is_stmt 1 view .LVU70
+ 275 0018 0448     		ldr	r0, .L13+8
+ 276 001a FFF7FEFF 		bl	I2C_Cmd
+ 277              	.LVL18:
+ 265:source\i2c/i2c_app.c ****       }
+ 278              		.loc 1 265 10 view .LVU71
+ 265:source\i2c/i2c_app.c ****       }
+ 279              		.loc 1 265 22 is_stmt 0 view .LVU72
+ 280 001e 0123     		movs	r3, #1
+ 281 0020 2370     		strb	r3, [r4]
+ 282              		.loc 1 267 1 view .LVU73
+ 283 0022 F8E7     		b	.L10
+ 284              	.L14:
+ 285              		.align	2
+ 286              	.L13:
+ 287 0024 00000000 		.word	.LANCHOR0
+ 288 0028 00540040 		.word	1073763328
+ 289 002c 00580040 		.word	1073764352
+ 290              		.cfi_endproc
+ 291              	.LFE137:
+ 293              		.section	.text.i2c_write,"ax",%progbits
+ 294              		.align	1
+ 295              		.global	i2c_write
+ 296              		.syntax unified
+ 297              		.thumb
+ 298              		.thumb_func
+ 300              	i2c_write:
+ 301              	.LVL19:
+ 302              	.LFB130:
+  25:source\i2c/i2c_app.c ****       i2c_error	= 0;
+ 303              		.loc 1 25 1 is_stmt 1 view -0
+ 304              		.cfi_startproc
+ 305              		@ args = 0, pretend = 0, frame = 0
+ 306              		@ frame_needed = 0, uses_anonymous_args = 0
+  26:source\i2c/i2c_app.c ****       time_out = 0;
+ 307              		.loc 1 26 7 view .LVU75
+  25:source\i2c/i2c_app.c ****       i2c_error	= 0;
+ 308              		.loc 1 25 1 is_stmt 0 view .LVU76
+ 309 0000 2DE9F84F 		push	{r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 310              		.cfi_def_cfa_offset 40
+ 311              		.cfi_offset 3, -40
+ 312              		.cfi_offset 4, -36
+ 313              		.cfi_offset 5, -32
+ 314              		.cfi_offset 6, -28
+ 315              		.cfi_offset 7, -24
+ 316              		.cfi_offset 8, -20
+ 317              		.cfi_offset 9, -16
+ 318              		.cfi_offset 10, -12
+ 319              		.cfi_offset 11, -8
+ 320              		.cfi_offset 14, -4
+  26:source\i2c/i2c_app.c ****       time_out = 0;
+ 321              		.loc 1 26 17 view .LVU77
+ 322 0004 464F     		ldr	r7, .L46
+  27:source\i2c/i2c_app.c ****       while (I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)) {
+ 323              		.loc 1 27 16 view .LVU78
+ 324 0006 474C     		ldr	r4, .L46+4
+  25:source\i2c/i2c_app.c ****       i2c_error	= 0;
+ 325              		.loc 1 25 1 view .LVU79
+ 326 0008 9846     		mov	r8, r3
+  26:source\i2c/i2c_app.c ****       time_out = 0;
+ 327              		.loc 1 26 17 view .LVU80
+ 328 000a 0023     		movs	r3, #0
+ 329              	.LVL20:
+  25:source\i2c/i2c_app.c ****       i2c_error	= 0;
+ 330              		.loc 1 25 1 view .LVU81
+ 331 000c 0546     		mov	r5, r0
+ 332 000e 0E46     		mov	r6, r1
+ 333 0010 9146     		mov	r9, r2
+  26:source\i2c/i2c_app.c ****       time_out = 0;
+ 334              		.loc 1 26 17 view .LVU82
+ 335 0012 3B70     		strb	r3, [r7]
+  27:source\i2c/i2c_app.c ****       while (I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)) {
+ 336              		.loc 1 27 7 is_stmt 1 view .LVU83
+  27:source\i2c/i2c_app.c ****       while (I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)) {
+ 337              		.loc 1 27 16 is_stmt 0 view .LVU84
+ 338 0014 2360     		str	r3, [r4]
+  28:source\i2c/i2c_app.c ****       	    time_out++;
+ 339              		.loc 1 28 7 is_stmt 1 view .LVU85
+ 340              	.LVL21:
+ 341              	.L16:
+  28:source\i2c/i2c_app.c ****       	    time_out++;
+ 342              		.loc 1 28 13 view .LVU86
+  28:source\i2c/i2c_app.c ****       	    time_out++;
+ 343              		.loc 1 28 14 is_stmt 0 view .LVU87
+ 344 0016 4FF40031 		mov	r1, #131072
+ 345 001a 2846     		mov	r0, r5
+ 346 001c FFF7FEFF 		bl	I2C_GetFlagStatus
+ 347              	.LVL22:
+  28:source\i2c/i2c_app.c ****       	    time_out++;
+ 348              		.loc 1 28 13 view .LVU88
+ 349 0020 28B1     		cbz	r0, .L19
+  29:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+ 350              		.loc 1 29 12 is_stmt 1 view .LVU89
+  29:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+ 351              		.loc 1 29 20 is_stmt 0 view .LVU90
+ 352 0022 2368     		ldr	r3, [r4]
+ 353 0024 0133     		adds	r3, r3, #1
+  30:source\i2c/i2c_app.c ****       }
+ 354              		.loc 1 30 15 view .LVU91
+ 355 0026 B3F57A7F 		cmp	r3, #1000
+  29:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+ 356              		.loc 1 29 20 view .LVU92
+ 357 002a 2360     		str	r3, [r4]
+  30:source\i2c/i2c_app.c ****       }
+ 358              		.loc 1 30 12 is_stmt 1 view .LVU93
+  30:source\i2c/i2c_app.c ****       }
+ 359              		.loc 1 30 15 is_stmt 0 view .LVU94
+ 360 002c F3D3     		bcc	.L16
+ 361              	.L19:
+  35:source\i2c/i2c_app.c ****       	    time_out++;
+ 362              		.loc 1 35 15 view .LVU95
+ 363 002e DFF8FCA0 		ldr	r10, .L46+12
+  49:source\i2c/i2c_app.c ****                goto restart_w1;
+ 364              		.loc 1 49 15 view .LVU96
+ 365 0032 DFF8FCB0 		ldr	fp, .L46+16
+ 366              	.LVL23:
+ 367              	.L17:
+  33:source\i2c/i2c_app.c ****       time_out = 0;
+ 368              		.loc 1 33 7 is_stmt 1 view .LVU97
+ 369 0036 0121     		movs	r1, #1
+ 370 0038 2846     		mov	r0, r5
+ 371 003a FFF7FEFF 		bl	I2C_GenerateSTART
+ 372              	.LVL24:
+  34:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_MODE_SELECT)) {
+ 373              		.loc 1 34 7 view .LVU98
+  34:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_MODE_SELECT)) {
+ 374              		.loc 1 34 16 is_stmt 0 view .LVU99
+ 375 003e 0023     		movs	r3, #0
+ 376 0040 2360     		str	r3, [r4]
+  35:source\i2c/i2c_app.c ****       	    time_out++;
+ 377              		.loc 1 35 7 is_stmt 1 view .LVU100
+ 378              	.L20:
+  35:source\i2c/i2c_app.c ****       	    time_out++;
+ 379              		.loc 1 35 13 view .LVU101
+  35:source\i2c/i2c_app.c ****       	    time_out++;
+ 380              		.loc 1 35 15 is_stmt 0 view .LVU102
+ 381 0042 5146     		mov	r1, r10
+ 382 0044 2846     		mov	r0, r5
+ 383 0046 FFF7FEFF 		bl	I2C_CheckEvent
+ 384              	.LVL25:
+  35:source\i2c/i2c_app.c ****       	    time_out++;
+ 385              		.loc 1 35 13 view .LVU103
+ 386 004a 40F6B732 		movw	r2, #2999
+ 387 004e 0028     		cmp	r0, #0
+ 388 0050 39D0     		beq	.L21
+  43:source\i2c/i2c_app.c ****       I2C_Send7bitAddress(I2Cx,device, I2C_Direction_Transmitter);
+ 389              		.loc 1 43 7 is_stmt 1 view .LVU104
+  43:source\i2c/i2c_app.c ****       I2C_Send7bitAddress(I2Cx,device, I2C_Direction_Transmitter);
+ 390              		.loc 1 43 14 is_stmt 0 view .LVU105
+ 391 0052 06F0FE06 		and	r6, r6, #254
+ 392              	.LVL26:
+  44:source\i2c/i2c_app.c ****       time_out = 0;
+ 393              		.loc 1 44 7 is_stmt 1 view .LVU106
+ 394 0056 0022     		movs	r2, #0
+ 395 0058 2846     		mov	r0, r5
+ 396 005a 3146     		mov	r1, r6
+ 397 005c FFF7FEFF 		bl	I2C_Send7bitAddress
+ 398              	.LVL27:
+  45:source\i2c/i2c_app.c ****       while ((I2Cx->SR1 & 0x0002) != 0x0002) {
+ 399              		.loc 1 45 7 view .LVU107
+  45:source\i2c/i2c_app.c ****       while ((I2Cx->SR1 & 0x0002) != 0x0002) {
+ 400              		.loc 1 45 16 is_stmt 0 view .LVU108
+ 401 0060 0023     		movs	r3, #0
+ 402 0062 2360     		str	r3, [r4]
+  46:source\i2c/i2c_app.c ****       	    time_out++;
+ 403              		.loc 1 46 7 is_stmt 1 view .LVU109
+  46:source\i2c/i2c_app.c ****       	    time_out++;
+ 404              		.loc 1 46 13 is_stmt 0 view .LVU110
+ 405 0064 1A46     		mov	r2, r3
+  48:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 406              		.loc 1 48 15 view .LVU111
+ 407 0066 40F6B830 		movw	r0, #3000
+ 408              	.L22:
+  46:source\i2c/i2c_app.c ****       	    time_out++;
+ 409              		.loc 1 46 13 is_stmt 1 view .LVU112
+  46:source\i2c/i2c_app.c ****       	    time_out++;
+ 410              		.loc 1 46 19 is_stmt 0 view .LVU113
+ 411 006a A98A     		ldrh	r1, [r5, #20]
+  46:source\i2c/i2c_app.c ****       	    time_out++;
+ 412              		.loc 1 46 13 view .LVU114
+ 413 006c 8907     		lsls	r1, r1, #30
+ 414 006e 35D5     		bpl	.L23
+ 415 0070 03B1     		cbz	r3, .L24
+ 416 0072 2260     		str	r2, [r4]
+ 417              	.L24:
+  53:source\i2c/i2c_app.c ****       I2C_SendData(I2Cx,address);
+ 418              		.loc 1 53 7 is_stmt 1 view .LVU115
+  54:source\i2c/i2c_app.c ****       time_out = 0;
+ 419              		.loc 1 54 7 is_stmt 0 view .LVU116
+ 420 0074 4946     		mov	r1, r9
+ 421 0076 2846     		mov	r0, r5
+  53:source\i2c/i2c_app.c ****       I2C_SendData(I2Cx,address);
+ 422              		.loc 1 53 20 view .LVU117
+ 423 0078 2B8B     		ldrh	r3, [r5, #24]
+ 424              	.LVL28:
+  54:source\i2c/i2c_app.c ****       time_out = 0;
+ 425              		.loc 1 54 7 is_stmt 1 view .LVU118
+  56:source\i2c/i2c_app.c ****       	    time_out++;
+ 426              		.loc 1 56 15 is_stmt 0 view .LVU119
+ 427 007a 2B4E     		ldr	r6, .L46+8
+  54:source\i2c/i2c_app.c ****       time_out = 0;
+ 428              		.loc 1 54 7 view .LVU120
+ 429 007c FFF7FEFF 		bl	I2C_SendData
+ 430              	.LVL29:
+  55:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
+ 431              		.loc 1 55 7 is_stmt 1 view .LVU121
+  55:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
+ 432              		.loc 1 55 16 is_stmt 0 view .LVU122
+ 433 0080 0023     		movs	r3, #0
+ 434 0082 2360     		str	r3, [r4]
+  56:source\i2c/i2c_app.c ****       	    time_out++;
+ 435              		.loc 1 56 7 is_stmt 1 view .LVU123
+  58:source\i2c/i2c_app.c ****       	       i2c_error = 2;
+ 436              		.loc 1 58 15 is_stmt 0 view .LVU124
+ 437 0084 40F6B739 		movw	r9, #2999
+ 438              	.L25:
+  56:source\i2c/i2c_app.c ****       	    time_out++;
+ 439              		.loc 1 56 13 is_stmt 1 view .LVU125
+  56:source\i2c/i2c_app.c ****       	    time_out++;
+ 440              		.loc 1 56 15 is_stmt 0 view .LVU126
+ 441 0088 3146     		mov	r1, r6
+ 442 008a 2846     		mov	r0, r5
+ 443 008c FFF7FEFF 		bl	I2C_CheckEvent
+ 444              	.LVL30:
+  56:source\i2c/i2c_app.c ****       	    time_out++;
+ 445              		.loc 1 56 13 view .LVU127
+ 446 0090 78B3     		cbz	r0, .L26
+  64:source\i2c/i2c_app.c ****       time_out = 0;
+ 447              		.loc 1 64 7 is_stmt 1 view .LVU128
+ 448 0092 4146     		mov	r1, r8
+ 449 0094 2846     		mov	r0, r5
+ 450 0096 FFF7FEFF 		bl	I2C_SendData
+ 451              	.LVL31:
+  65:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
+ 452              		.loc 1 65 7 view .LVU129
+  66:source\i2c/i2c_app.c ****       	    time_out++;
+ 453              		.loc 1 66 15 is_stmt 0 view .LVU130
+ 454 009a 234E     		ldr	r6, .L46+8
+  65:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
+ 455              		.loc 1 65 16 view .LVU131
+ 456 009c 0023     		movs	r3, #0
+ 457 009e 2360     		str	r3, [r4]
+  66:source\i2c/i2c_app.c ****       	    time_out++;
+ 458              		.loc 1 66 7 is_stmt 1 view .LVU132
+  68:source\i2c/i2c_app.c ****       	       i2c_error = 3;
+ 459              		.loc 1 68 15 is_stmt 0 view .LVU133
+ 460 00a0 40F6B738 		movw	r8, #2999
+ 461              	.L27:
+  66:source\i2c/i2c_app.c ****       	    time_out++;
+ 462              		.loc 1 66 13 is_stmt 1 view .LVU134
+  66:source\i2c/i2c_app.c ****       	    time_out++;
+ 463              		.loc 1 66 15 is_stmt 0 view .LVU135
+ 464 00a4 3146     		mov	r1, r6
+ 465 00a6 2846     		mov	r0, r5
+ 466 00a8 FFF7FEFF 		bl	I2C_CheckEvent
+ 467              	.LVL32:
+  66:source\i2c/i2c_app.c ****       	    time_out++;
+ 468              		.loc 1 66 13 view .LVU136
+ 469 00ac 40B3     		cbz	r0, .L28
+  74:source\i2c/i2c_app.c ****       while (I2Cx->CR1 & 0x0200) {
+ 470              		.loc 1 74 7 is_stmt 1 view .LVU137
+ 471 00ae 0121     		movs	r1, #1
+ 472 00b0 2846     		mov	r0, r5
+ 473 00b2 FFF7FEFF 		bl	I2C_GenerateSTOP
+ 474              	.LVL33:
+  75:source\i2c/i2c_app.c ****       	    time_out++;
+ 475              		.loc 1 75 7 view .LVU138
+ 476 00b6 2368     		ldr	r3, [r4]
+  75:source\i2c/i2c_app.c ****       	    time_out++;
+ 477              		.loc 1 75 13 is_stmt 0 view .LVU139
+ 478 00b8 0022     		movs	r2, #0
+ 479              	.L29:
+  75:source\i2c/i2c_app.c ****       	    time_out++;
+ 480              		.loc 1 75 13 is_stmt 1 view .LVU140
+  75:source\i2c/i2c_app.c ****       	    time_out++;
+ 481              		.loc 1 75 18 is_stmt 0 view .LVU141
+ 482 00ba 2988     		ldrh	r1, [r5]
+  75:source\i2c/i2c_app.c ****       	    time_out++;
+ 483              		.loc 1 75 13 view .LVU142
+ 484 00bc 8905     		lsls	r1, r1, #22
+ 485 00be 26D4     		bmi	.L31
+ 486 00c0 5ABB     		cbnz	r2, .L44
+ 487              	.L15:
+  79:source\i2c/i2c_app.c **** 
+ 488              		.loc 1 79 1 view .LVU143
+ 489 00c2 BDE8F88F 		pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 490              	.LVL34:
+ 491              	.L21:
+  36:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 492              		.loc 1 36 12 is_stmt 1 view .LVU144
+  36:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 493              		.loc 1 36 20 is_stmt 0 view .LVU145
+ 494 00c6 2368     		ldr	r3, [r4]
+ 495 00c8 0133     		adds	r3, r3, #1
+  37:source\i2c/i2c_app.c ****       	       i2c_error = 1;
+ 496              		.loc 1 37 15 view .LVU146
+ 497 00ca 9342     		cmp	r3, r2
+  36:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 498              		.loc 1 36 20 view .LVU147
+ 499 00cc 2360     		str	r3, [r4]
+  37:source\i2c/i2c_app.c ****       	       i2c_error = 1;
+ 500              		.loc 1 37 12 is_stmt 1 view .LVU148
+  37:source\i2c/i2c_app.c ****       	       i2c_error = 1;
+ 501              		.loc 1 37 15 is_stmt 0 view .LVU149
+ 502 00ce B8D9     		bls	.L20
+  38:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 503              		.loc 1 38 15 is_stmt 1 view .LVU150
+  38:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 504              		.loc 1 38 25 is_stmt 0 view .LVU151
+ 505 00d0 0123     		movs	r3, #1
+ 506              	.LVL35:
+ 507              	.L45:
+  69:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 508              		.loc 1 69 25 view .LVU152
+ 509 00d2 3B70     		strb	r3, [r7]
+  70:source\i2c/i2c_app.c ****       	       return;
+ 510              		.loc 1 70 15 is_stmt 1 view .LVU153
+  79:source\i2c/i2c_app.c **** 
+ 511              		.loc 1 79 1 is_stmt 0 view .LVU154
+ 512 00d4 BDE8F84F 		pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 513              		.cfi_remember_state
+ 514              		.cfi_restore 14
+ 515              		.cfi_restore 11
+ 516              		.cfi_restore 10
+ 517              		.cfi_restore 9
+ 518              		.cfi_restore 8
+ 519              		.cfi_restore 7
+ 520              		.cfi_restore 6
+ 521              		.cfi_restore 5
+ 522              		.cfi_restore 4
+ 523              		.cfi_restore 3
+ 524              		.cfi_def_cfa_offset 0
+ 525              	.LVL36:
+  70:source\i2c/i2c_app.c ****       	       return;
+ 526              		.loc 1 70 15 view .LVU155
+ 527 00d8 FFF7FEBF 		b	init_i2c_24xx
+ 528              	.LVL37:
+ 529              	.L23:
+ 530              		.cfi_restore_state
+  47:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 531              		.loc 1 47 12 is_stmt 1 view .LVU156
+  47:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 532              		.loc 1 47 20 is_stmt 0 view .LVU157
+ 533 00dc 0132     		adds	r2, r2, #1
+  48:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 534              		.loc 1 48 12 is_stmt 1 view .LVU158
+  48:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 535              		.loc 1 48 15 is_stmt 0 view .LVU159
+ 536 00de 8242     		cmp	r2, r0
+ 537 00e0 4FF00103 		mov	r3, #1
+ 538 00e4 C1D1     		bne	.L22
+  49:source\i2c/i2c_app.c ****                goto restart_w1;
+ 539              		.loc 1 49 15 view .LVU160
+ 540 00e6 5946     		mov	r1, fp
+ 541 00e8 2846     		mov	r0, r5
+ 542 00ea 2260     		str	r2, [r4]
+  49:source\i2c/i2c_app.c ****                goto restart_w1;
+ 543              		.loc 1 49 15 is_stmt 1 view .LVU161
+ 544 00ec FFF7FEFF 		bl	I2C_ClearFlag
+ 545              	.LVL38:
+  50:source\i2c/i2c_app.c ****       	    }
+ 546              		.loc 1 50 16 view .LVU162
+ 547 00f0 A1E7     		b	.L17
+ 548              	.LVL39:
+ 549              	.L26:
+  57:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 550              		.loc 1 57 12 view .LVU163
+  57:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 551              		.loc 1 57 20 is_stmt 0 view .LVU164
+ 552 00f2 2368     		ldr	r3, [r4]
+ 553 00f4 0133     		adds	r3, r3, #1
+  58:source\i2c/i2c_app.c ****       	       i2c_error = 2;
+ 554              		.loc 1 58 15 view .LVU165
+ 555 00f6 4B45     		cmp	r3, r9
+  57:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 556              		.loc 1 57 20 view .LVU166
+ 557 00f8 2360     		str	r3, [r4]
+  58:source\i2c/i2c_app.c ****       	       i2c_error = 2;
+ 558              		.loc 1 58 12 is_stmt 1 view .LVU167
+  58:source\i2c/i2c_app.c ****       	       i2c_error = 2;
+ 559              		.loc 1 58 15 is_stmt 0 view .LVU168
+ 560 00fa C5D9     		bls	.L25
+  59:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 561              		.loc 1 59 15 is_stmt 1 view .LVU169
+  59:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 562              		.loc 1 59 25 is_stmt 0 view .LVU170
+ 563 00fc 0223     		movs	r3, #2
+ 564 00fe E8E7     		b	.L45
+ 565              	.L28:
+  67:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 566              		.loc 1 67 12 is_stmt 1 view .LVU171
+  67:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 567              		.loc 1 67 20 is_stmt 0 view .LVU172
+ 568 0100 2368     		ldr	r3, [r4]
+ 569 0102 0133     		adds	r3, r3, #1
+  68:source\i2c/i2c_app.c ****       	       i2c_error = 3;
+ 570              		.loc 1 68 15 view .LVU173
+ 571 0104 4345     		cmp	r3, r8
+  67:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 572              		.loc 1 67 20 view .LVU174
+ 573 0106 2360     		str	r3, [r4]
+  68:source\i2c/i2c_app.c ****       	       i2c_error = 3;
+ 574              		.loc 1 68 12 is_stmt 1 view .LVU175
+  68:source\i2c/i2c_app.c ****       	       i2c_error = 3;
+ 575              		.loc 1 68 15 is_stmt 0 view .LVU176
+ 576 0108 CCD9     		bls	.L27
+  69:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 577              		.loc 1 69 15 is_stmt 1 view .LVU177
+  69:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 578              		.loc 1 69 25 is_stmt 0 view .LVU178
+ 579 010a 0323     		movs	r3, #3
+ 580 010c E1E7     		b	.L45
+ 581              	.L31:
+  76:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+ 582              		.loc 1 76 12 is_stmt 1 view .LVU179
+  76:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+ 583              		.loc 1 76 20 is_stmt 0 view .LVU180
+ 584 010e 0133     		adds	r3, r3, #1
+  77:source\i2c/i2c_app.c ****       }
+ 585              		.loc 1 77 12 is_stmt 1 view .LVU181
+  77:source\i2c/i2c_app.c ****       }
+ 586              		.loc 1 77 15 is_stmt 0 view .LVU182
+ 587 0110 B3F57A7F 		cmp	r3, #1000
+ 588 0114 4FF00102 		mov	r2, #1
+ 589 0118 CFD3     		bcc	.L29
+ 590              	.L44:
+ 591 011a 2360     		str	r3, [r4]
+ 592 011c D1E7     		b	.L15
+ 593              	.L47:
+ 594 011e 00BF     		.align	2
+ 595              	.L46:
+ 596 0120 00000000 		.word	.LANCHOR2
+ 597 0124 00000000 		.word	.LANCHOR3
+ 598 0128 84000700 		.word	458884
+ 599 012c 01000300 		.word	196609
+ 600 0130 00040210 		.word	268567552
+ 601              		.cfi_endproc
+ 602              	.LFE130:
+ 604              		.section	.text.u8_write,"ax",%progbits
+ 605              		.align	1
+ 606              		.global	u8_write
+ 607              		.syntax unified
+ 608              		.thumb
+ 609              		.thumb_func
+ 611              	u8_write:
+ 612              	.LVL40:
+ 613              	.LFB133:
+ 219:source\i2c/i2c_app.c ****       /* Reload IWDG counter */
+ 614              		.loc 1 219 1 is_stmt 1 view -0
+ 615              		.cfi_startproc
+ 616              		@ args = 0, pretend = 0, frame = 8
+ 617              		@ frame_needed = 0, uses_anonymous_args = 0
+ 221:source\i2c/i2c_app.c ****       if (I2C_CHANNEL == 0) {
+ 618              		.loc 1 221 7 view .LVU184
+ 219:source\i2c/i2c_app.c ****       /* Reload IWDG counter */
+ 619              		.loc 1 219 1 is_stmt 0 view .LVU185
+ 620 0000 37B5     		push	{r0, r1, r2, r4, r5, lr}
+ 621              		.cfi_def_cfa_offset 24
+ 622              		.cfi_offset 4, -12
+ 623              		.cfi_offset 5, -8
+ 624              		.cfi_offset 14, -4
+ 219:source\i2c/i2c_app.c ****       /* Reload IWDG counter */
+ 625              		.loc 1 219 1 view .LVU186
+ 626 0002 0446     		mov	r4, r0
+ 627 0004 0192     		str	r2, [sp, #4]
+ 628 0006 0D46     		mov	r5, r1
+ 221:source\i2c/i2c_app.c ****       if (I2C_CHANNEL == 0) {
+ 629              		.loc 1 221 7 view .LVU187
+ 630 0008 FFF7FEFF 		bl	IWDG_ReloadCounter
+ 631              	.LVL41:
+ 222:source\i2c/i2c_app.c ****          i2c_write(I2C1,device,address,data);
+ 632              		.loc 1 222 7 is_stmt 1 view .LVU188
+ 222:source\i2c/i2c_app.c ****          i2c_write(I2C1,device,address,data);
+ 633              		.loc 1 222 23 is_stmt 0 view .LVU189
+ 634 000c 094A     		ldr	r2, .L52
+ 222:source\i2c/i2c_app.c ****          i2c_write(I2C1,device,address,data);
+ 635              		.loc 1 222 10 view .LVU190
+ 636 000e 019B     		ldr	r3, [sp, #4]
+ 637 0010 1278     		ldrb	r2, [r2]	@ zero_extendqisi2
+ 638 0012 52B9     		cbnz	r2, .L49
+ 223:source\i2c/i2c_app.c ****       } else {
+ 639              		.loc 1 223 10 is_stmt 1 view .LVU191
+ 640 0014 0848     		ldr	r0, .L52+4
+ 641 0016 2A46     		mov	r2, r5
+ 642 0018 2146     		mov	r1, r4
+ 643              	.L51:
+ 225:source\i2c/i2c_app.c ****       }
+ 644              		.loc 1 225 10 is_stmt 0 view .LVU192
+ 645 001a FFF7FEFF 		bl	i2c_write
+ 646              	.LVL42:
+ 227:source\i2c/i2c_app.c **** }
+ 647              		.loc 1 227 7 is_stmt 1 view .LVU193
+ 648 001e 0420     		movs	r0, #4
+ 228:source\i2c/i2c_app.c **** 
+ 649              		.loc 1 228 1 is_stmt 0 view .LVU194
+ 650 0020 03B0     		add	sp, sp, #12
+ 651              		.cfi_remember_state
+ 652              		.cfi_def_cfa_offset 12
+ 653              		@ sp needed
+ 654 0022 BDE83040 		pop	{r4, r5, lr}
+ 655              		.cfi_restore 14
+ 656              		.cfi_restore 5
+ 657              		.cfi_restore 4
+ 658              		.cfi_def_cfa_offset 0
+ 227:source\i2c/i2c_app.c **** }
+ 659              		.loc 1 227 7 view .LVU195
+ 660 0026 FFF7FEBF 		b	wait_ms
+ 661              	.LVL43:
+ 662              	.L49:
+ 663              		.cfi_restore_state
+ 225:source\i2c/i2c_app.c ****       }
+ 664              		.loc 1 225 10 is_stmt 1 view .LVU196
+ 665 002a 0448     		ldr	r0, .L52+8
+ 666 002c 2A46     		mov	r2, r5
+ 667 002e 2146     		mov	r1, r4
+ 668 0030 F3E7     		b	.L51
+ 669              	.L53:
+ 670 0032 00BF     		.align	2
+ 671              	.L52:
+ 672 0034 00000000 		.word	.LANCHOR0
+ 673 0038 00540040 		.word	1073763328
+ 674 003c 00580040 		.word	1073764352
+ 675              		.cfi_endproc
+ 676              	.LFE133:
+ 678              		.section	.text.eeprom_write,"ax",%progbits
+ 679              		.align	1
+ 680              		.global	eeprom_write
+ 681              		.syntax unified
+ 682              		.thumb
+ 683              		.thumb_func
+ 685              	eeprom_write:
+ 686              	.LVL44:
+ 687              	.LFB136:
+ 252:source\i2c/i2c_app.c ****       u8_write(SEEP_PAGE0,address,data);
+ 688              		.loc 1 252 1 view -0
+ 689              		.cfi_startproc
+ 690              		@ args = 0, pretend = 0, frame = 0
+ 691              		@ frame_needed = 0, uses_anonymous_args = 0
+ 692              		@ link register save eliminated.
+ 253:source\i2c/i2c_app.c **** }
+ 693              		.loc 1 253 7 view .LVU198
+ 252:source\i2c/i2c_app.c ****       u8_write(SEEP_PAGE0,address,data);
+ 694              		.loc 1 252 1 is_stmt 0 view .LVU199
+ 695 0000 0A46     		mov	r2, r1
+ 253:source\i2c/i2c_app.c **** }
+ 696              		.loc 1 253 7 view .LVU200
+ 697 0002 0146     		mov	r1, r0
+ 698              	.LVL45:
+ 253:source\i2c/i2c_app.c **** }
+ 699              		.loc 1 253 7 view .LVU201
+ 700 0004 A020     		movs	r0, #160
+ 701              	.LVL46:
+ 253:source\i2c/i2c_app.c **** }
+ 702              		.loc 1 253 7 view .LVU202
+ 703 0006 FFF7FEBF 		b	u8_write
+ 704              	.LVL47:
+ 705              		.cfi_endproc
+ 706              	.LFE136:
+ 708              		.section	.text.i2c_read,"ax",%progbits
+ 709              		.align	1
+ 710              		.global	i2c_read
+ 711              		.syntax unified
+ 712              		.thumb
+ 713              		.thumb_func
+ 715              	i2c_read:
+ 716              	.LVL48:
+ 717              	.LFB131:
+  83:source\i2c/i2c_app.c ****       unsigned char data;
+ 718              		.loc 1 83 1 is_stmt 1 view -0
+ 719              		.cfi_startproc
+ 720              		@ args = 0, pretend = 0, frame = 0
+ 721              		@ frame_needed = 0, uses_anonymous_args = 0
+  84:source\i2c/i2c_app.c ****       i2c_error	= 0;
+ 722              		.loc 1 84 7 view .LVU204
+  85:source\i2c/i2c_app.c ****       time_out = 0;
+ 723              		.loc 1 85 7 view .LVU205
+  83:source\i2c/i2c_app.c ****       unsigned char data;
+ 724              		.loc 1 83 1 is_stmt 0 view .LVU206
+ 725 0000 2DE9F84F 		push	{r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 726              		.cfi_def_cfa_offset 40
+ 727              		.cfi_offset 3, -40
+ 728              		.cfi_offset 4, -36
+ 729              		.cfi_offset 5, -32
+ 730              		.cfi_offset 6, -28
+ 731              		.cfi_offset 7, -24
+ 732              		.cfi_offset 8, -20
+ 733              		.cfi_offset 9, -16
+ 734              		.cfi_offset 10, -12
+ 735              		.cfi_offset 11, -8
+ 736              		.cfi_offset 14, -4
+  85:source\i2c/i2c_app.c ****       time_out = 0;
+ 737              		.loc 1 85 17 view .LVU207
+ 738 0004 DFF8C081 		ldr	r8, .L94+8
+  86:source\i2c/i2c_app.c ****       while (I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)) {
+ 739              		.loc 1 86 16 view .LVU208
+ 740 0008 6D4D     		ldr	r5, .L94
+  85:source\i2c/i2c_app.c ****       time_out = 0;
+ 741              		.loc 1 85 17 view .LVU209
+ 742 000a 0023     		movs	r3, #0
+  83:source\i2c/i2c_app.c ****       unsigned char data;
+ 743              		.loc 1 83 1 view .LVU210
+ 744 000c 0446     		mov	r4, r0
+ 745 000e 0F46     		mov	r7, r1
+ 746 0010 9146     		mov	r9, r2
+  85:source\i2c/i2c_app.c ****       time_out = 0;
+ 747              		.loc 1 85 17 view .LVU211
+ 748 0012 88F80030 		strb	r3, [r8]
+  86:source\i2c/i2c_app.c ****       while (I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)) {
+ 749              		.loc 1 86 7 is_stmt 1 view .LVU212
+  86:source\i2c/i2c_app.c ****       while (I2C_GetFlagStatus(I2Cx,I2C_FLAG_BUSY)) {
+ 750              		.loc 1 86 16 is_stmt 0 view .LVU213
+ 751 0016 2B60     		str	r3, [r5]
+  87:source\i2c/i2c_app.c ****       	    time_out++;
+ 752              		.loc 1 87 7 is_stmt 1 view .LVU214
+ 753              	.LVL49:
+ 754              	.L56:
+  87:source\i2c/i2c_app.c ****       	    time_out++;
+ 755              		.loc 1 87 13 view .LVU215
+  87:source\i2c/i2c_app.c ****       	    time_out++;
+ 756              		.loc 1 87 14 is_stmt 0 view .LVU216
+ 757 0018 4FF40031 		mov	r1, #131072
+ 758 001c 2046     		mov	r0, r4
+ 759 001e FFF7FEFF 		bl	I2C_GetFlagStatus
+ 760              	.LVL50:
+  87:source\i2c/i2c_app.c ****       	    time_out++;
+ 761              		.loc 1 87 13 view .LVU217
+ 762 0022 28B1     		cbz	r0, .L59
+  88:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+ 763              		.loc 1 88 12 is_stmt 1 view .LVU218
+  88:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+ 764              		.loc 1 88 20 is_stmt 0 view .LVU219
+ 765 0024 2B68     		ldr	r3, [r5]
+ 766 0026 0133     		adds	r3, r3, #1
+  89:source\i2c/i2c_app.c ****       }
+ 767              		.loc 1 89 15 view .LVU220
+ 768 0028 B3F57A7F 		cmp	r3, #1000
+  88:source\i2c/i2c_app.c ****       	    if (time_out >= 1000) break;
+ 769              		.loc 1 88 20 view .LVU221
+ 770 002c 2B60     		str	r3, [r5]
+  89:source\i2c/i2c_app.c ****       }
+ 771              		.loc 1 89 12 is_stmt 1 view .LVU222
+  89:source\i2c/i2c_app.c ****       }
+ 772              		.loc 1 89 15 is_stmt 0 view .LVU223
+ 773 002e F3D3     		bcc	.L56
+ 774              	.L59:
+  94:source\i2c/i2c_app.c ****       	    time_out++;
+ 775              		.loc 1 94 15 view .LVU224
+ 776 0030 DFF898A1 		ldr	r10, .L94+12
+ 108:source\i2c/i2c_app.c ****                goto restart_r1;
+ 777              		.loc 1 108 15 view .LVU225
+ 778 0034 DFF898B1 		ldr	fp, .L94+16
+ 779              	.LVL51:
+ 780              	.L57:
+  92:source\i2c/i2c_app.c ****       time_out = 0;
+ 781              		.loc 1 92 7 is_stmt 1 view .LVU226
+ 782 0038 0121     		movs	r1, #1
+ 783 003a 2046     		mov	r0, r4
+ 784 003c FFF7FEFF 		bl	I2C_GenerateSTART
+ 785              	.LVL52:
+  93:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_MODE_SELECT)) {
+ 786              		.loc 1 93 7 view .LVU227
+  93:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_MODE_SELECT)) {
+ 787              		.loc 1 93 16 is_stmt 0 view .LVU228
+ 788 0040 0023     		movs	r3, #0
+ 789 0042 2B60     		str	r3, [r5]
+  94:source\i2c/i2c_app.c ****       	    time_out++;
+ 790              		.loc 1 94 7 is_stmt 1 view .LVU229
+ 791              	.L60:
+  94:source\i2c/i2c_app.c ****       	    time_out++;
+ 792              		.loc 1 94 13 view .LVU230
+  94:source\i2c/i2c_app.c ****       	    time_out++;
+ 793              		.loc 1 94 15 is_stmt 0 view .LVU231
+ 794 0044 5146     		mov	r1, r10
+ 795 0046 2046     		mov	r0, r4
+ 796 0048 FFF7FEFF 		bl	I2C_CheckEvent
+ 797              	.LVL53:
+  94:source\i2c/i2c_app.c ****       	    time_out++;
+ 798              		.loc 1 94 13 view .LVU232
+ 799 004c 40F6B732 		movw	r2, #2999
+ 800 0050 0646     		mov	r6, r0
+ 801 0052 0028     		cmp	r0, #0
+ 802 0054 74D0     		beq	.L62
+ 102:source\i2c/i2c_app.c ****       I2C_Send7bitAddress(I2Cx,device, I2C_Direction_Transmitter);
+ 803              		.loc 1 102 7 is_stmt 1 view .LVU233
+ 102:source\i2c/i2c_app.c ****       I2C_Send7bitAddress(I2Cx,device, I2C_Direction_Transmitter);
+ 804              		.loc 1 102 14 is_stmt 0 view .LVU234
+ 805 0056 07F0FE07 		and	r7, r7, #254
+ 806              	.LVL54:
+ 103:source\i2c/i2c_app.c ****       time_out = 0;
+ 807              		.loc 1 103 7 is_stmt 1 view .LVU235
+ 808 005a 0022     		movs	r2, #0
+ 809 005c 2046     		mov	r0, r4
+ 810 005e 3946     		mov	r1, r7
+ 811 0060 FFF7FEFF 		bl	I2C_Send7bitAddress
+ 812              	.LVL55:
+ 104:source\i2c/i2c_app.c ****       while ((I2Cx->SR1 & 0x0002) != 0x0002) {
+ 813              		.loc 1 104 7 view .LVU236
+ 104:source\i2c/i2c_app.c ****       while ((I2Cx->SR1 & 0x0002) != 0x0002) {
+ 814              		.loc 1 104 16 is_stmt 0 view .LVU237
+ 815 0064 0023     		movs	r3, #0
+ 816 0066 2B60     		str	r3, [r5]
+ 105:source\i2c/i2c_app.c ****       	    time_out++;
+ 817              		.loc 1 105 7 is_stmt 1 view .LVU238
+ 105:source\i2c/i2c_app.c ****       	    time_out++;
+ 818              		.loc 1 105 13 is_stmt 0 view .LVU239
+ 819 0068 1A46     		mov	r2, r3
+ 107:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 820              		.loc 1 107 15 view .LVU240
+ 821 006a 40F6B830 		movw	r0, #3000
+ 822              	.L63:
+ 105:source\i2c/i2c_app.c ****       	    time_out++;
+ 823              		.loc 1 105 13 is_stmt 1 view .LVU241
+ 105:source\i2c/i2c_app.c ****       	    time_out++;
+ 824              		.loc 1 105 19 is_stmt 0 view .LVU242
+ 825 006e A18A     		ldrh	r1, [r4, #20]
+ 105:source\i2c/i2c_app.c ****       	    time_out++;
+ 826              		.loc 1 105 13 view .LVU243
+ 827 0070 8E07     		lsls	r6, r1, #30
+ 828 0072 73D5     		bpl	.L64
+ 829 0074 03B1     		cbz	r3, .L65
+ 830 0076 2A60     		str	r2, [r5]
+ 831              	.L65:
+ 112:source\i2c/i2c_app.c ****       I2C_SendData(I2Cx,address);
+ 832              		.loc 1 112 7 is_stmt 1 view .LVU244
+ 112:source\i2c/i2c_app.c ****       I2C_SendData(I2Cx,address);
+ 833              		.loc 1 112 16 is_stmt 0 view .LVU245
+ 834 0078 524B     		ldr	r3, .L94+4
+ 112:source\i2c/i2c_app.c ****       I2C_SendData(I2Cx,address);
+ 835              		.loc 1 112 22 view .LVU246
+ 836 007a 228B     		ldrh	r2, [r4, #24]
+ 112:source\i2c/i2c_app.c ****       I2C_SendData(I2Cx,address);
+ 837              		.loc 1 112 16 view .LVU247
+ 838 007c 1A80     		strh	r2, [r3]	@ movhi
+ 113:source\i2c/i2c_app.c ****       time_out = 0;
+ 839              		.loc 1 113 7 is_stmt 1 view .LVU248
+ 840 007e 4946     		mov	r1, r9
+ 841 0080 2046     		mov	r0, r4
+ 842 0082 FFF7FEFF 		bl	I2C_SendData
+ 843              	.LVL56:
+ 114:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
+ 844              		.loc 1 114 7 view .LVU249
+ 115:source\i2c/i2c_app.c ****       	    time_out++;
+ 845              		.loc 1 115 15 is_stmt 0 view .LVU250
+ 846 0086 DFF84C91 		ldr	r9, .L94+20
+ 114:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
+ 847              		.loc 1 114 16 view .LVU251
+ 848 008a 0023     		movs	r3, #0
+ 849 008c 2B60     		str	r3, [r5]
+ 115:source\i2c/i2c_app.c ****       	    time_out++;
+ 850              		.loc 1 115 7 is_stmt 1 view .LVU252
+ 117:source\i2c/i2c_app.c ****       	       i2c_error = 2;
+ 851              		.loc 1 117 15 is_stmt 0 view .LVU253
+ 852 008e 40F6B73A 		movw	r10, #2999
+ 853              	.L66:
+ 115:source\i2c/i2c_app.c ****       	    time_out++;
+ 854              		.loc 1 115 13 is_stmt 1 view .LVU254
+ 115:source\i2c/i2c_app.c ****       	    time_out++;
+ 855              		.loc 1 115 15 is_stmt 0 view .LVU255
+ 856 0092 4946     		mov	r1, r9
+ 857 0094 2046     		mov	r0, r4
+ 858 0096 FFF7FEFF 		bl	I2C_CheckEvent
+ 859              	.LVL57:
+ 115:source\i2c/i2c_app.c ****       	    time_out++;
+ 860              		.loc 1 115 13 view .LVU256
+ 861 009a 0646     		mov	r6, r0
+ 862 009c 0028     		cmp	r0, #0
+ 863 009e 68D0     		beq	.L67
+ 123:source\i2c/i2c_app.c **** restart_r2:
+ 864              		.loc 1 123 7 is_stmt 1 view .LVU257
+ 865 00a0 0021     		movs	r1, #0
+ 866 00a2 2046     		mov	r0, r4
+ 867 00a4 FFF7FEFF 		bl	I2C_AcknowledgeConfig
+ 868              	.LVL58:
+ 127:source\i2c/i2c_app.c ****       	    time_out++;
+ 869              		.loc 1 127 15 is_stmt 0 view .LVU258
+ 870 00a8 DFF820A1 		ldr	r10, .L94+12
+ 137:source\i2c/i2c_app.c ****       	    time_out++;
+ 871              		.loc 1 137 15 view .LVU259
+ 872 00ac DFF82891 		ldr	r9, .L94+24
+ 140:source\i2c/i2c_app.c ****                goto restart_r2;
+ 873              		.loc 1 140 15 view .LVU260
+ 874 00b0 DFF81CB1 		ldr	fp, .L94+16
+ 875              	.L68:
+ 125:source\i2c/i2c_app.c ****       time_out = 0;
+ 876              		.loc 1 125 7 is_stmt 1 view .LVU261
+ 877 00b4 0121     		movs	r1, #1
+ 878 00b6 2046     		mov	r0, r4
+ 879 00b8 FFF7FEFF 		bl	I2C_GenerateSTART
+ 880              	.LVL59:
+ 126:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_MODE_SELECT)) {
+ 881              		.loc 1 126 7 view .LVU262
+ 126:source\i2c/i2c_app.c ****       while (!I2C_CheckEvent(I2Cx,I2C_EVENT_MASTER_MODE_SELECT)) {
+ 882              		.loc 1 126 16 is_stmt 0 view .LVU263
+ 883 00bc 0023     		movs	r3, #0
+ 884 00be 2B60     		str	r3, [r5]
+ 127:source\i2c/i2c_app.c ****       	    time_out++;
+ 885              		.loc 1 127 7 is_stmt 1 view .LVU264
+ 886              	.L69:
+ 127:source\i2c/i2c_app.c ****       	    time_out++;
+ 887              		.loc 1 127 13 view .LVU265
+ 127:source\i2c/i2c_app.c ****       	    time_out++;
+ 888              		.loc 1 127 15 is_stmt 0 view .LVU266
+ 889 00c0 5146     		mov	r1, r10
+ 890 00c2 2046     		mov	r0, r4
+ 891 00c4 FFF7FEFF 		bl	I2C_CheckEvent
+ 892              	.LVL60:
+ 127:source\i2c/i2c_app.c ****       	    time_out++;
+ 893              		.loc 1 127 13 view .LVU267
+ 894 00c8 40F6B732 		movw	r2, #2999
+ 895 00cc 0646     		mov	r6, r0
+ 896 00ce 0028     		cmp	r0, #0
+ 897 00d0 56D0     		beq	.L70
+ 135:source\i2c/i2c_app.c ****       time_out = 0;
+ 898              		.loc 1 135 7 is_stmt 1 view .LVU268
+ 899 00d2 0122     		movs	r2, #1
+ 900 00d4 3946     		mov	r1, r7
+ 901 00d6 2046     		mov	r0, r4
+ 902 00d8 FFF7FEFF 		bl	I2C_Send7bitAddress
+ 903              	.LVL61:
+ 136:source\i2c/i2c_app.c ****       while (!I2C_GetFlagStatus(I2Cx,I2C_FLAG_ADDR)) {
+ 904              		.loc 1 136 7 view .LVU269
+ 136:source\i2c/i2c_app.c ****       while (!I2C_GetFlagStatus(I2Cx,I2C_FLAG_ADDR)) {
+ 905              		.loc 1 136 16 is_stmt 0 view .LVU270
+ 906 00dc 0023     		movs	r3, #0
+ 907 00de 2B60     		str	r3, [r5]
+ 137:source\i2c/i2c_app.c ****       	    time_out++;
+ 908              		.loc 1 137 7 is_stmt 1 view .LVU271
+ 139:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 909              		.loc 1 139 15 is_stmt 0 view .LVU272
+ 910 00e0 40F6B736 		movw	r6, #2999
+ 911              	.L71:
+ 137:source\i2c/i2c_app.c ****       	    time_out++;
+ 912              		.loc 1 137 13 is_stmt 1 view .LVU273
+ 137:source\i2c/i2c_app.c ****       	    time_out++;
+ 913              		.loc 1 137 15 is_stmt 0 view .LVU274
+ 914 00e4 4946     		mov	r1, r9
+ 915 00e6 2046     		mov	r0, r4
+ 916 00e8 FFF7FEFF 		bl	I2C_GetFlagStatus
+ 917              	.LVL62:
+ 137:source\i2c/i2c_app.c ****       	    time_out++;
+ 918              		.loc 1 137 13 view .LVU275
+ 919 00ec 0028     		cmp	r0, #0
+ 920 00ee 4ED0     		beq	.L72
+ 144:source\i2c/i2c_app.c ****       __disable_irq();
+ 921              		.loc 1 144 7 is_stmt 1 view .LVU276
+ 922 00f0 0021     		movs	r1, #0
+ 923 00f2 2046     		mov	r0, r4
+ 924 00f4 FFF7FEFF 		bl	I2C_AcknowledgeConfig
+ 925              	.LVL63:
+ 145:source\i2c/i2c_app.c ****       device = I2Cx->SR2;
+ 926              		.loc 1 145 7 view .LVU277
+ 927              	.LBB12:
+ 928              	.LBI12:
+ 929              		.file 2 "/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h"
+   1:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** /**************************************************************************//**
+   2:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * @file     cmsis_gcc.h
+   3:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * @brief    CMSIS compiler GCC header file
+   4:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * @version  V5.0.4
+   5:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * @date     09. April 2018
+   6:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  ******************************************************************************/
+   7:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** /*
+   8:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * Copyright (c) 2009-2018 Arm Limited. All rights reserved.
+   9:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  *
+  10:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * SPDX-License-Identifier: Apache-2.0
+  11:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  *
+  12:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * Licensed under the Apache License, Version 2.0 (the License); you may
+  13:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * not use this file except in compliance with the License.
+  14:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * You may obtain a copy of the License at
+  15:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  *
+  16:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * www.apache.org/licenses/LICENSE-2.0
+  17:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  *
+  18:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * Unless required by applicable law or agreed to in writing, software
+  19:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+  20:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  21:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * See the License for the specific language governing permissions and
+  22:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  * limitations under the License.
+  23:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  */
+  24:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** 
+  25:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef __CMSIS_GCC_H
+  26:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #define __CMSIS_GCC_H
+  27:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** 
+  28:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** /* ignore some GCC warnings */
+  29:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #pragma GCC diagnostic push
+  30:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wsign-conversion"
+  31:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wconversion"
+  32:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wunused-parameter"
+  33:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** 
+  34:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** /* Fallback for __has_builtin */
+  35:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef __has_builtin
+  36:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __has_builtin(x) (0)
+  37:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  38:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** 
+  39:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** /* CMSIS compiler specific defines */
+  40:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __ASM
+  41:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __ASM                                  __asm
+  42:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  43:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __INLINE
+  44:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __INLINE                               inline
+  45:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  46:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __STATIC_INLINE
+  47:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __STATIC_INLINE                        static inline
+  48:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  49:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __STATIC_FORCEINLINE                 
+  50:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __STATIC_FORCEINLINE                   __attribute__((always_inline)) static inline
+  51:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif                                           
+  52:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __NO_RETURN
+  53:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __NO_RETURN                            __attribute__((__noreturn__))
+  54:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  55:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __USED
+  56:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __USED                                 __attribute__((used))
+  57:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  58:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __WEAK
+  59:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __WEAK                                 __attribute__((weak))
+  60:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  61:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __PACKED
+  62:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __PACKED                               __attribute__((packed, aligned(1)))
+  63:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  64:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __PACKED_STRUCT
+  65:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __PACKED_STRUCT                        struct __attribute__((packed, aligned(1)))
+  66:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  67:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __PACKED_UNION
+  68:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __PACKED_UNION                         union __attribute__((packed, aligned(1)))
+  69:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  70:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT32        /* deprecated */
+  71:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  72:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  73:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  74:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   struct __attribute__((packed)) T_UINT32 { uint32_t v; };
+  75:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+  76:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __UNALIGNED_UINT32(x)                  (((struct T_UINT32 *)(x))->v)
+  77:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  78:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT16_WRITE
+  79:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  80:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  81:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  82:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT16_WRITE { uint16_t v; };
+  83:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+  84:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __UNALIGNED_UINT16_WRITE(addr, val)    (void)((((struct T_UINT16_WRITE *)(void *)(addr))-
+  85:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  86:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT16_READ
+  87:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  88:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  89:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  90:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT16_READ { uint16_t v; };
+  91:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+  92:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __UNALIGNED_UINT16_READ(addr)          (((const struct T_UINT16_READ *)(const void *)(add
+  93:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+  94:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT32_WRITE
+  95:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  96:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  97:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  98:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT32_WRITE { uint32_t v; };
+  99:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+ 100:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __UNALIGNED_UINT32_WRITE(addr, val)    (void)((((struct T_UINT32_WRITE *)(void *)(addr))-
+ 101:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+ 102:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT32_READ
+ 103:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic push
+ 104:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+ 105:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+ 106:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT32_READ { uint32_t v; };
+ 107:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+ 108:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __UNALIGNED_UINT32_READ(addr)          (((const struct T_UINT32_READ *)(const void *)(add
+ 109:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+ 110:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __ALIGNED
+ 111:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __ALIGNED(x)                           __attribute__((aligned(x)))
+ 112:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+ 113:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #ifndef   __RESTRICT
+ 114:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   #define __RESTRICT                             __restrict
+ 115:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** #endif
+ 116:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** 
+ 117:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** 
+ 118:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** /* ###########################  Core Function Access  ########################### */
+ 119:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** /** \ingroup  CMSIS_Core_FunctionInterface
+ 120:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****     \defgroup CMSIS_Core_RegAccFunctions CMSIS Core Register Access Functions
+ 121:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   @{
+ 122:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  */
+ 123:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** 
+ 124:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** /**
+ 125:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   \brief   Enable IRQ Interrupts
+ 126:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   \details Enables IRQ interrupts by clearing the I-bit in the CPSR.
+ 127:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****            Can only be executed in Privileged modes.
+ 128:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  */
+ 129:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** __STATIC_FORCEINLINE void __enable_irq(void)
+ 130:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** {
+ 131:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   __ASM volatile ("cpsie i" : : : "memory");
+ 132:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** }
+ 133:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** 
+ 134:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** 
+ 135:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** /**
+ 136:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   \brief   Disable IRQ Interrupts
+ 137:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   \details Disables IRQ interrupts by setting the I-bit in the CPSR.
+ 138:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****            Can only be executed in Privileged modes.
+ 139:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****  */
+ 140:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** __STATIC_FORCEINLINE void __disable_irq(void)
+ 930              		.loc 2 140 27 view .LVU278
+ 931              	.LBB13:
+ 141:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** {
+ 142:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h ****   __ASM volatile ("cpsid i" : : : "memory");
+ 932              		.loc 2 142 3 view .LVU279
+ 933              		.syntax unified
+ 934              	@ 142 "/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h" 1
+ 935 00f8 72B6     		cpsid i
+ 936              	@ 0 "" 2
+ 937              		.thumb
+ 938              		.syntax unified
+ 939              	.LBE13:
+ 940              	.LBE12:
+ 146:source\i2c/i2c_app.c ****       I2C_GenerateSTOP(I2Cx,ENABLE);
+ 941              		.loc 1 146 7 view .LVU280
+ 147:source\i2c/i2c_app.c ****       __enable_irq();
+ 942              		.loc 1 147 7 is_stmt 0 view .LVU281
+ 943 00fa 0121     		movs	r1, #1
+ 944 00fc 2046     		mov	r0, r4
+ 146:source\i2c/i2c_app.c ****       I2C_GenerateSTOP(I2Cx,ENABLE);
+ 945              		.loc 1 146 20 view .LVU282
+ 946 00fe 238B     		ldrh	r3, [r4, #24]
+ 947              	.LVL64:
+ 147:source\i2c/i2c_app.c ****       __enable_irq();
+ 948              		.loc 1 147 7 is_stmt 1 view .LVU283
+ 949 0100 FFF7FEFF 		bl	I2C_GenerateSTOP
+ 950              	.LVL65:
+ 148:source\i2c/i2c_app.c ****       time_out = 0;
+ 951              		.loc 1 148 7 view .LVU284
+ 952              	.LBB14:
+ 953              	.LBI14:
+ 129:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** {
+ 954              		.loc 2 129 27 view .LVU285
+ 955              	.LBB15:
+ 131:/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h **** }
+ 956              		.loc 2 131 3 view .LVU286
+ 957              		.syntax unified
+ 958              	@ 131 "/project/stm32f4x_iolib/include/cmsis/cmsis_gcc.h" 1
+ 959 0104 62B6     		cpsie i
+ 960              	@ 0 "" 2
+ 961              		.thumb
+ 962              		.syntax unified
+ 963              	.LBE15:
+ 964              	.LBE14:
+ 149:source\i2c/i2c_app.c ****       while ((I2C_GetLastEvent(I2Cx) & 0x0040) != 0x0040) {
+ 965              		.loc 1 149 7 view .LVU287
+ 149:source\i2c/i2c_app.c ****       while ((I2C_GetLastEvent(I2Cx) & 0x0040) != 0x0040) {
+ 966              		.loc 1 149 16 is_stmt 0 view .LVU288
+ 967 0106 0023     		movs	r3, #0
+ 968 0108 2B60     		str	r3, [r5]
+ 150:source\i2c/i2c_app.c ****       	    time_out++;
+ 969              		.loc 1 150 7 is_stmt 1 view .LVU289
+ 152:source\i2c/i2c_app.c ****       	       i2c_error = 4;
+ 970              		.loc 1 152 15 is_stmt 0 view .LVU290
+ 971 010a 41F28737 		movw	r7, #4999
+ 972              	.L73:
+ 150:source\i2c/i2c_app.c ****       	    time_out++;
+ 973              		.loc 1 150 13 is_stmt 1 view .LVU291
+ 150:source\i2c/i2c_app.c ****       	    time_out++;
+ 974              		.loc 1 150 15 is_stmt 0 view .LVU292
+ 975 010e 2046     		mov	r0, r4
+ 976 0110 FFF7FEFF 		bl	I2C_GetLastEvent
+ 977              	.LVL66:
+ 150:source\i2c/i2c_app.c ****       	    time_out++;
+ 978              		.loc 1 150 13 view .LVU293
+ 979 0114 10F04006 		ands	r6, r0, #64
+ 980 0118 43D0     		beq	.L74
+ 158:source\i2c/i2c_app.c ****       time_out = 0;
+ 981              		.loc 1 158 7 is_stmt 1 view .LVU294
+ 158:source\i2c/i2c_app.c ****       time_out = 0;
+ 982              		.loc 1 158 14 is_stmt 0 view .LVU295
+ 983 011a 2046     		mov	r0, r4
+ 984 011c FFF7FEFF 		bl	I2C_ReceiveData
+ 985              	.LVL67:
+ 159:source\i2c/i2c_app.c ****       while ((I2Cx->CR1 & 0x200) == 0x200) {
+ 986              		.loc 1 159 16 view .LVU296
+ 987 0120 0023     		movs	r3, #0
+ 158:source\i2c/i2c_app.c ****       time_out = 0;
+ 988              		.loc 1 158 14 view .LVU297
+ 989 0122 0646     		mov	r6, r0
+ 990              	.LVL68:
+ 159:source\i2c/i2c_app.c ****       while ((I2Cx->CR1 & 0x200) == 0x200) {
+ 991              		.loc 1 159 7 is_stmt 1 view .LVU298
+ 159:source\i2c/i2c_app.c ****       while ((I2Cx->CR1 & 0x200) == 0x200) {
+ 992              		.loc 1 159 16 is_stmt 0 view .LVU299
+ 993 0124 2B60     		str	r3, [r5]
+ 160:source\i2c/i2c_app.c ****       	    time_out++;
+ 994              		.loc 1 160 7 is_stmt 1 view .LVU300
+ 160:source\i2c/i2c_app.c ****       	    time_out++;
+ 995              		.loc 1 160 13 is_stmt 0 view .LVU301
+ 996 0126 1A46     		mov	r2, r3
+ 162:source\i2c/i2c_app.c ****       }
+ 997              		.loc 1 162 15 view .LVU302
+ 998 0128 40F6B830 		movw	r0, #3000
+ 999              	.L75:
+ 160:source\i2c/i2c_app.c ****       	    time_out++;
+ 1000              		.loc 1 160 13 is_stmt 1 view .LVU303
+ 160:source\i2c/i2c_app.c ****       	    time_out++;
+ 1001              		.loc 1 160 19 is_stmt 0 view .LVU304
+ 1002 012c 2188     		ldrh	r1, [r4]
+ 160:source\i2c/i2c_app.c ****       	    time_out++;
+ 1003              		.loc 1 160 13 view .LVU305
+ 1004 012e 8905     		lsls	r1, r1, #22
+ 1005 0130 3ED4     		bmi	.L77
+ 1006 0132 002B     		cmp	r3, #0
+ 1007 0134 41D1     		bne	.L92
+ 1008              	.L76:
+ 164:source\i2c/i2c_app.c ****       return data;
+ 1009              		.loc 1 164 7 is_stmt 1 view .LVU306
+ 1010 0136 0121     		movs	r1, #1
+ 1011 0138 2046     		mov	r0, r4
+ 1012 013a FFF7FEFF 		bl	I2C_AcknowledgeConfig
+ 1013              	.LVL69:
+ 165:source\i2c/i2c_app.c **** }
+ 1014              		.loc 1 165 7 view .LVU307
+ 165:source\i2c/i2c_app.c **** }
+ 1015              		.loc 1 165 14 is_stmt 0 view .LVU308
+ 1016 013e 0AE0     		b	.L61
+ 1017              	.LVL70:
+ 1018              	.L62:
+  95:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1019              		.loc 1 95 12 is_stmt 1 view .LVU309
+  95:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1020              		.loc 1 95 20 is_stmt 0 view .LVU310
+ 1021 0140 2B68     		ldr	r3, [r5]
+ 1022 0142 0133     		adds	r3, r3, #1
+  96:source\i2c/i2c_app.c ****       	       i2c_error = 1;
+ 1023              		.loc 1 96 15 view .LVU311
+ 1024 0144 9342     		cmp	r3, r2
+  95:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1025              		.loc 1 95 20 view .LVU312
+ 1026 0146 2B60     		str	r3, [r5]
+  96:source\i2c/i2c_app.c ****       	       i2c_error = 1;
+ 1027              		.loc 1 96 12 is_stmt 1 view .LVU313
+  96:source\i2c/i2c_app.c ****       	       i2c_error = 1;
+ 1028              		.loc 1 96 15 is_stmt 0 view .LVU314
+ 1029 0148 7FF67CAF 		bls	.L60
+  97:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 1030              		.loc 1 97 15 is_stmt 1 view .LVU315
+  97:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 1031              		.loc 1 97 25 is_stmt 0 view .LVU316
+ 1032 014c 0123     		movs	r3, #1
+ 1033              	.LVL71:
+ 1034              	.L93:
+ 118:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 1035              		.loc 1 118 25 view .LVU317
+ 1036 014e 88F80030 		strb	r3, [r8]
+ 119:source\i2c/i2c_app.c ****       	       return 0;
+ 1037              		.loc 1 119 15 is_stmt 1 view .LVU318
+ 1038 0152 FFF7FEFF 		bl	init_i2c_24xx
+ 1039              	.LVL72:
+ 120:source\i2c/i2c_app.c ****       	    }
+ 1040              		.loc 1 120 15 view .LVU319
+ 1041              	.L61:
+ 166:source\i2c/i2c_app.c **** 
+ 1042              		.loc 1 166 1 is_stmt 0 view .LVU320
+ 1043 0156 3046     		mov	r0, r6
+ 1044 0158 BDE8F88F 		pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 1045              	.LVL73:
+ 1046              	.L64:
+ 106:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1047              		.loc 1 106 12 is_stmt 1 view .LVU321
+ 106:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1048              		.loc 1 106 20 is_stmt 0 view .LVU322
+ 1049 015c 0132     		adds	r2, r2, #1
+ 107:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 1050              		.loc 1 107 12 is_stmt 1 view .LVU323
+ 107:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 1051              		.loc 1 107 15 is_stmt 0 view .LVU324
+ 1052 015e 8242     		cmp	r2, r0
+ 1053 0160 4FF00103 		mov	r3, #1
+ 1054 0164 83D1     		bne	.L63
+ 108:source\i2c/i2c_app.c ****                goto restart_r1;
+ 1055              		.loc 1 108 15 view .LVU325
+ 1056 0166 5946     		mov	r1, fp
+ 1057 0168 2046     		mov	r0, r4
+ 1058 016a 2A60     		str	r2, [r5]
+ 108:source\i2c/i2c_app.c ****                goto restart_r1;
+ 1059              		.loc 1 108 15 is_stmt 1 view .LVU326
+ 1060 016c FFF7FEFF 		bl	I2C_ClearFlag
+ 1061              	.LVL74:
+ 109:source\i2c/i2c_app.c ****       	    }
+ 1062              		.loc 1 109 16 view .LVU327
+ 1063 0170 62E7     		b	.L57
+ 1064              	.L67:
+ 116:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1065              		.loc 1 116 12 view .LVU328
+ 116:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1066              		.loc 1 116 20 is_stmt 0 view .LVU329
+ 1067 0172 2B68     		ldr	r3, [r5]
+ 1068 0174 0133     		adds	r3, r3, #1
+ 117:source\i2c/i2c_app.c ****       	       i2c_error = 2;
+ 1069              		.loc 1 117 15 view .LVU330
+ 1070 0176 5345     		cmp	r3, r10
+ 116:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1071              		.loc 1 116 20 view .LVU331
+ 1072 0178 2B60     		str	r3, [r5]
+ 117:source\i2c/i2c_app.c ****       	       i2c_error = 2;
+ 1073              		.loc 1 117 12 is_stmt 1 view .LVU332
+ 117:source\i2c/i2c_app.c ****       	       i2c_error = 2;
+ 1074              		.loc 1 117 15 is_stmt 0 view .LVU333
+ 1075 017a 8AD9     		bls	.L66
+ 118:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 1076              		.loc 1 118 15 is_stmt 1 view .LVU334
+ 118:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 1077              		.loc 1 118 25 is_stmt 0 view .LVU335
+ 1078 017c 0223     		movs	r3, #2
+ 1079 017e E6E7     		b	.L93
+ 1080              	.L70:
+ 128:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1081              		.loc 1 128 12 is_stmt 1 view .LVU336
+ 128:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1082              		.loc 1 128 20 is_stmt 0 view .LVU337
+ 1083 0180 2B68     		ldr	r3, [r5]
+ 1084 0182 0133     		adds	r3, r3, #1
+ 129:source\i2c/i2c_app.c ****       	       i2c_error = 3;
+ 1085              		.loc 1 129 15 view .LVU338
+ 1086 0184 9342     		cmp	r3, r2
+ 128:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1087              		.loc 1 128 20 view .LVU339
+ 1088 0186 2B60     		str	r3, [r5]
+ 129:source\i2c/i2c_app.c ****       	       i2c_error = 3;
+ 1089              		.loc 1 129 12 is_stmt 1 view .LVU340
+ 129:source\i2c/i2c_app.c ****       	       i2c_error = 3;
+ 1090              		.loc 1 129 15 is_stmt 0 view .LVU341
+ 1091 0188 9AD9     		bls	.L69
+ 130:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 1092              		.loc 1 130 15 is_stmt 1 view .LVU342
+ 130:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 1093              		.loc 1 130 25 is_stmt 0 view .LVU343
+ 1094 018a 0323     		movs	r3, #3
+ 1095 018c DFE7     		b	.L93
+ 1096              	.L72:
+ 138:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1097              		.loc 1 138 12 is_stmt 1 view .LVU344
+ 138:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1098              		.loc 1 138 20 is_stmt 0 view .LVU345
+ 1099 018e 2B68     		ldr	r3, [r5]
+ 1100 0190 0133     		adds	r3, r3, #1
+ 139:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 1101              		.loc 1 139 15 view .LVU346
+ 1102 0192 B342     		cmp	r3, r6
+ 138:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) {
+ 1103              		.loc 1 138 20 view .LVU347
+ 1104 0194 2B60     		str	r3, [r5]
+ 139:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 1105              		.loc 1 139 12 is_stmt 1 view .LVU348
+ 139:source\i2c/i2c_app.c ****       	       I2C_ClearFlag(I2Cx,I2C_FLAG_BUSY | I2C_FLAG_AF);
+ 1106              		.loc 1 139 15 is_stmt 0 view .LVU349
+ 1107 0196 A5D9     		bls	.L71
+ 140:source\i2c/i2c_app.c ****                goto restart_r2;
+ 1108              		.loc 1 140 15 is_stmt 1 view .LVU350
+ 1109 0198 5946     		mov	r1, fp
+ 1110 019a 2046     		mov	r0, r4
+ 1111 019c FFF7FEFF 		bl	I2C_ClearFlag
+ 1112              	.LVL75:
+ 141:source\i2c/i2c_app.c ****       	    }
+ 1113              		.loc 1 141 16 view .LVU351
+ 1114 01a0 88E7     		b	.L68
+ 1115              	.LVL76:
+ 1116              	.L74:
+ 151:source\i2c/i2c_app.c ****       	    if (time_out >= 5000) {
+ 1117              		.loc 1 151 12 view .LVU352
+ 151:source\i2c/i2c_app.c ****       	    if (time_out >= 5000) {
+ 1118              		.loc 1 151 20 is_stmt 0 view .LVU353
+ 1119 01a2 2B68     		ldr	r3, [r5]
+ 1120 01a4 0133     		adds	r3, r3, #1
+ 152:source\i2c/i2c_app.c ****       	       i2c_error = 4;
+ 1121              		.loc 1 152 15 view .LVU354
+ 1122 01a6 BB42     		cmp	r3, r7
+ 151:source\i2c/i2c_app.c ****       	    if (time_out >= 5000) {
+ 1123              		.loc 1 151 20 view .LVU355
+ 1124 01a8 2B60     		str	r3, [r5]
+ 152:source\i2c/i2c_app.c ****       	       i2c_error = 4;
+ 1125              		.loc 1 152 12 is_stmt 1 view .LVU356
+ 152:source\i2c/i2c_app.c ****       	       i2c_error = 4;
+ 1126              		.loc 1 152 15 is_stmt 0 view .LVU357
+ 1127 01aa B0D9     		bls	.L73
+ 153:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 1128              		.loc 1 153 15 is_stmt 1 view .LVU358
+ 153:source\i2c/i2c_app.c ****       	       init_i2c_24xx();
+ 1129              		.loc 1 153 25 is_stmt 0 view .LVU359
+ 1130 01ac 0423     		movs	r3, #4
+ 1131 01ae CEE7     		b	.L93
+ 1132              	.LVL77:
+ 1133              	.L77:
+ 161:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) break;
+ 1134              		.loc 1 161 12 is_stmt 1 view .LVU360
+ 161:source\i2c/i2c_app.c ****       	    if (time_out >= 3000) break;
+ 1135              		.loc 1 161 20 is_stmt 0 view .LVU361
+ 1136 01b0 0132     		adds	r2, r2, #1
+ 162:source\i2c/i2c_app.c ****       }
+ 1137              		.loc 1 162 12 is_stmt 1 view .LVU362
+ 162:source\i2c/i2c_app.c ****       }
+ 1138              		.loc 1 162 15 is_stmt 0 view .LVU363
+ 1139 01b2 8242     		cmp	r2, r0
+ 1140 01b4 4FF00103 		mov	r3, #1
+ 1141 01b8 B8D1     		bne	.L75
+ 1142              	.L92:
+ 1143 01ba 2A60     		str	r2, [r5]
+ 1144 01bc BBE7     		b	.L76
+ 1145              	.L95:
+ 1146 01be 00BF     		.align	2
+ 1147              	.L94:
+ 1148 01c0 00000000 		.word	.LANCHOR3
+ 1149 01c4 00000000 		.word	.LANCHOR4
+ 1150 01c8 00000000 		.word	.LANCHOR2
+ 1151 01cc 01000300 		.word	196609
+ 1152 01d0 00040210 		.word	268567552
+ 1153 01d4 84000700 		.word	458884
+ 1154 01d8 02000010 		.word	268435458
+ 1155              		.cfi_endproc
+ 1156              	.LFE131:
+ 1158              		.section	.text.u8_read,"ax",%progbits
+ 1159              		.align	1
+ 1160              		.global	u8_read
+ 1161              		.syntax unified
+ 1162              		.thumb
+ 1163              		.thumb_func
+ 1165              	u8_read:
+ 1166              	.LVL78:
+ 1167              	.LFB134:
+ 232:source\i2c/i2c_app.c ****       unsigned char ret_value;
+ 1168              		.loc 1 232 1 is_stmt 1 view -0
+ 1169              		.cfi_startproc
+ 1170              		@ args = 0, pretend = 0, frame = 8
+ 1171              		@ frame_needed = 0, uses_anonymous_args = 0
+ 233:source\i2c/i2c_app.c ****       /* Reload IWDG counter */
+ 1172              		.loc 1 233 7 view .LVU365
+ 235:source\i2c/i2c_app.c ****       if (I2C_CHANNEL == 0) {
+ 1173              		.loc 1 235 7 view .LVU366
+ 232:source\i2c/i2c_app.c ****       unsigned char ret_value;
+ 1174              		.loc 1 232 1 is_stmt 0 view .LVU367
+ 1175 0000 13B5     		push	{r0, r1, r4, lr}
+ 1176              		.cfi_def_cfa_offset 16
+ 1177              		.cfi_offset 4, -8
+ 1178              		.cfi_offset 14, -4
+ 232:source\i2c/i2c_app.c ****       unsigned char ret_value;
+ 1179              		.loc 1 232 1 view .LVU368
+ 1180 0002 0446     		mov	r4, r0
+ 1181 0004 0191     		str	r1, [sp, #4]
+ 235:source\i2c/i2c_app.c ****       if (I2C_CHANNEL == 0) {
+ 1182              		.loc 1 235 7 view .LVU369
+ 1183 0006 FFF7FEFF 		bl	IWDG_ReloadCounter
+ 1184              	.LVL79:
+ 236:source\i2c/i2c_app.c ****          ret_value = i2c_read(I2C1,device,address);
+ 1185              		.loc 1 236 7 is_stmt 1 view .LVU370
+ 236:source\i2c/i2c_app.c ****          ret_value = i2c_read(I2C1,device,address);
+ 1186              		.loc 1 236 23 is_stmt 0 view .LVU371
+ 1187 000a 064B     		ldr	r3, .L99
+ 236:source\i2c/i2c_app.c ****          ret_value = i2c_read(I2C1,device,address);
+ 1188              		.loc 1 236 10 view .LVU372
+ 1189 000c 019A     		ldr	r2, [sp, #4]
+ 1190 000e 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1191              	.LBB18:
+ 1192              	.LBB19:
+ 237:source\i2c/i2c_app.c ****       } else {
+ 1193              		.loc 1 237 22 view .LVU373
+ 1194 0010 2146     		mov	r1, r4
+ 1195              	.LBE19:
+ 1196              	.LBE18:
+ 236:source\i2c/i2c_app.c ****          ret_value = i2c_read(I2C1,device,address);
+ 1197              		.loc 1 236 10 view .LVU374
+ 1198 0012 2BB9     		cbnz	r3, .L97
+ 1199              	.LVL80:
+ 1200              	.LBB21:
+ 1201              	.LBI18:
+ 231:source\i2c/i2c_app.c **** {
+ 1202              		.loc 1 231 15 is_stmt 1 view .LVU375
+ 1203              	.LBB20:
+ 237:source\i2c/i2c_app.c ****       } else {
+ 1204              		.loc 1 237 10 view .LVU376
+ 237:source\i2c/i2c_app.c ****       } else {
+ 1205              		.loc 1 237 22 is_stmt 0 view .LVU377
+ 1206 0014 0448     		ldr	r0, .L99+4
+ 1207              	.LVL81:
+ 1208              	.L98:
+ 237:source\i2c/i2c_app.c ****       } else {
+ 1209              		.loc 1 237 22 view .LVU378
+ 1210              	.LBE20:
+ 1211              	.LBE21:
+ 242:source\i2c/i2c_app.c **** 
+ 1212              		.loc 1 242 1 view .LVU379
+ 1213 0016 02B0     		add	sp, sp, #8
+ 1214              		.cfi_remember_state
+ 1215              		.cfi_def_cfa_offset 8
+ 1216              		@ sp needed
+ 1217 0018 BDE81040 		pop	{r4, lr}
+ 1218              		.cfi_restore 14
+ 1219              		.cfi_restore 4
+ 1220              		.cfi_def_cfa_offset 0
+ 239:source\i2c/i2c_app.c ****       }
+ 1221              		.loc 1 239 22 view .LVU380
+ 1222 001c FFF7FEBF 		b	i2c_read
+ 1223              	.LVL82:
+ 1224              	.L97:
+ 1225              		.cfi_restore_state
+ 239:source\i2c/i2c_app.c ****       }
+ 1226              		.loc 1 239 10 is_stmt 1 view .LVU381
+ 239:source\i2c/i2c_app.c ****       }
+ 1227              		.loc 1 239 22 is_stmt 0 view .LVU382
+ 1228 0020 0248     		ldr	r0, .L99+8
+ 1229 0022 F8E7     		b	.L98
+ 1230              	.L100:
+ 1231              		.align	2
+ 1232              	.L99:
+ 1233 0024 00000000 		.word	.LANCHOR0
+ 1234 0028 00540040 		.word	1073763328
+ 1235 002c 00580040 		.word	1073764352
+ 1236              		.cfi_endproc
+ 1237              	.LFE134:
+ 1239              		.section	.text.eeprom_read,"ax",%progbits
+ 1240              		.align	1
+ 1241              		.global	eeprom_read
+ 1242              		.syntax unified
+ 1243              		.thumb
+ 1244              		.thumb_func
+ 1246              	eeprom_read:
+ 1247              	.LVL83:
+ 1248              	.LFB135:
+ 246:source\i2c/i2c_app.c ****       return u8_read(SEEP_PAGE0,address);
+ 1249              		.loc 1 246 1 is_stmt 1 view -0
+ 1250              		.cfi_startproc
+ 1251              		@ args = 0, pretend = 0, frame = 0
+ 1252              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1253              		@ link register save eliminated.
+ 247:source\i2c/i2c_app.c **** }
+ 1254              		.loc 1 247 7 view .LVU384
+ 246:source\i2c/i2c_app.c ****       return u8_read(SEEP_PAGE0,address);
+ 1255              		.loc 1 246 1 is_stmt 0 view .LVU385
+ 1256 0000 0146     		mov	r1, r0
+ 247:source\i2c/i2c_app.c **** }
+ 1257              		.loc 1 247 14 view .LVU386
+ 1258 0002 A020     		movs	r0, #160
+ 1259              	.LVL84:
+ 247:source\i2c/i2c_app.c **** }
+ 1260              		.loc 1 247 14 view .LVU387
+ 1261 0004 FFF7FEBF 		b	u8_read
+ 1262              	.LVL85:
+ 1263              		.cfi_endproc
+ 1264              	.LFE135:
+ 1266              		.global	time_out
+ 1267              		.global	i2c_temp
+ 1268              		.global	i2c_error
+ 1269              		.global	I2C_CHANNEL
+ 1270              		.global	I2C1_PORT
+ 1271              		.section	.bss.I2C_CHANNEL,"aw",%nobits
+ 1272              		.set	.LANCHOR0,. + 0
+ 1275              	I2C_CHANNEL:
+ 1276 0000 00       		.space	1
+ 1277              		.section	.bss.i2c_error,"aw",%nobits
+ 1278              		.set	.LANCHOR2,. + 0
+ 1281              	i2c_error:
+ 1282 0000 00       		.space	1
+ 1283              		.section	.bss.i2c_temp,"aw",%nobits
+ 1284              		.align	1
+ 1285              		.set	.LANCHOR4,. + 0
+ 1288              	i2c_temp:
+ 1289 0000 0000     		.space	2
+ 1290              		.section	.bss.time_out,"aw",%nobits
+ 1291              		.align	2
+ 1292              		.set	.LANCHOR3,. + 0
+ 1295              	time_out:
+ 1296 0000 00000000 		.space	4
+ 1297              		.section	.data.I2C1_PORT,"aw"
+ 1298              		.set	.LANCHOR1,. + 0
+ 1301              	I2C1_PORT:
+ 1302 0000 01       		.byte	1
+ 1303              		.text
+ 1304              	.Letext0:
+ 1305              		.file 3 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 1306              		.file 4 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 1307              		.file 5 "/project/stm32f4x_iolib/include/cmsis/stm32f4xx.h"
+ 1308              		.file 6 "/project/stm32f4x_iolib/include/stm32f4xx_gpio.h"
+ 1309              		.file 7 "/project/stm32f4x_iolib/include/stm32f4xx_i2c.h"
+ 1310              		.file 8 "/project/stm32f4x_iolib/include/fundefs.h"
+ 1311              		.file 9 "source\\i2c\\../prototype.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 i2c_app.c
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:20     .text.I2C_LowLevel_Init:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:26     .text.I2C_LowLevel_Init:00000000 I2C_LowLevel_Init
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:208    .text.I2C_LowLevel_Init:000000f0 $d
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:221    .text.init_i2c_24xx:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:227    .text.init_i2c_24xx:00000000 init_i2c_24xx
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:287    .text.init_i2c_24xx:00000024 $d
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:294    .text.i2c_write:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:300    .text.i2c_write:00000000 i2c_write
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:596    .text.i2c_write:00000120 $d
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:605    .text.u8_write:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:611    .text.u8_write:00000000 u8_write
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:672    .text.u8_write:00000034 $d
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:679    .text.eeprom_write:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:685    .text.eeprom_write:00000000 eeprom_write
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:709    .text.i2c_read:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:715    .text.i2c_read:00000000 i2c_read
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1148   .text.i2c_read:000001c0 $d
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1159   .text.u8_read:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1165   .text.u8_read:00000000 u8_read
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1233   .text.u8_read:00000024 $d
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1240   .text.eeprom_read:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1246   .text.eeprom_read:00000000 eeprom_read
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1295   .bss.time_out:00000000 time_out
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1288   .bss.i2c_temp:00000000 i2c_temp
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1281   .bss.i2c_error:00000000 i2c_error
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1275   .bss.I2C_CHANNEL:00000000 I2C_CHANNEL
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1301   .data.I2C1_PORT:00000000 I2C1_PORT
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1276   .bss.I2C_CHANNEL:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1282   .bss.i2c_error:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1284   .bss.i2c_temp:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\cc01Ygdl.s:1291   .bss.time_out:00000000 $d
+
+UNDEFINED SYMBOLS
+RCC_APB1PeriphClockCmd
+GPIO_PinAFConfig
+GPIO_Init_Pin
+I2C_DeInit
+I2C_Init
+I2C_Cmd
+I2C_GetFlagStatus
+I2C_GenerateSTART
+I2C_CheckEvent
+I2C_Send7bitAddress
+I2C_SendData
+I2C_GenerateSTOP
+I2C_ClearFlag
+IWDG_ReloadCounter
+wait_ms
+I2C_AcknowledgeConfig
+I2C_GetLastEvent
+I2C_ReceiveData

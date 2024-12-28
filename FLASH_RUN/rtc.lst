@@ -1,0 +1,1166 @@
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 4
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"rtc.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.RTC_Set_Time,"ax",%progbits
+  20              		.align	1
+  21              		.global	RTC_Set_Time
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	RTC_Set_Time:
+  27              	.LVL0:
+  28              	.LFB130:
+  29              		.file 1 "source\\rtc\\rtc.c"
+   1:source\rtc/rtc.c **** /********************************************************************************/
+   2:source\rtc/rtc.c **** /* rtc.c                                                                        */
+   3:source\rtc/rtc.c **** /* STM32F407ZGT6                                                                */
+   4:source\rtc/rtc.c **** /* (Lee ChangWoo HL2IRW  hl2irw@daum.net 010-8573-6860)                 	*/
+   5:source\rtc/rtc.c **** /* stm32f4x_test								*/
+   6:source\rtc/rtc.c **** /********************************************************************************/
+   7:source\rtc/rtc.c **** #include "../../hwdefs.h"
+   8:source\rtc/rtc.c **** #include "../prototype.h"
+   9:source\rtc/rtc.c **** 
+  10:source\rtc/rtc.c **** 
+  11:source\rtc/rtc.c **** volatile unsigned char rtc_alarm,rtc_wkup;
+  12:source\rtc/rtc.c **** const unsigned char table_week [12] = {0,3,3,6,1,4,6,2,5,0,3,5};
+  13:source\rtc/rtc.c **** 
+  14:source\rtc/rtc.c **** 
+  15:source\rtc/rtc.c **** 
+  16:source\rtc/rtc.c **** ErrorStatus RTC_Set_Time (unsigned char hour,unsigned char min,unsigned char sec,unsigned char ampm
+  17:source\rtc/rtc.c **** {
+  30              		.loc 1 17 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 8
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  18:source\rtc/rtc.c ****       RTC_TimeTypeDef RTC_TimeTypeInitStructure;
+  34              		.loc 1 18 7 view .LVU1
+  19:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_Hours = hour;
+  35              		.loc 1 19 7 view .LVU2
+  17:source\rtc/rtc.c ****       RTC_TimeTypeDef RTC_TimeTypeInitStructure;
+  36              		.loc 1 17 1 is_stmt 0 view .LVU3
+  37 0000 07B5     		push	{r0, r1, r2, lr}
+  38              		.cfi_def_cfa_offset 16
+  39              		.cfi_offset 14, -4
+  40              		.loc 1 19 43 view .LVU4
+  41 0002 8DF80400 		strb	r0, [sp, #4]
+  20:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_Minutes = min;
+  42              		.loc 1 20 7 is_stmt 1 view .LVU5
+  43              		.loc 1 20 45 is_stmt 0 view .LVU6
+  44 0006 8DF80510 		strb	r1, [sp, #5]
+  21:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_Seconds = sec;
+  45              		.loc 1 21 7 is_stmt 1 view .LVU7
+  22:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_H12 = ampm;
+  23:source\rtc/rtc.c ****       return RTC_SetTime(RTC_Format_BIN,&RTC_TimeTypeInitStructure);
+  46              		.loc 1 23 14 is_stmt 0 view .LVU8
+  47 000a 0020     		movs	r0, #0
+  48              	.LVL1:
+  49              		.loc 1 23 14 view .LVU9
+  50 000c 01A9     		add	r1, sp, #4
+  51              	.LVL2:
+  21:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_Seconds = sec;
+  52              		.loc 1 21 45 view .LVU10
+  53 000e 8DF80620 		strb	r2, [sp, #6]
+  22:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_H12 = ampm;
+  54              		.loc 1 22 7 is_stmt 1 view .LVU11
+  22:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_H12 = ampm;
+  55              		.loc 1 22 41 is_stmt 0 view .LVU12
+  56 0012 8DF80730 		strb	r3, [sp, #7]
+  57              		.loc 1 23 7 is_stmt 1 view .LVU13
+  58              		.loc 1 23 14 is_stmt 0 view .LVU14
+  59 0016 FFF7FEFF 		bl	RTC_SetTime
+  60              	.LVL3:
+  24:source\rtc/rtc.c **** 
+  25:source\rtc/rtc.c **** }
+  61              		.loc 1 25 1 view .LVU15
+  62 001a 03B0     		add	sp, sp, #12
+  63              		.cfi_def_cfa_offset 4
+  64              		@ sp needed
+  65 001c 5DF804FB 		ldr	pc, [sp], #4
+  66              		.cfi_endproc
+  67              	.LFE130:
+  69              		.section	.text.RTC_Set_Date,"ax",%progbits
+  70              		.align	1
+  71              		.global	RTC_Set_Date
+  72              		.syntax unified
+  73              		.thumb
+  74              		.thumb_func
+  76              	RTC_Set_Date:
+  77              	.LVL4:
+  78              	.LFB131:
+  26:source\rtc/rtc.c **** 
+  27:source\rtc/rtc.c **** 
+  28:source\rtc/rtc.c **** ErrorStatus RTC_Set_Date (unsigned char year,unsigned char month,unsigned char date,unsigned char w
+  29:source\rtc/rtc.c **** {
+  79              		.loc 1 29 1 is_stmt 1 view -0
+  80              		.cfi_startproc
+  81              		@ args = 0, pretend = 0, frame = 8
+  82              		@ frame_needed = 0, uses_anonymous_args = 0
+  30:source\rtc/rtc.c **** 
+  31:source\rtc/rtc.c ****       RTC_DateTypeDef RTC_DateTypeInitStructure;
+  83              		.loc 1 31 7 view .LVU17
+  32:source\rtc/rtc.c ****       RTC_DateTypeInitStructure.RTC_Date = date;
+  84              		.loc 1 32 7 view .LVU18
+  29:source\rtc/rtc.c **** 
+  85              		.loc 1 29 1 is_stmt 0 view .LVU19
+  86 0000 07B5     		push	{r0, r1, r2, lr}
+  87              		.cfi_def_cfa_offset 16
+  88              		.cfi_offset 14, -4
+  33:source\rtc/rtc.c ****       RTC_DateTypeInitStructure.RTC_Month = month;
+  89              		.loc 1 33 43 view .LVU20
+  90 0002 8DF80510 		strb	r1, [sp, #5]
+  34:source\rtc/rtc.c ****       RTC_DateTypeInitStructure.RTC_WeekDay = week;
+  35:source\rtc/rtc.c ****       RTC_DateTypeInitStructure.RTC_Year = year;
+  91              		.loc 1 35 42 view .LVU21
+  92 0006 8DF80700 		strb	r0, [sp, #7]
+  36:source\rtc/rtc.c ****       return RTC_SetDate(RTC_Format_BIN,&RTC_DateTypeInitStructure);
+  93              		.loc 1 36 14 view .LVU22
+  94 000a 01A9     		add	r1, sp, #4
+  95              	.LVL5:
+  96              		.loc 1 36 14 view .LVU23
+  97 000c 0020     		movs	r0, #0
+  98              	.LVL6:
+  32:source\rtc/rtc.c ****       RTC_DateTypeInitStructure.RTC_Month = month;
+  99              		.loc 1 32 42 view .LVU24
+ 100 000e 8DF80620 		strb	r2, [sp, #6]
+  33:source\rtc/rtc.c ****       RTC_DateTypeInitStructure.RTC_WeekDay = week;
+ 101              		.loc 1 33 7 is_stmt 1 view .LVU25
+  34:source\rtc/rtc.c ****       RTC_DateTypeInitStructure.RTC_Year = year;
+ 102              		.loc 1 34 7 view .LVU26
+  34:source\rtc/rtc.c ****       RTC_DateTypeInitStructure.RTC_Year = year;
+ 103              		.loc 1 34 45 is_stmt 0 view .LVU27
+ 104 0012 8DF80430 		strb	r3, [sp, #4]
+  35:source\rtc/rtc.c ****       return RTC_SetDate(RTC_Format_BIN,&RTC_DateTypeInitStructure);
+ 105              		.loc 1 35 7 is_stmt 1 view .LVU28
+ 106              		.loc 1 36 7 view .LVU29
+ 107              		.loc 1 36 14 is_stmt 0 view .LVU30
+ 108 0016 FFF7FEFF 		bl	RTC_SetDate
+ 109              	.LVL7:
+  37:source\rtc/rtc.c **** }
+ 110              		.loc 1 37 1 view .LVU31
+ 111 001a 03B0     		add	sp, sp, #12
+ 112              		.cfi_def_cfa_offset 4
+ 113              		@ sp needed
+ 114 001c 5DF804FB 		ldr	pc, [sp], #4
+ 115              		.cfi_endproc
+ 116              	.LFE131:
+ 118              		.section	.text.RTC_Get_Time,"ax",%progbits
+ 119              		.align	1
+ 120              		.global	RTC_Get_Time
+ 121              		.syntax unified
+ 122              		.thumb
+ 123              		.thumb_func
+ 125              	RTC_Get_Time:
+ 126              	.LVL8:
+ 127              	.LFB132:
+  38:source\rtc/rtc.c **** 
+  39:source\rtc/rtc.c **** 
+  40:source\rtc/rtc.c **** void RTC_Get_Time (unsigned char *hour,unsigned char *min,unsigned char *sec,unsigned char *ampm)
+  41:source\rtc/rtc.c **** {
+ 128              		.loc 1 41 1 is_stmt 1 view -0
+ 129              		.cfi_startproc
+ 130              		@ args = 0, pretend = 0, frame = 8
+ 131              		@ frame_needed = 0, uses_anonymous_args = 0
+  42:source\rtc/rtc.c ****       RTC_TimeTypeDef RTC_TimeTypeInitStructure;
+ 132              		.loc 1 42 7 view .LVU33
+  43:source\rtc/rtc.c ****       RTC_GetTime(RTC_Format_BIN,&RTC_TimeTypeInitStructure);
+ 133              		.loc 1 43 7 view .LVU34
+  41:source\rtc/rtc.c ****       RTC_TimeTypeDef RTC_TimeTypeInitStructure;
+ 134              		.loc 1 41 1 is_stmt 0 view .LVU35
+ 135 0000 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 136              		.cfi_def_cfa_offset 32
+ 137              		.cfi_offset 4, -20
+ 138              		.cfi_offset 5, -16
+ 139              		.cfi_offset 6, -12
+ 140              		.cfi_offset 7, -8
+ 141              		.cfi_offset 14, -4
+  41:source\rtc/rtc.c ****       RTC_TimeTypeDef RTC_TimeTypeInitStructure;
+ 142              		.loc 1 41 1 view .LVU36
+ 143 0002 0746     		mov	r7, r0
+ 144 0004 0E46     		mov	r6, r1
+ 145              		.loc 1 43 7 view .LVU37
+ 146 0006 0020     		movs	r0, #0
+ 147              	.LVL9:
+ 148              		.loc 1 43 7 view .LVU38
+ 149 0008 01A9     		add	r1, sp, #4
+ 150              	.LVL10:
+  41:source\rtc/rtc.c ****       RTC_TimeTypeDef RTC_TimeTypeInitStructure;
+ 151              		.loc 1 41 1 view .LVU39
+ 152 000a 1C46     		mov	r4, r3
+ 153 000c 1546     		mov	r5, r2
+ 154              		.loc 1 43 7 view .LVU40
+ 155 000e FFF7FEFF 		bl	RTC_GetTime
+ 156              	.LVL11:
+  44:source\rtc/rtc.c ****       *hour = RTC_TimeTypeInitStructure.RTC_Hours;
+ 157              		.loc 1 44 7 is_stmt 1 view .LVU41
+ 158              		.loc 1 44 13 is_stmt 0 view .LVU42
+ 159 0012 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 160 0016 3B70     		strb	r3, [r7]
+  45:source\rtc/rtc.c ****       *min = RTC_TimeTypeInitStructure.RTC_Minutes;
+ 161              		.loc 1 45 7 is_stmt 1 view .LVU43
+ 162              		.loc 1 45 12 is_stmt 0 view .LVU44
+ 163 0018 9DF80530 		ldrb	r3, [sp, #5]	@ zero_extendqisi2
+ 164 001c 3370     		strb	r3, [r6]
+  46:source\rtc/rtc.c ****       *sec = RTC_TimeTypeInitStructure.RTC_Seconds;
+ 165              		.loc 1 46 7 is_stmt 1 view .LVU45
+ 166              		.loc 1 46 12 is_stmt 0 view .LVU46
+ 167 001e 9DF80630 		ldrb	r3, [sp, #6]	@ zero_extendqisi2
+ 168 0022 2B70     		strb	r3, [r5]
+  47:source\rtc/rtc.c ****       *ampm = RTC_TimeTypeInitStructure.RTC_H12;
+ 169              		.loc 1 47 7 is_stmt 1 view .LVU47
+ 170              		.loc 1 47 13 is_stmt 0 view .LVU48
+ 171 0024 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 172 0028 2370     		strb	r3, [r4]
+  48:source\rtc/rtc.c **** }
+ 173              		.loc 1 48 1 view .LVU49
+ 174 002a 03B0     		add	sp, sp, #12
+ 175              		.cfi_def_cfa_offset 20
+ 176              		@ sp needed
+ 177 002c F0BD     		pop	{r4, r5, r6, r7, pc}
+ 178              		.loc 1 48 1 view .LVU50
+ 179              		.cfi_endproc
+ 180              	.LFE132:
+ 182              		.section	.text.RTC_Get_Date,"ax",%progbits
+ 183              		.align	1
+ 184              		.global	RTC_Get_Date
+ 185              		.syntax unified
+ 186              		.thumb
+ 187              		.thumb_func
+ 189              	RTC_Get_Date:
+ 190              	.LVL12:
+ 191              	.LFB133:
+  49:source\rtc/rtc.c **** 
+  50:source\rtc/rtc.c **** 
+  51:source\rtc/rtc.c **** void RTC_Get_Date (unsigned char *year,unsigned char *month,unsigned char *date,unsigned char *week
+  52:source\rtc/rtc.c **** {
+ 192              		.loc 1 52 1 is_stmt 1 view -0
+ 193              		.cfi_startproc
+ 194              		@ args = 0, pretend = 0, frame = 8
+ 195              		@ frame_needed = 0, uses_anonymous_args = 0
+  53:source\rtc/rtc.c ****       RTC_DateTypeDef RTC_DateStruct;
+ 196              		.loc 1 53 7 view .LVU52
+  54:source\rtc/rtc.c ****       RTC_GetDate(RTC_Format_BIN, &RTC_DateStruct);
+ 197              		.loc 1 54 7 view .LVU53
+  52:source\rtc/rtc.c ****       RTC_DateTypeDef RTC_DateStruct;
+ 198              		.loc 1 52 1 is_stmt 0 view .LVU54
+ 199 0000 F7B5     		push	{r0, r1, r2, r4, r5, r6, r7, lr}
+ 200              		.cfi_def_cfa_offset 32
+ 201              		.cfi_offset 4, -20
+ 202              		.cfi_offset 5, -16
+ 203              		.cfi_offset 6, -12
+ 204              		.cfi_offset 7, -8
+ 205              		.cfi_offset 14, -4
+  52:source\rtc/rtc.c ****       RTC_DateTypeDef RTC_DateStruct;
+ 206              		.loc 1 52 1 view .LVU55
+ 207 0002 0746     		mov	r7, r0
+ 208 0004 0E46     		mov	r6, r1
+ 209              		.loc 1 54 7 view .LVU56
+ 210 0006 0020     		movs	r0, #0
+ 211              	.LVL13:
+ 212              		.loc 1 54 7 view .LVU57
+ 213 0008 01A9     		add	r1, sp, #4
+ 214              	.LVL14:
+  52:source\rtc/rtc.c ****       RTC_DateTypeDef RTC_DateStruct;
+ 215              		.loc 1 52 1 view .LVU58
+ 216 000a 1C46     		mov	r4, r3
+ 217 000c 1546     		mov	r5, r2
+ 218              		.loc 1 54 7 view .LVU59
+ 219 000e FFF7FEFF 		bl	RTC_GetDate
+ 220              	.LVL15:
+  55:source\rtc/rtc.c ****       *year = RTC_DateStruct.RTC_Year;
+ 221              		.loc 1 55 7 is_stmt 1 view .LVU60
+ 222              		.loc 1 55 13 is_stmt 0 view .LVU61
+ 223 0012 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 224 0016 3B70     		strb	r3, [r7]
+  56:source\rtc/rtc.c ****       *month = RTC_DateStruct.RTC_Month;
+ 225              		.loc 1 56 7 is_stmt 1 view .LVU62
+ 226              		.loc 1 56 14 is_stmt 0 view .LVU63
+ 227 0018 9DF80530 		ldrb	r3, [sp, #5]	@ zero_extendqisi2
+ 228 001c 3370     		strb	r3, [r6]
+  57:source\rtc/rtc.c ****       *date = RTC_DateStruct.RTC_Date;
+ 229              		.loc 1 57 7 is_stmt 1 view .LVU64
+ 230              		.loc 1 57 13 is_stmt 0 view .LVU65
+ 231 001e 9DF80630 		ldrb	r3, [sp, #6]	@ zero_extendqisi2
+ 232 0022 2B70     		strb	r3, [r5]
+  58:source\rtc/rtc.c ****       *week = RTC_DateStruct.RTC_WeekDay;
+ 233              		.loc 1 58 7 is_stmt 1 view .LVU66
+ 234              		.loc 1 58 13 is_stmt 0 view .LVU67
+ 235 0024 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 236 0028 2370     		strb	r3, [r4]
+  59:source\rtc/rtc.c **** }
+ 237              		.loc 1 59 1 view .LVU68
+ 238 002a 03B0     		add	sp, sp, #12
+ 239              		.cfi_def_cfa_offset 20
+ 240              		@ sp needed
+ 241 002c F0BD     		pop	{r4, r5, r6, r7, pc}
+ 242              		.loc 1 59 1 view .LVU69
+ 243              		.cfi_endproc
+ 244              	.LFE133:
+ 246              		.section	.text.rtc_init,"ax",%progbits
+ 247              		.align	1
+ 248              		.global	rtc_init
+ 249              		.syntax unified
+ 250              		.thumb
+ 251              		.thumb_func
+ 253              	rtc_init:
+ 254              	.LFB134:
+  60:source\rtc/rtc.c **** 
+  61:source\rtc/rtc.c **** 
+  62:source\rtc/rtc.c **** unsigned char rtc_init (void)
+  63:source\rtc/rtc.c **** {
+ 255              		.loc 1 63 1 is_stmt 1 view -0
+ 256              		.cfi_startproc
+ 257              		@ args = 0, pretend = 0, frame = 16
+ 258              		@ frame_needed = 0, uses_anonymous_args = 0
+  64:source\rtc/rtc.c ****       RTC_InitTypeDef RTC_InitStructure;
+ 259              		.loc 1 64 7 view .LVU71
+  65:source\rtc/rtc.c ****       unsigned short retry = 0x1FFF;
+ 260              		.loc 1 65 7 view .LVU72
+ 261              	.LVL16:
+  66:source\rtc/rtc.c ****       RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+ 262              		.loc 1 66 7 view .LVU73
+  63:source\rtc/rtc.c ****       RTC_InitTypeDef RTC_InitStructure;
+ 263              		.loc 1 63 1 is_stmt 0 view .LVU74
+ 264 0000 1FB5     		push	{r0, r1, r2, r3, r4, lr}
+ 265              		.cfi_def_cfa_offset 24
+ 266              		.cfi_offset 4, -8
+ 267              		.cfi_offset 14, -4
+ 268              		.loc 1 66 7 view .LVU75
+ 269 0002 0121     		movs	r1, #1
+ 270 0004 4FF08050 		mov	r0, #268435456
+ 271 0008 FFF7FEFF 		bl	RCC_APB1PeriphClockCmd
+ 272              	.LVL17:
+  67:source\rtc/rtc.c ****       PWR_BackupAccessCmd(ENABLE);
+ 273              		.loc 1 67 7 is_stmt 1 view .LVU76
+ 274 000c 0120     		movs	r0, #1
+ 275 000e FFF7FEFF 		bl	PWR_BackupAccessCmd
+ 276              	.LVL18:
+  68:source\rtc/rtc.c ****       if (RTC_ReadBackupRegister(RTC_BKP_DR0) != 0x5050) {
+ 277              		.loc 1 68 7 view .LVU77
+ 278              		.loc 1 68 11 is_stmt 0 view .LVU78
+ 279 0012 0020     		movs	r0, #0
+ 280 0014 FFF7FEFF 		bl	RTC_ReadBackupRegister
+ 281              	.LVL19:
+ 282              		.loc 1 68 10 view .LVU79
+ 283 0018 45F25003 		movw	r3, #20560
+ 284 001c 9842     		cmp	r0, r3
+ 285 001e 2AD0     		beq	.L9
+  69:source\rtc/rtc.c **** 	 RCC_LSEConfig(RCC_LSE_ON);
+ 286              		.loc 1 69 3 is_stmt 1 view .LVU80
+ 287 0020 0120     		movs	r0, #1
+ 288 0022 FFF7FEFF 		bl	RCC_LSEConfig
+ 289              	.LVL20:
+  70:source\rtc/rtc.c **** 	 while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) {
+ 290              		.loc 1 70 3 view .LVU81
+  65:source\rtc/rtc.c ****       RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+ 291              		.loc 1 65 22 is_stmt 0 view .LVU82
+ 292 0026 41F6FF74 		movw	r4, #8191
+ 293              	.LVL21:
+ 294              	.L7:
+ 295              		.loc 1 70 9 is_stmt 1 view .LVU83
+ 296              		.loc 1 70 10 is_stmt 0 view .LVU84
+ 297 002a 4120     		movs	r0, #65
+ 298 002c FFF7FEFF 		bl	RCC_GetFlagStatus
+ 299              	.LVL22:
+ 300              		.loc 1 70 9 view .LVU85
+ 301 0030 20B3     		cbz	r0, .L8
+  71:source\rtc/rtc.c **** 	       retry++;
+  72:source\rtc/rtc.c **** 	       wait_ms(10);
+  73:source\rtc/rtc.c **** 	 }
+  74:source\rtc/rtc.c **** 	 if (retry == 0) return 1;
+ 302              		.loc 1 74 3 is_stmt 1 view .LVU86
+ 303              		.loc 1 74 6 is_stmt 0 view .LVU87
+ 304 0032 4CB3     		cbz	r4, .L10
+  75:source\rtc/rtc.c **** 	 RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
+ 305              		.loc 1 75 3 is_stmt 1 view .LVU88
+ 306 0034 4FF48070 		mov	r0, #256
+ 307 0038 FFF7FEFF 		bl	RCC_RTCCLKConfig
+ 308              	.LVL23:
+  76:source\rtc/rtc.c **** 	 RCC_RTCCLKCmd(ENABLE);
+ 309              		.loc 1 76 3 view .LVU89
+ 310 003c 0120     		movs	r0, #1
+ 311 003e FFF7FEFF 		bl	RCC_RTCCLKCmd
+ 312              	.LVL24:
+  77:source\rtc/rtc.c ****          RTC_InitStructure.RTC_AsynchPrediv = 0x7F;
+ 313              		.loc 1 77 10 view .LVU90
+  78:source\rtc/rtc.c ****          RTC_InitStructure.RTC_SynchPrediv = 0xFF;
+  79:source\rtc/rtc.c ****          RTC_InitStructure.RTC_HourFormat = RTC_HourFormat_24;
+ 314              		.loc 1 79 43 is_stmt 0 view .LVU91
+ 315 0042 0024     		movs	r4, #0
+ 316              	.LVL25:
+  78:source\rtc/rtc.c ****          RTC_InitStructure.RTC_SynchPrediv = 0xFF;
+ 317              		.loc 1 78 44 view .LVU92
+ 318 0044 7F22     		movs	r2, #127
+ 319 0046 FF23     		movs	r3, #255
+  80:source\rtc/rtc.c ****          RTC_Init(&RTC_InitStructure);
+ 320              		.loc 1 80 10 view .LVU93
+ 321 0048 01A8     		add	r0, sp, #4
+  78:source\rtc/rtc.c ****          RTC_InitStructure.RTC_SynchPrediv = 0xFF;
+ 322              		.loc 1 78 44 view .LVU94
+ 323 004a CDE90223 		strd	r2, r3, [sp, #8]
+  79:source\rtc/rtc.c ****          RTC_Init(&RTC_InitStructure);
+ 324              		.loc 1 79 10 is_stmt 1 view .LVU95
+  79:source\rtc/rtc.c ****          RTC_Init(&RTC_InitStructure);
+ 325              		.loc 1 79 43 is_stmt 0 view .LVU96
+ 326 004e 0194     		str	r4, [sp, #4]
+ 327              		.loc 1 80 10 is_stmt 1 view .LVU97
+ 328 0050 FFF7FEFF 		bl	RTC_Init
+ 329              	.LVL26:
+  81:source\rtc/rtc.c **** 	 RTC_Set_Time(23,59,56,RTC_H12_AM);
+ 330              		.loc 1 81 3 view .LVU98
+ 331 0054 2346     		mov	r3, r4
+ 332 0056 3822     		movs	r2, #56
+ 333 0058 3B21     		movs	r1, #59
+ 334 005a 1720     		movs	r0, #23
+ 335 005c FFF7FEFF 		bl	RTC_Set_Time
+ 336              	.LVL27:
+  82:source\rtc/rtc.c **** 	 RTC_Set_Date(21,5,5,3);
+ 337              		.loc 1 82 3 view .LVU99
+ 338 0060 0522     		movs	r2, #5
+ 339 0062 1146     		mov	r1, r2
+ 340 0064 0323     		movs	r3, #3
+ 341 0066 1520     		movs	r0, #21
+ 342 0068 FFF7FEFF 		bl	RTC_Set_Date
+ 343              	.LVL28:
+  83:source\rtc/rtc.c **** 	 RTC_WriteBackupRegister(RTC_BKP_DR0,0x5050);
+ 344              		.loc 1 83 3 view .LVU100
+ 345 006c 45F25001 		movw	r1, #20560
+ 346 0070 2046     		mov	r0, r4
+ 347 0072 FFF7FEFF 		bl	RTC_WriteBackupRegister
+ 348              	.LVL29:
+ 349              	.L9:
+  84:source\rtc/rtc.c ****      }
+  85:source\rtc/rtc.c ****      return 0;
+ 350              		.loc 1 85 13 is_stmt 0 view .LVU101
+ 351 0076 0020     		movs	r0, #0
+ 352              	.L6:
+  86:source\rtc/rtc.c **** }
+ 353              		.loc 1 86 1 view .LVU102
+ 354 0078 04B0     		add	sp, sp, #16
+ 355              		.cfi_remember_state
+ 356              		.cfi_def_cfa_offset 8
+ 357              		@ sp needed
+ 358 007a 10BD     		pop	{r4, pc}
+ 359              	.LVL30:
+ 360              	.L8:
+ 361              		.cfi_restore_state
+  71:source\rtc/rtc.c **** 	       wait_ms(10);
+ 362              		.loc 1 71 9 is_stmt 1 view .LVU103
+  71:source\rtc/rtc.c **** 	       wait_ms(10);
+ 363              		.loc 1 71 14 is_stmt 0 view .LVU104
+ 364 007c 0134     		adds	r4, r4, #1
+ 365              	.LVL31:
+  72:source\rtc/rtc.c **** 	 }
+ 366              		.loc 1 72 9 view .LVU105
+ 367 007e 0A20     		movs	r0, #10
+  71:source\rtc/rtc.c **** 	       wait_ms(10);
+ 368              		.loc 1 71 14 view .LVU106
+ 369 0080 A4B2     		uxth	r4, r4
+ 370              	.LVL32:
+  72:source\rtc/rtc.c **** 	 }
+ 371              		.loc 1 72 9 is_stmt 1 view .LVU107
+ 372 0082 FFF7FEFF 		bl	wait_ms
+ 373              	.LVL33:
+ 374 0086 D0E7     		b	.L7
+ 375              	.L10:
+  74:source\rtc/rtc.c **** 	 RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
+ 376              		.loc 1 74 26 is_stmt 0 view .LVU108
+ 377 0088 0120     		movs	r0, #1
+ 378 008a F5E7     		b	.L6
+ 379              		.cfi_endproc
+ 380              	.LFE134:
+ 382              		.section	.text.RTC_Set_AlarmA,"ax",%progbits
+ 383              		.align	1
+ 384              		.global	RTC_Set_AlarmA
+ 385              		.syntax unified
+ 386              		.thumb
+ 387              		.thumb_func
+ 389              	RTC_Set_AlarmA:
+ 390              	.LVL34:
+ 391              	.LFB135:
+  87:source\rtc/rtc.c **** 
+  88:source\rtc/rtc.c **** 
+  89:source\rtc/rtc.c **** void RTC_Set_AlarmA (unsigned char week,unsigned char hour,unsigned char min,unsigned char sec)
+  90:source\rtc/rtc.c **** {
+ 392              		.loc 1 90 1 is_stmt 1 view -0
+ 393              		.cfi_startproc
+ 394              		@ args = 0, pretend = 0, frame = 32
+ 395              		@ frame_needed = 0, uses_anonymous_args = 0
+  91:source\rtc/rtc.c ****       EXTI_InitTypeDef EXTI_InitStructure;
+ 396              		.loc 1 91 7 view .LVU110
+  92:source\rtc/rtc.c ****       RTC_AlarmTypeDef RTC_AlarmTypeInitStructure;
+ 397              		.loc 1 92 7 view .LVU111
+  93:source\rtc/rtc.c ****       RTC_TimeTypeDef RTC_TimeTypeInitStructure;
+ 398              		.loc 1 93 7 view .LVU112
+  94:source\rtc/rtc.c ****       NVIC_InitTypeDef NVIC_InitStructure;
+ 399              		.loc 1 94 7 view .LVU113
+  95:source\rtc/rtc.c ****       RTC_AlarmCmd(RTC_Alarm_A,DISABLE);
+ 400              		.loc 1 95 7 view .LVU114
+  90:source\rtc/rtc.c ****       EXTI_InitTypeDef EXTI_InitStructure;
+ 401              		.loc 1 90 1 is_stmt 0 view .LVU115
+ 402 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 403              		.cfi_def_cfa_offset 20
+ 404              		.cfi_offset 4, -20
+ 405              		.cfi_offset 5, -16
+ 406              		.cfi_offset 6, -12
+ 407              		.cfi_offset 7, -8
+ 408              		.cfi_offset 14, -4
+ 409 0002 89B0     		sub	sp, sp, #36
+ 410              		.cfi_def_cfa_offset 56
+  90:source\rtc/rtc.c ****       EXTI_InitTypeDef EXTI_InitStructure;
+ 411              		.loc 1 90 1 view .LVU116
+ 412 0004 0446     		mov	r4, r0
+ 413 0006 0F46     		mov	r7, r1
+ 414              		.loc 1 95 7 view .LVU117
+ 415 0008 4FF48070 		mov	r0, #256
+ 416              	.LVL35:
+ 417              		.loc 1 95 7 view .LVU118
+ 418 000c 0021     		movs	r1, #0
+ 419              	.LVL36:
+  90:source\rtc/rtc.c ****       EXTI_InitTypeDef EXTI_InitStructure;
+ 420              		.loc 1 90 1 view .LVU119
+ 421 000e 1646     		mov	r6, r2
+ 422 0010 1D46     		mov	r5, r3
+ 423              		.loc 1 95 7 view .LVU120
+ 424 0012 FFF7FEFF 		bl	RTC_AlarmCmd
+ 425              	.LVL37:
+  96:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_Hours = hour;
+ 426              		.loc 1 96 7 is_stmt 1 view .LVU121
+  97:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_Minutes = min;
+ 427              		.loc 1 97 7 view .LVU122
+  98:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_Seconds = sec;
+ 428              		.loc 1 98 7 view .LVU123
+  99:source\rtc/rtc.c ****       RTC_TimeTypeInitStructure.RTC_H12 = RTC_H12_AM;
+ 429              		.loc 1 99 7 view .LVU124
+ 100:source\rtc/rtc.c ****       RTC_AlarmTypeInitStructure.RTC_AlarmDateWeekDay = week;
+ 430              		.loc 1 100 7 view .LVU125
+ 431              		.loc 1 100 55 is_stmt 0 view .LVU126
+ 432 0016 8DF81C40 		strb	r4, [sp, #28]
+ 101:source\rtc/rtc.c ****       RTC_AlarmTypeInitStructure.RTC_AlarmDateWeekDaySel = RTC_AlarmDateWeekDaySel_WeekDay;
+ 433              		.loc 1 101 7 is_stmt 1 view .LVU127
+ 102:source\rtc/rtc.c ****       RTC_AlarmTypeInitStructure.RTC_AlarmMask = RTC_AlarmMask_None;
+ 434              		.loc 1 102 48 is_stmt 0 view .LVU128
+ 435 001a 0024     		movs	r4, #0
+ 103:source\rtc/rtc.c ****       RTC_AlarmTypeInitStructure.RTC_AlarmTime = RTC_TimeTypeInitStructure;
+ 104:source\rtc/rtc.c ****       RTC_SetAlarm(RTC_Format_BIN,RTC_Alarm_A,&RTC_AlarmTypeInitStructure);
+ 436              		.loc 1 104 7 view .LVU129
+ 437 001c 04AA     		add	r2, sp, #16
+ 102:source\rtc/rtc.c ****       RTC_AlarmTypeInitStructure.RTC_AlarmMask = RTC_AlarmMask_None;
+ 438              		.loc 1 102 48 view .LVU130
+ 439 001e 4FF08043 		mov	r3, #1073741824
+ 440              		.loc 1 104 7 view .LVU131
+ 441 0022 4FF48071 		mov	r1, #256
+ 442 0026 2046     		mov	r0, r4
+ 102:source\rtc/rtc.c ****       RTC_AlarmTypeInitStructure.RTC_AlarmMask = RTC_AlarmMask_None;
+ 443              		.loc 1 102 48 view .LVU132
+ 444 0028 CDE90543 		strd	r4, r3, [sp, #20]
+ 103:source\rtc/rtc.c ****       RTC_AlarmTypeInitStructure.RTC_AlarmTime = RTC_TimeTypeInitStructure;
+ 445              		.loc 1 103 7 is_stmt 1 view .LVU133
+ 103:source\rtc/rtc.c ****       RTC_AlarmTypeInitStructure.RTC_AlarmTime = RTC_TimeTypeInitStructure;
+ 446              		.loc 1 103 48 is_stmt 0 view .LVU134
+ 447 002c 8DF81250 		strb	r5, [sp, #18]
+ 448 0030 8DF81070 		strb	r7, [sp, #16]
+ 449 0034 8DF81160 		strb	r6, [sp, #17]
+ 450 0038 8DF81340 		strb	r4, [sp, #19]
+ 451              		.loc 1 104 7 is_stmt 1 view .LVU135
+ 452 003c FFF7FEFF 		bl	RTC_SetAlarm
+ 453              	.LVL38:
+ 105:source\rtc/rtc.c ****       RTC_ClearITPendingBit(RTC_IT_ALRA);
+ 454              		.loc 1 105 7 view .LVU136
+ 455 0040 4FF48050 		mov	r0, #4096
+ 456 0044 FFF7FEFF 		bl	RTC_ClearITPendingBit
+ 457              	.LVL39:
+ 106:source\rtc/rtc.c ****       EXTI_ClearITPendingBit(EXTI_Line17);
+ 458              		.loc 1 106 7 view .LVU137
+ 459 0048 4FF40030 		mov	r0, #131072
+ 460 004c FFF7FEFF 		bl	EXTI_ClearITPendingBit
+ 461              	.LVL40:
+ 107:source\rtc/rtc.c ****       RTC_ITConfig(RTC_IT_ALRA,ENABLE);
+ 462              		.loc 1 107 7 view .LVU138
+ 463 0050 0121     		movs	r1, #1
+ 464 0052 4FF48050 		mov	r0, #4096
+ 465 0056 FFF7FEFF 		bl	RTC_ITConfig
+ 466              	.LVL41:
+ 108:source\rtc/rtc.c ****       RTC_AlarmCmd(RTC_Alarm_A,ENABLE);
+ 467              		.loc 1 108 7 view .LVU139
+ 468 005a 0121     		movs	r1, #1
+ 469 005c 4FF48070 		mov	r0, #256
+ 470 0060 FFF7FEFF 		bl	RTC_AlarmCmd
+ 471              	.LVL42:
+ 109:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Line = EXTI_Line17;
+ 472              		.loc 1 109 7 view .LVU140
+ 110:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+ 473              		.loc 1 110 7 view .LVU141
+ 111:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+ 474              		.loc 1 111 7 view .LVU142
+ 112:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+ 475              		.loc 1 112 7 view .LVU143
+ 109:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+ 476              		.loc 1 109 36 is_stmt 0 view .LVU144
+ 477 0064 4FF40033 		mov	r3, #131072
+ 478 0068 0293     		str	r3, [sp, #8]
+ 479              		.loc 1 112 39 view .LVU145
+ 480 006a 0125     		movs	r5, #1
+ 481              	.LVL43:
+ 110:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+ 482              		.loc 1 110 36 view .LVU146
+ 483 006c 4FF40063 		mov	r3, #2048
+ 113:source\rtc/rtc.c ****       EXTI_Init(&EXTI_InitStructure);
+ 484              		.loc 1 113 7 view .LVU147
+ 485 0070 02A8     		add	r0, sp, #8
+ 110:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+ 486              		.loc 1 110 36 view .LVU148
+ 487 0072 ADF80C30 		strh	r3, [sp, #12]	@ movhi
+ 112:source\rtc/rtc.c ****       EXTI_Init(&EXTI_InitStructure);
+ 488              		.loc 1 112 39 view .LVU149
+ 489 0076 8DF80E50 		strb	r5, [sp, #14]
+ 490              		.loc 1 113 7 is_stmt 1 view .LVU150
+ 491 007a FFF7FEFF 		bl	EXTI_Init
+ 492              	.LVL44:
+ 114:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannel = RTC_Alarm_IRQn;
+ 493              		.loc 1 114 7 view .LVU151
+ 494              		.loc 1 114 42 is_stmt 0 view .LVU152
+ 495 007e 2923     		movs	r3, #41
+ 496 0080 8DF80430 		strb	r3, [sp, #4]
+ 115:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x03;
+ 497              		.loc 1 115 7 is_stmt 1 view .LVU153
+ 116:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority =  0;
+ 117:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ 118:source\rtc/rtc.c ****       NVIC_Init(&NVIC_InitStructure);
+ 498              		.loc 1 118 7 is_stmt 0 view .LVU154
+ 499 0084 01A8     		add	r0, sp, #4
+ 115:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x03;
+ 500              		.loc 1 115 60 view .LVU155
+ 501 0086 0323     		movs	r3, #3
+ 502 0088 8DF80530 		strb	r3, [sp, #5]
+ 116:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority =  0;
+ 503              		.loc 1 116 7 is_stmt 1 view .LVU156
+ 116:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority =  0;
+ 504              		.loc 1 116 53 is_stmt 0 view .LVU157
+ 505 008c 8DF80640 		strb	r4, [sp, #6]
+ 117:source\rtc/rtc.c ****       NVIC_Init(&NVIC_InitStructure);
+ 506              		.loc 1 117 7 is_stmt 1 view .LVU158
+ 117:source\rtc/rtc.c ****       NVIC_Init(&NVIC_InitStructure);
+ 507              		.loc 1 117 45 is_stmt 0 view .LVU159
+ 508 0090 8DF80750 		strb	r5, [sp, #7]
+ 509              		.loc 1 118 7 is_stmt 1 view .LVU160
+ 510 0094 FFF7FEFF 		bl	NVIC_Init
+ 511              	.LVL45:
+ 119:source\rtc/rtc.c **** }
+ 512              		.loc 1 119 1 is_stmt 0 view .LVU161
+ 513 0098 09B0     		add	sp, sp, #36
+ 514              		.cfi_def_cfa_offset 20
+ 515              		@ sp needed
+ 516 009a F0BD     		pop	{r4, r5, r6, r7, pc}
+ 517              		.cfi_endproc
+ 518              	.LFE135:
+ 520              		.section	.text.RTC_Set_WakeUp,"ax",%progbits
+ 521              		.align	1
+ 522              		.global	RTC_Set_WakeUp
+ 523              		.syntax unified
+ 524              		.thumb
+ 525              		.thumb_func
+ 527              	RTC_Set_WakeUp:
+ 528              	.LVL46:
+ 529              	.LFB136:
+ 120:source\rtc/rtc.c **** 
+ 121:source\rtc/rtc.c **** 
+ 122:source\rtc/rtc.c **** void RTC_Set_WakeUp (unsigned int wksel,unsigned short cnt)
+ 123:source\rtc/rtc.c **** {
+ 530              		.loc 1 123 1 is_stmt 1 view -0
+ 531              		.cfi_startproc
+ 532              		@ args = 0, pretend = 0, frame = 16
+ 533              		@ frame_needed = 0, uses_anonymous_args = 0
+ 124:source\rtc/rtc.c ****       EXTI_InitTypeDef EXTI_InitStructure;
+ 534              		.loc 1 124 7 view .LVU163
+ 125:source\rtc/rtc.c ****       NVIC_InitTypeDef NVIC_InitStructure;
+ 535              		.loc 1 125 7 view .LVU164
+ 126:source\rtc/rtc.c ****       RTC_WakeUpCmd(DISABLE);
+ 536              		.loc 1 126 7 view .LVU165
+ 123:source\rtc/rtc.c ****       EXTI_InitTypeDef EXTI_InitStructure;
+ 537              		.loc 1 123 1 is_stmt 0 view .LVU166
+ 538 0000 30B5     		push	{r4, r5, lr}
+ 539              		.cfi_def_cfa_offset 12
+ 540              		.cfi_offset 4, -12
+ 541              		.cfi_offset 5, -8
+ 542              		.cfi_offset 14, -4
+ 543 0002 0546     		mov	r5, r0
+ 544 0004 85B0     		sub	sp, sp, #20
+ 545              		.cfi_def_cfa_offset 32
+ 546              		.loc 1 126 7 view .LVU167
+ 547 0006 0020     		movs	r0, #0
+ 548              	.LVL47:
+ 123:source\rtc/rtc.c ****       EXTI_InitTypeDef EXTI_InitStructure;
+ 549              		.loc 1 123 1 view .LVU168
+ 550 0008 0C46     		mov	r4, r1
+ 551              		.loc 1 126 7 view .LVU169
+ 552 000a FFF7FEFF 		bl	RTC_WakeUpCmd
+ 553              	.LVL48:
+ 127:source\rtc/rtc.c ****       RTC_WakeUpClockConfig(wksel);
+ 554              		.loc 1 127 7 is_stmt 1 view .LVU170
+ 555 000e 2846     		mov	r0, r5
+ 556 0010 FFF7FEFF 		bl	RTC_WakeUpClockConfig
+ 557              	.LVL49:
+ 128:source\rtc/rtc.c ****       RTC_SetWakeUpCounter(cnt);
+ 558              		.loc 1 128 7 view .LVU171
+ 559 0014 2046     		mov	r0, r4
+ 560 0016 FFF7FEFF 		bl	RTC_SetWakeUpCounter
+ 561              	.LVL50:
+ 129:source\rtc/rtc.c ****       RTC_ClearITPendingBit(RTC_IT_WUT);
+ 562              		.loc 1 129 7 view .LVU172
+ 563 001a 4FF48040 		mov	r0, #16384
+ 564 001e FFF7FEFF 		bl	RTC_ClearITPendingBit
+ 565              	.LVL51:
+ 130:source\rtc/rtc.c ****       EXTI_ClearITPendingBit(EXTI_Line22);
+ 566              		.loc 1 130 7 view .LVU173
+ 567 0022 4FF48000 		mov	r0, #4194304
+ 568 0026 FFF7FEFF 		bl	EXTI_ClearITPendingBit
+ 569              	.LVL52:
+ 131:source\rtc/rtc.c ****       RTC_ITConfig(RTC_IT_WUT,ENABLE);
+ 570              		.loc 1 131 7 view .LVU174
+ 571 002a 0121     		movs	r1, #1
+ 572 002c 4FF48040 		mov	r0, #16384
+ 573 0030 FFF7FEFF 		bl	RTC_ITConfig
+ 574              	.LVL53:
+ 132:source\rtc/rtc.c ****       RTC_WakeUpCmd(ENABLE);
+ 575              		.loc 1 132 7 view .LVU175
+ 576 0034 0120     		movs	r0, #1
+ 577 0036 FFF7FEFF 		bl	RTC_WakeUpCmd
+ 578              	.LVL54:
+ 133:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Line = EXTI_Line22;
+ 579              		.loc 1 133 7 view .LVU176
+ 134:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+ 580              		.loc 1 134 7 view .LVU177
+ 135:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+ 581              		.loc 1 135 7 view .LVU178
+ 136:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+ 582              		.loc 1 136 7 view .LVU179
+ 133:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+ 583              		.loc 1 133 36 is_stmt 0 view .LVU180
+ 584 003a 4FF48003 		mov	r3, #4194304
+ 585 003e 0293     		str	r3, [sp, #8]
+ 586              		.loc 1 136 39 view .LVU181
+ 587 0040 0124     		movs	r4, #1
+ 134:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+ 588              		.loc 1 134 36 view .LVU182
+ 589 0042 4FF40063 		mov	r3, #2048
+ 137:source\rtc/rtc.c ****       EXTI_Init(&EXTI_InitStructure);
+ 590              		.loc 1 137 7 view .LVU183
+ 591 0046 02A8     		add	r0, sp, #8
+ 134:source\rtc/rtc.c ****       EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+ 592              		.loc 1 134 36 view .LVU184
+ 593 0048 ADF80C30 		strh	r3, [sp, #12]	@ movhi
+ 136:source\rtc/rtc.c ****       EXTI_Init(&EXTI_InitStructure);
+ 594              		.loc 1 136 39 view .LVU185
+ 595 004c 8DF80E40 		strb	r4, [sp, #14]
+ 596              		.loc 1 137 7 is_stmt 1 view .LVU186
+ 597 0050 FFF7FEFF 		bl	EXTI_Init
+ 598              	.LVL55:
+ 138:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannel = RTC_WKUP_IRQn;
+ 599              		.loc 1 138 7 view .LVU187
+ 600              		.loc 1 138 42 is_stmt 0 view .LVU188
+ 601 0054 0323     		movs	r3, #3
+ 602 0056 8DF80430 		strb	r3, [sp, #4]
+ 139:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x02;
+ 603              		.loc 1 139 7 is_stmt 1 view .LVU189
+ 140:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;
+ 141:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ 142:source\rtc/rtc.c ****       NVIC_Init(&NVIC_InitStructure);
+ 604              		.loc 1 142 7 is_stmt 0 view .LVU190
+ 605 005a 01A8     		add	r0, sp, #4
+ 139:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x02;
+ 606              		.loc 1 139 60 view .LVU191
+ 607 005c 0223     		movs	r3, #2
+ 608 005e 8DF80530 		strb	r3, [sp, #5]
+ 140:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;
+ 609              		.loc 1 140 7 is_stmt 1 view .LVU192
+ 140:source\rtc/rtc.c ****       NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;
+ 610              		.loc 1 140 53 is_stmt 0 view .LVU193
+ 611 0062 8DF80630 		strb	r3, [sp, #6]
+ 141:source\rtc/rtc.c ****       NVIC_Init(&NVIC_InitStructure);
+ 612              		.loc 1 141 7 is_stmt 1 view .LVU194
+ 141:source\rtc/rtc.c ****       NVIC_Init(&NVIC_InitStructure);
+ 613              		.loc 1 141 45 is_stmt 0 view .LVU195
+ 614 0066 8DF80740 		strb	r4, [sp, #7]
+ 615              		.loc 1 142 7 is_stmt 1 view .LVU196
+ 616 006a FFF7FEFF 		bl	NVIC_Init
+ 617              	.LVL56:
+ 143:source\rtc/rtc.c **** }
+ 618              		.loc 1 143 1 is_stmt 0 view .LVU197
+ 619 006e 05B0     		add	sp, sp, #20
+ 620              		.cfi_def_cfa_offset 12
+ 621              		@ sp needed
+ 622 0070 30BD     		pop	{r4, r5, pc}
+ 623              		.loc 1 143 1 view .LVU198
+ 624              		.cfi_endproc
+ 625              	.LFE136:
+ 627              		.section	.text.RTC_Alarm_IRQHandler,"ax",%progbits
+ 628              		.align	1
+ 629              		.global	RTC_Alarm_IRQHandler
+ 630              		.syntax unified
+ 631              		.thumb
+ 632              		.thumb_func
+ 634              	RTC_Alarm_IRQHandler:
+ 635              	.LFB137:
+ 144:source\rtc/rtc.c **** 
+ 145:source\rtc/rtc.c **** 
+ 146:source\rtc/rtc.c **** void RTC_Alarm_IRQHandler (void)
+ 147:source\rtc/rtc.c **** {
+ 636              		.loc 1 147 1 is_stmt 1 view -0
+ 637              		.cfi_startproc
+ 638              		@ args = 0, pretend = 0, frame = 0
+ 639              		@ frame_needed = 0, uses_anonymous_args = 0
+ 148:source\rtc/rtc.c ****       if (RTC_GetFlagStatus(RTC_FLAG_ALRAF) == SET) {
+ 640              		.loc 1 148 7 view .LVU200
+ 147:source\rtc/rtc.c ****       if (RTC_GetFlagStatus(RTC_FLAG_ALRAF) == SET) {
+ 641              		.loc 1 147 1 is_stmt 0 view .LVU201
+ 642 0000 10B5     		push	{r4, lr}
+ 643              		.cfi_def_cfa_offset 8
+ 644              		.cfi_offset 4, -8
+ 645              		.cfi_offset 14, -4
+ 646              		.loc 1 148 11 view .LVU202
+ 647 0002 4FF48070 		mov	r0, #256
+ 648 0006 FFF7FEFF 		bl	RTC_GetFlagStatus
+ 649              	.LVL57:
+ 650              		.loc 1 148 10 view .LVU203
+ 651 000a 0128     		cmp	r0, #1
+ 652              		.loc 1 148 11 view .LVU204
+ 653 000c 0446     		mov	r4, r0
+ 654              		.loc 1 148 10 view .LVU205
+ 655 000e 05D1     		bne	.L14
+ 149:source\rtc/rtc.c **** 	 RTC_ClearFlag(RTC_FLAG_ALRAF);
+ 656              		.loc 1 149 3 is_stmt 1 view .LVU206
+ 657 0010 4FF48070 		mov	r0, #256
+ 658 0014 FFF7FEFF 		bl	RTC_ClearFlag
+ 659              	.LVL58:
+ 150:source\rtc/rtc.c **** 	 rtc_alarm = 1;
+ 660              		.loc 1 150 3 view .LVU207
+ 661              		.loc 1 150 13 is_stmt 0 view .LVU208
+ 662 0018 034B     		ldr	r3, .L15
+ 663 001a 1C70     		strb	r4, [r3]
+ 664              	.L14:
+ 151:source\rtc/rtc.c ****       }
+ 152:source\rtc/rtc.c ****       EXTI_ClearITPendingBit(EXTI_Line17);
+ 665              		.loc 1 152 7 is_stmt 1 view .LVU209
+ 153:source\rtc/rtc.c **** }
+ 666              		.loc 1 153 1 is_stmt 0 view .LVU210
+ 667 001c BDE81040 		pop	{r4, lr}
+ 668              		.cfi_restore 14
+ 669              		.cfi_restore 4
+ 670              		.cfi_def_cfa_offset 0
+ 152:source\rtc/rtc.c **** }
+ 671              		.loc 1 152 7 view .LVU211
+ 672 0020 4FF40030 		mov	r0, #131072
+ 673 0024 FFF7FEBF 		b	EXTI_ClearITPendingBit
+ 674              	.LVL59:
+ 675              	.L16:
+ 676              		.align	2
+ 677              	.L15:
+ 678 0028 00000000 		.word	.LANCHOR0
+ 679              		.cfi_endproc
+ 680              	.LFE137:
+ 682              		.section	.text.RTC_WKUP_IRQHandler,"ax",%progbits
+ 683              		.align	1
+ 684              		.global	RTC_WKUP_IRQHandler
+ 685              		.syntax unified
+ 686              		.thumb
+ 687              		.thumb_func
+ 689              	RTC_WKUP_IRQHandler:
+ 690              	.LFB138:
+ 154:source\rtc/rtc.c **** 
+ 155:source\rtc/rtc.c **** 
+ 156:source\rtc/rtc.c **** void RTC_WKUP_IRQHandler (void)
+ 157:source\rtc/rtc.c **** {
+ 691              		.loc 1 157 1 is_stmt 1 view -0
+ 692              		.cfi_startproc
+ 693              		@ args = 0, pretend = 0, frame = 0
+ 694              		@ frame_needed = 0, uses_anonymous_args = 0
+ 158:source\rtc/rtc.c ****       if (RTC_GetFlagStatus(RTC_FLAG_WUTF) == SET) {
+ 695              		.loc 1 158 7 view .LVU213
+ 157:source\rtc/rtc.c ****       if (RTC_GetFlagStatus(RTC_FLAG_WUTF) == SET) {
+ 696              		.loc 1 157 1 is_stmt 0 view .LVU214
+ 697 0000 10B5     		push	{r4, lr}
+ 698              		.cfi_def_cfa_offset 8
+ 699              		.cfi_offset 4, -8
+ 700              		.cfi_offset 14, -4
+ 701              		.loc 1 158 11 view .LVU215
+ 702 0002 4FF48060 		mov	r0, #1024
+ 703 0006 FFF7FEFF 		bl	RTC_GetFlagStatus
+ 704              	.LVL60:
+ 705              		.loc 1 158 10 view .LVU216
+ 706 000a 0128     		cmp	r0, #1
+ 707              		.loc 1 158 11 view .LVU217
+ 708 000c 0446     		mov	r4, r0
+ 709              		.loc 1 158 10 view .LVU218
+ 710 000e 05D1     		bne	.L18
+ 159:source\rtc/rtc.c **** 	 RTC_ClearFlag(RTC_FLAG_WUTF);
+ 711              		.loc 1 159 3 is_stmt 1 view .LVU219
+ 712 0010 4FF48060 		mov	r0, #1024
+ 713 0014 FFF7FEFF 		bl	RTC_ClearFlag
+ 714              	.LVL61:
+ 160:source\rtc/rtc.c ****          rtc_wkup = 1;
+ 715              		.loc 1 160 10 view .LVU220
+ 716              		.loc 1 160 19 is_stmt 0 view .LVU221
+ 717 0018 034B     		ldr	r3, .L19
+ 718 001a 1C70     		strb	r4, [r3]
+ 719              	.L18:
+ 161:source\rtc/rtc.c ****       }
+ 162:source\rtc/rtc.c ****       EXTI_ClearITPendingBit(EXTI_Line22);
+ 720              		.loc 1 162 7 is_stmt 1 view .LVU222
+ 163:source\rtc/rtc.c **** }
+ 721              		.loc 1 163 1 is_stmt 0 view .LVU223
+ 722 001c BDE81040 		pop	{r4, lr}
+ 723              		.cfi_restore 14
+ 724              		.cfi_restore 4
+ 725              		.cfi_def_cfa_offset 0
+ 162:source\rtc/rtc.c **** }
+ 726              		.loc 1 162 7 view .LVU224
+ 727 0020 4FF48000 		mov	r0, #4194304
+ 728 0024 FFF7FEBF 		b	EXTI_ClearITPendingBit
+ 729              	.LVL62:
+ 730              	.L20:
+ 731              		.align	2
+ 732              	.L19:
+ 733 0028 00000000 		.word	.LANCHOR1
+ 734              		.cfi_endproc
+ 735              	.LFE138:
+ 737              		.section	.text.RTC_Get_Week,"ax",%progbits
+ 738              		.align	1
+ 739              		.global	RTC_Get_Week
+ 740              		.syntax unified
+ 741              		.thumb
+ 742              		.thumb_func
+ 744              	RTC_Get_Week:
+ 745              	.LVL63:
+ 746              	.LFB139:
+ 164:source\rtc/rtc.c **** 
+ 165:source\rtc/rtc.c **** 
+ 166:source\rtc/rtc.c **** unsigned char RTC_Get_Week (unsigned short year,unsigned char month,unsigned char day)
+ 167:source\rtc/rtc.c **** {
+ 747              		.loc 1 167 1 is_stmt 1 view -0
+ 748              		.cfi_startproc
+ 749              		@ args = 0, pretend = 0, frame = 0
+ 750              		@ frame_needed = 0, uses_anonymous_args = 0
+ 168:source\rtc/rtc.c ****       unsigned short temp2;
+ 751              		.loc 1 168 7 view .LVU226
+ 169:source\rtc/rtc.c ****       unsigned char yearH,yearL;
+ 752              		.loc 1 169 7 view .LVU227
+ 170:source\rtc/rtc.c ****       yearH = year / 100;
+ 753              		.loc 1 170 7 view .LVU228
+ 171:source\rtc/rtc.c ****       yearL = year % 100;
+ 754              		.loc 1 171 7 view .LVU229
+ 167:source\rtc/rtc.c ****       unsigned short temp2;
+ 755              		.loc 1 167 1 is_stmt 0 view .LVU230
+ 756 0000 30B5     		push	{r4, r5, lr}
+ 757              		.cfi_def_cfa_offset 12
+ 758              		.cfi_offset 4, -12
+ 759              		.cfi_offset 5, -8
+ 760              		.cfi_offset 14, -4
+ 761              		.loc 1 171 13 view .LVU231
+ 762 0002 6424     		movs	r4, #100
+ 763 0004 B0FBF4F5 		udiv	r5, r0, r4
+ 764 0008 04FB1504 		mls	r4, r4, r5, r0
+ 172:source\rtc/rtc.c ****       if (yearH > 19) yearL += 100;
+ 765              		.loc 1 172 10 view .LVU232
+ 766 000c EDB2     		uxtb	r5, r5
+ 171:source\rtc/rtc.c ****       yearL = year % 100;
+ 767              		.loc 1 171 13 view .LVU233
+ 768 000e E4B2     		uxtb	r4, r4
+ 769              	.LVL64:
+ 770              		.loc 1 172 7 is_stmt 1 view .LVU234
+ 771              		.loc 1 172 10 is_stmt 0 view .LVU235
+ 772 0010 132D     		cmp	r5, #19
+ 773              		.loc 1 172 23 is_stmt 1 view .LVU236
+ 173:source\rtc/rtc.c ****       temp2 = yearL + yearL / 4;
+ 174:source\rtc/rtc.c ****       temp2 = temp2 % 7;
+ 175:source\rtc/rtc.c ****       temp2 = temp2 + day + table_week[month - 1];
+ 774              		.loc 1 175 39 is_stmt 0 view .LVU237
+ 775 0012 1348     		ldr	r0, .L25
+ 776              	.LVL65:
+ 172:source\rtc/rtc.c ****       if (yearH > 19) yearL += 100;
+ 777              		.loc 1 172 29 view .LVU238
+ 778 0014 84BF     		itt	hi
+ 779 0016 6434     		addhi	r4, r4, #100
+ 780              	.LVL66:
+ 172:source\rtc/rtc.c ****       if (yearH > 19) yearL += 100;
+ 781              		.loc 1 172 29 view .LVU239
+ 782 0018 E4B2     		uxtbhi	r4, r4
+ 783              	.LVL67:
+ 173:source\rtc/rtc.c ****       temp2 = yearL + yearL / 4;
+ 784              		.loc 1 173 7 is_stmt 1 view .LVU240
+ 785              		.loc 1 175 39 is_stmt 0 view .LVU241
+ 786 001a 0844     		add	r0, r0, r1
+ 173:source\rtc/rtc.c ****       temp2 = yearL + yearL / 4;
+ 787              		.loc 1 173 13 view .LVU242
+ 788 001c 04EB9403 		add	r3, r4, r4, lsr #2
+ 789              	.LVL68:
+ 174:source\rtc/rtc.c ****       temp2 = temp2 + day + table_week[month - 1];
+ 790              		.loc 1 174 7 is_stmt 1 view .LVU243
+ 174:source\rtc/rtc.c ****       temp2 = temp2 + day + table_week[month - 1];
+ 791              		.loc 1 174 13 is_stmt 0 view .LVU244
+ 792 0020 0725     		movs	r5, #7
+ 793 0022 B3FBF5F5 		udiv	r5, r3, r5
+ 794 0026 C5EBC505 		rsb	r5, r5, r5, lsl #3
+ 795 002a 5B1B     		subs	r3, r3, r5
+ 796              	.LVL69:
+ 797              		.loc 1 175 7 is_stmt 1 view .LVU245
+ 798              		.loc 1 175 39 is_stmt 0 view .LVU246
+ 799 002c 10F8015C 		ldrb	r5, [r0, #-1]	@ zero_extendqisi2
+ 800              		.loc 1 175 13 view .LVU247
+ 801 0030 A818     		adds	r0, r5, r2
+ 802 0032 10FA83F0 		uxtah	r0, r0, r3
+ 176:source\rtc/rtc.c ****       if (yearL % 4 == 0 && month < 3) temp2--;
+ 803              		.loc 1 176 10 view .LVU248
+ 804 0036 A307     		lsls	r3, r4, #30
+ 805              	.LVL70:
+ 175:source\rtc/rtc.c ****       if (yearL % 4 == 0 && month < 3) temp2--;
+ 806              		.loc 1 175 13 view .LVU249
+ 807 0038 80B2     		uxth	r0, r0
+ 808              	.LVL71:
+ 809              		.loc 1 176 7 is_stmt 1 view .LVU250
+ 810              		.loc 1 176 10 is_stmt 0 view .LVU251
+ 811 003a 04D1     		bne	.L23
+ 812              		.loc 1 176 26 discriminator 1 view .LVU252
+ 813 003c 0229     		cmp	r1, #2
+ 814              		.loc 1 176 40 is_stmt 1 discriminator 1 view .LVU253
+ 815              		.loc 1 176 45 is_stmt 0 discriminator 1 view .LVU254
+ 816 003e 9CBF     		itt	ls
+ 817 0040 00F1FF30 		addls	r0, r0, #-1
+ 818              	.LVL72:
+ 819              		.loc 1 176 45 discriminator 1 view .LVU255
+ 820 0044 80B2     		uxthls	r0, r0
+ 821              	.LVL73:
+ 822              	.L23:
+ 177:source\rtc/rtc.c ****       temp2 %= 7;
+ 823              		.loc 1 177 7 is_stmt 1 view .LVU256
+ 824              		.loc 1 177 13 is_stmt 0 view .LVU257
+ 825 0046 0723     		movs	r3, #7
+ 826 0048 B0FBF3F3 		udiv	r3, r0, r3
+ 827 004c C3EBC303 		rsb	r3, r3, r3, lsl #3
+ 828 0050 C01A     		subs	r0, r0, r3
+ 829              	.LVL74:
+ 830              		.loc 1 177 13 view .LVU258
+ 831 0052 80B2     		uxth	r0, r0
+ 832              	.LVL75:
+ 178:source\rtc/rtc.c ****       if (temp2 == 0) temp2 = 7;
+ 833              		.loc 1 178 7 is_stmt 1 view .LVU259
+ 834              		.loc 1 178 29 is_stmt 0 view .LVU260
+ 835 0054 0028     		cmp	r0, #0
+ 836 0056 08BF     		it	eq
+ 837 0058 0720     		moveq	r0, #7
+ 838              	.LVL76:
+ 179:source\rtc/rtc.c ****       return temp2;
+ 839              		.loc 1 179 7 is_stmt 1 view .LVU261
+ 180:source\rtc/rtc.c **** }
+ 840              		.loc 1 180 1 is_stmt 0 view .LVU262
+ 841 005a C0B2     		uxtb	r0, r0
+ 842              	.LVL77:
+ 843              		.loc 1 180 1 view .LVU263
+ 844 005c 30BD     		pop	{r4, r5, pc}
+ 845              	.LVL78:
+ 846              	.L26:
+ 847              		.loc 1 180 1 view .LVU264
+ 848 005e 00BF     		.align	2
+ 849              	.L25:
+ 850 0060 00000000 		.word	.LANCHOR2
+ 851              		.cfi_endproc
+ 852              	.LFE139:
+ 854              		.global	table_week
+ 855              		.global	rtc_wkup
+ 856              		.global	rtc_alarm
+ 857              		.section	.bss.rtc_alarm,"aw",%nobits
+ 858              		.set	.LANCHOR0,. + 0
+ 861              	rtc_alarm:
+ 862 0000 00       		.space	1
+ 863              		.section	.bss.rtc_wkup,"aw",%nobits
+ 864              		.set	.LANCHOR1,. + 0
+ 867              	rtc_wkup:
+ 868 0000 00       		.space	1
+ 869              		.section	.rodata.table_week,"a"
+ 870              		.set	.LANCHOR2,. + 0
+ 873              	table_week:
+ 874 0000 00030306 		.ascii	"\000\003\003\006\001\004\006\002\005\000\003\005"
+ 874      01040602 
+ 874      05000305 
+ 875              		.text
+ 876              	.Letext0:
+ 877              		.file 2 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 878              		.file 3 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 879              		.file 4 "/project/stm32f4x_iolib/include/cmsis/stm32f4xx.h"
+ 880              		.file 5 "/project/stm32f4x_iolib/include/misc.h"
+ 881              		.file 6 "/project/stm32f4x_iolib/include/stm32f4xx_exti.h"
+ 882              		.file 7 "/project/stm32f4x_iolib/include/stm32f4xx_rtc.h"
+ 883              		.file 8 "/project/stm32f4x_iolib/include/fundefs.h"
+ 884              		.file 9 "source\\rtc\\../prototype.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 rtc.c
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:20     .text.RTC_Set_Time:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:26     .text.RTC_Set_Time:00000000 RTC_Set_Time
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:70     .text.RTC_Set_Date:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:76     .text.RTC_Set_Date:00000000 RTC_Set_Date
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:119    .text.RTC_Get_Time:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:125    .text.RTC_Get_Time:00000000 RTC_Get_Time
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:183    .text.RTC_Get_Date:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:189    .text.RTC_Get_Date:00000000 RTC_Get_Date
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:247    .text.rtc_init:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:253    .text.rtc_init:00000000 rtc_init
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:383    .text.RTC_Set_AlarmA:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:389    .text.RTC_Set_AlarmA:00000000 RTC_Set_AlarmA
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:521    .text.RTC_Set_WakeUp:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:527    .text.RTC_Set_WakeUp:00000000 RTC_Set_WakeUp
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:628    .text.RTC_Alarm_IRQHandler:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:634    .text.RTC_Alarm_IRQHandler:00000000 RTC_Alarm_IRQHandler
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:678    .text.RTC_Alarm_IRQHandler:00000028 $d
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:683    .text.RTC_WKUP_IRQHandler:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:689    .text.RTC_WKUP_IRQHandler:00000000 RTC_WKUP_IRQHandler
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:733    .text.RTC_WKUP_IRQHandler:00000028 $d
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:738    .text.RTC_Get_Week:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:744    .text.RTC_Get_Week:00000000 RTC_Get_Week
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:850    .text.RTC_Get_Week:00000060 $d
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:873    .rodata.table_week:00000000 table_week
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:867    .bss.rtc_wkup:00000000 rtc_wkup
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:861    .bss.rtc_alarm:00000000 rtc_alarm
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:862    .bss.rtc_alarm:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccXFiUlP.s:868    .bss.rtc_wkup:00000000 $d
+
+UNDEFINED SYMBOLS
+RTC_SetTime
+RTC_SetDate
+RTC_GetTime
+RTC_GetDate
+RCC_APB1PeriphClockCmd
+PWR_BackupAccessCmd
+RTC_ReadBackupRegister
+RCC_LSEConfig
+RCC_GetFlagStatus
+RCC_RTCCLKConfig
+RCC_RTCCLKCmd
+RTC_Init
+RTC_WriteBackupRegister
+wait_ms
+RTC_AlarmCmd
+RTC_SetAlarm
+RTC_ClearITPendingBit
+EXTI_ClearITPendingBit
+RTC_ITConfig
+EXTI_Init
+NVIC_Init
+RTC_WakeUpCmd
+RTC_WakeUpClockConfig
+RTC_SetWakeUpCounter
+RTC_GetFlagStatus
+RTC_ClearFlag

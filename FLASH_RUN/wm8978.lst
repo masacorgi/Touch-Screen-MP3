@@ -1,0 +1,2111 @@
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 4
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"wm8978.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.wm8978_read_para,"ax",%progbits
+  20              		.align	1
+  21              		.global	wm8978_read_para
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	wm8978_read_para:
+  27              	.LVL0:
+  28              	.LFB130:
+  29              		.file 1 "source\\wm8978\\wm8978.c"
+   1:source\wm8978/wm8978.c **** /********************************************************************************/
+   2:source\wm8978/wm8978.c **** /* wm8978.c                                                                     */
+   3:source\wm8978/wm8978.c **** /* STM32F407ZGT6                                                                */
+   4:source\wm8978/wm8978.c **** /* (Lee ChangWoo HL2IRW  hl2irw@daum.net 010-8573-6860)                 	*/
+   5:source\wm8978/wm8978.c **** /* stm32f4x_test								*/
+   6:source\wm8978/wm8978.c **** /********************************************************************************/
+   7:source\wm8978/wm8978.c **** #include "../../hwdefs.h"
+   8:source\wm8978/wm8978.c **** #include "../prototype.h"
+   9:source\wm8978/wm8978.c **** 
+  10:source\wm8978/wm8978.c **** 
+  11:source\wm8978/wm8978.c **** #define WM8978_ADDR			0x1A
+  12:source\wm8978/wm8978.c **** //FREQ[0]
+  13:source\wm8978/wm8978.c **** #define EQ1_80Hz			0x00
+  14:source\wm8978/wm8978.c **** #define EQ1_105Hz			0x01
+  15:source\wm8978/wm8978.c **** #define EQ1_135Hz			0x02
+  16:source\wm8978/wm8978.c **** #define EQ1_175Hz			0x03
+  17:source\wm8978/wm8978.c **** //FREQ[1]
+  18:source\wm8978/wm8978.c **** #define EQ2_230Hz			0x00
+  19:source\wm8978/wm8978.c **** #define EQ2_300Hz			0x01
+  20:source\wm8978/wm8978.c **** #define EQ2_385Hz			0x02
+  21:source\wm8978/wm8978.c **** #define EQ2_500Hz			0x03
+  22:source\wm8978/wm8978.c **** //FREQ[2]
+  23:source\wm8978/wm8978.c **** #define EQ3_650Hz			0x00
+  24:source\wm8978/wm8978.c **** #define EQ3_850Hz			0x01
+  25:source\wm8978/wm8978.c **** #define EQ3_1100Hz			0x02
+  26:source\wm8978/wm8978.c **** #define EQ3_14000Hz			0x03
+  27:source\wm8978/wm8978.c **** //FREQ[3]
+  28:source\wm8978/wm8978.c **** #define EQ4_1800Hz			0x00
+  29:source\wm8978/wm8978.c **** #define EQ4_2400Hz			0x01
+  30:source\wm8978/wm8978.c **** #define EQ4_3200Hz			0x02
+  31:source\wm8978/wm8978.c **** #define EQ4_4100Hz			0x03
+  32:source\wm8978/wm8978.c **** //FREQ[4]
+  33:source\wm8978/wm8978.c **** #define EQ5_5300Hz			0x00
+  34:source\wm8978/wm8978.c **** #define EQ5_6900Hz			0x01
+  35:source\wm8978/wm8978.c **** #define EQ5_9000Hz			0x02
+  36:source\wm8978/wm8978.c **** #define EQ5_11700Hz			0x03
+  37:source\wm8978/wm8978.c **** 
+  38:source\wm8978/wm8978.c **** #define SYSTEM_PARA_SAVE_BASE		20
+  39:source\wm8978/wm8978.c **** 
+  40:source\wm8978/wm8978.c **** extern unsigned char I2C_CHANNEL;
+  41:source\wm8978/wm8978.c **** 
+  42:source\wm8978/wm8978.c **** _wm8978_obj wm8978set = {
+  43:source\wm8978/wm8978.c ****       .mvol = 50,
+  44:source\wm8978/wm8978.c ****       .cfreq = {0,0,0,0,0},
+  45:source\wm8978/wm8978.c ****       .freqval = {0,0,0,0,0},
+  46:source\wm8978/wm8978.c ****       .d3 = 0,
+  47:source\wm8978/wm8978.c ****       .speakersw = 1,
+  48:source\wm8978/wm8978.c ****       .saveflag = 0,
+  49:source\wm8978/wm8978.c **** };
+  50:source\wm8978/wm8978.c **** 
+  51:source\wm8978/wm8978.c **** 
+  52:source\wm8978/wm8978.c **** static unsigned short WM8978_REGVAL_TBL [58] =
+  53:source\wm8978/wm8978.c **** {
+  54:source\wm8978/wm8978.c ****       0x0000,0x0000,0x0000,0x0000,0x0050,0x0000,0x0140,0x0000,
+  55:source\wm8978/wm8978.c ****       0x0000,0x0000,0x0000,0x00FF,0x00FF,0x0000,0x0100,0x00FF,
+  56:source\wm8978/wm8978.c ****       0x00FF,0x0000,0x012C,0x002C,0x002C,0x002C,0x002C,0x0000,
+  57:source\wm8978/wm8978.c ****       0x0032,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+  58:source\wm8978/wm8978.c ****       0x0038,0x000B,0x0032,0x0000,0x0008,0x000C,0x0093,0x00E9,
+  59:source\wm8978/wm8978.c ****       0x0000,0x0000,0x0000,0x0000,0x0003,0x0010,0x0010,0x0100,
+  60:source\wm8978/wm8978.c ****       0x0100,0x0002,0x0001,0x0001,0x0039,0x0039,0x0039,0x0039,
+  61:source\wm8978/wm8978.c ****       0x0001,0x0001
+  62:source\wm8978/wm8978.c **** };
+  63:source\wm8978/wm8978.c **** 
+  64:source\wm8978/wm8978.c **** 
+  65:source\wm8978/wm8978.c **** void wm8978_read_para (_wm8978_obj *wm8978dev)
+  66:source\wm8978/wm8978.c **** {
+  30              		.loc 1 66 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  67:source\wm8978/wm8978.c ****       wm8978dev->mvol = eeprom_read(SYSTEM_PARA_SAVE_BASE + 0);
+  34              		.loc 1 67 7 view .LVU1
+  66:source\wm8978/wm8978.c ****       wm8978dev->mvol = eeprom_read(SYSTEM_PARA_SAVE_BASE + 0);
+  35              		.loc 1 66 1 is_stmt 0 view .LVU2
+  36 0000 10B5     		push	{r4, lr}
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 4, -8
+  39              		.cfi_offset 14, -4
+  66:source\wm8978/wm8978.c ****       wm8978dev->mvol = eeprom_read(SYSTEM_PARA_SAVE_BASE + 0);
+  40              		.loc 1 66 1 view .LVU3
+  41 0002 0446     		mov	r4, r0
+  42              		.loc 1 67 25 view .LVU4
+  43 0004 1420     		movs	r0, #20
+  44              	.LVL1:
+  45              		.loc 1 67 25 view .LVU5
+  46 0006 FFF7FEFF 		bl	eeprom_read
+  47              	.LVL2:
+  48              		.loc 1 67 23 view .LVU6
+  49 000a 2070     		strb	r0, [r4]
+  68:source\wm8978/wm8978.c ****       wm8978dev->cfreq[0] = eeprom_read(SYSTEM_PARA_SAVE_BASE + 1);
+  50              		.loc 1 68 7 is_stmt 1 view .LVU7
+  51              		.loc 1 68 29 is_stmt 0 view .LVU8
+  52 000c 1520     		movs	r0, #21
+  53 000e FFF7FEFF 		bl	eeprom_read
+  54              	.LVL3:
+  55              		.loc 1 68 27 view .LVU9
+  56 0012 6070     		strb	r0, [r4, #1]
+  69:source\wm8978/wm8978.c ****       wm8978dev->cfreq[1] = eeprom_read(SYSTEM_PARA_SAVE_BASE + 2);
+  57              		.loc 1 69 7 is_stmt 1 view .LVU10
+  58              		.loc 1 69 29 is_stmt 0 view .LVU11
+  59 0014 1620     		movs	r0, #22
+  60 0016 FFF7FEFF 		bl	eeprom_read
+  61              	.LVL4:
+  62              		.loc 1 69 27 view .LVU12
+  63 001a A070     		strb	r0, [r4, #2]
+  70:source\wm8978/wm8978.c ****       wm8978dev->cfreq[2] = eeprom_read(SYSTEM_PARA_SAVE_BASE + 3);
+  64              		.loc 1 70 7 is_stmt 1 view .LVU13
+  65              		.loc 1 70 29 is_stmt 0 view .LVU14
+  66 001c 1720     		movs	r0, #23
+  67 001e FFF7FEFF 		bl	eeprom_read
+  68              	.LVL5:
+  69              		.loc 1 70 27 view .LVU15
+  70 0022 E070     		strb	r0, [r4, #3]
+  71:source\wm8978/wm8978.c ****       wm8978dev->cfreq[3] = eeprom_read(SYSTEM_PARA_SAVE_BASE + 4);
+  71              		.loc 1 71 7 is_stmt 1 view .LVU16
+  72              		.loc 1 71 29 is_stmt 0 view .LVU17
+  73 0024 1820     		movs	r0, #24
+  74 0026 FFF7FEFF 		bl	eeprom_read
+  75              	.LVL6:
+  76              		.loc 1 71 27 view .LVU18
+  77 002a 2071     		strb	r0, [r4, #4]
+  72:source\wm8978/wm8978.c ****       wm8978dev->cfreq[4] = eeprom_read(SYSTEM_PARA_SAVE_BASE + 5);
+  78              		.loc 1 72 7 is_stmt 1 view .LVU19
+  79              		.loc 1 72 29 is_stmt 0 view .LVU20
+  80 002c 1920     		movs	r0, #25
+  81 002e FFF7FEFF 		bl	eeprom_read
+  82              	.LVL7:
+  83              		.loc 1 72 27 view .LVU21
+  84 0032 6071     		strb	r0, [r4, #5]
+  73:source\wm8978/wm8978.c ****       wm8978dev->freqval[0] = eeprom_read(SYSTEM_PARA_SAVE_BASE + 6);
+  85              		.loc 1 73 7 is_stmt 1 view .LVU22
+  86              		.loc 1 73 31 is_stmt 0 view .LVU23
+  87 0034 1A20     		movs	r0, #26
+  88 0036 FFF7FEFF 		bl	eeprom_read
+  89              	.LVL8:
+  90              		.loc 1 73 29 view .LVU24
+  91 003a A071     		strb	r0, [r4, #6]
+  74:source\wm8978/wm8978.c ****       wm8978dev->freqval[1] = eeprom_read(SYSTEM_PARA_SAVE_BASE + 7);
+  92              		.loc 1 74 7 is_stmt 1 view .LVU25
+  93              		.loc 1 74 31 is_stmt 0 view .LVU26
+  94 003c 1B20     		movs	r0, #27
+  95 003e FFF7FEFF 		bl	eeprom_read
+  96              	.LVL9:
+  97              		.loc 1 74 29 view .LVU27
+  98 0042 E071     		strb	r0, [r4, #7]
+  75:source\wm8978/wm8978.c ****       wm8978dev->freqval[2] = eeprom_read(SYSTEM_PARA_SAVE_BASE + 8);
+  99              		.loc 1 75 7 is_stmt 1 view .LVU28
+ 100              		.loc 1 75 31 is_stmt 0 view .LVU29
+ 101 0044 1C20     		movs	r0, #28
+ 102 0046 FFF7FEFF 		bl	eeprom_read
+ 103              	.LVL10:
+ 104              		.loc 1 75 29 view .LVU30
+ 105 004a 2072     		strb	r0, [r4, #8]
+  76:source\wm8978/wm8978.c ****       wm8978dev->freqval[3] = eeprom_read(SYSTEM_PARA_SAVE_BASE + 9);
+ 106              		.loc 1 76 7 is_stmt 1 view .LVU31
+ 107              		.loc 1 76 31 is_stmt 0 view .LVU32
+ 108 004c 1D20     		movs	r0, #29
+ 109 004e FFF7FEFF 		bl	eeprom_read
+ 110              	.LVL11:
+ 111              		.loc 1 76 29 view .LVU33
+ 112 0052 6072     		strb	r0, [r4, #9]
+  77:source\wm8978/wm8978.c ****       wm8978dev->freqval[4] = eeprom_read(SYSTEM_PARA_SAVE_BASE + 10);
+ 113              		.loc 1 77 7 is_stmt 1 view .LVU34
+ 114              		.loc 1 77 31 is_stmt 0 view .LVU35
+ 115 0054 1E20     		movs	r0, #30
+ 116 0056 FFF7FEFF 		bl	eeprom_read
+ 117              	.LVL12:
+ 118              		.loc 1 77 29 view .LVU36
+ 119 005a A072     		strb	r0, [r4, #10]
+  78:source\wm8978/wm8978.c ****       wm8978dev->d3 = eeprom_read(SYSTEM_PARA_SAVE_BASE + 11);
+ 120              		.loc 1 78 7 is_stmt 1 view .LVU37
+ 121              		.loc 1 78 23 is_stmt 0 view .LVU38
+ 122 005c 1F20     		movs	r0, #31
+ 123 005e FFF7FEFF 		bl	eeprom_read
+ 124              	.LVL13:
+ 125              		.loc 1 78 21 view .LVU39
+ 126 0062 E072     		strb	r0, [r4, #11]
+  79:source\wm8978/wm8978.c ****       wm8978dev->speakersw = eeprom_read(SYSTEM_PARA_SAVE_BASE + 12);
+ 127              		.loc 1 79 7 is_stmt 1 view .LVU40
+ 128              		.loc 1 79 30 is_stmt 0 view .LVU41
+ 129 0064 2020     		movs	r0, #32
+ 130 0066 FFF7FEFF 		bl	eeprom_read
+ 131              	.LVL14:
+ 132              		.loc 1 79 28 view .LVU42
+ 133 006a 2073     		strb	r0, [r4, #12]
+  80:source\wm8978/wm8978.c ****       wm8978dev->saveflag = eeprom_read(SYSTEM_PARA_SAVE_BASE + 13);     
+ 134              		.loc 1 80 7 is_stmt 1 view .LVU43
+ 135              		.loc 1 80 29 is_stmt 0 view .LVU44
+ 136 006c 2120     		movs	r0, #33
+ 137 006e FFF7FEFF 		bl	eeprom_read
+ 138              	.LVL15:
+ 139              		.loc 1 80 27 view .LVU45
+ 140 0072 6073     		strb	r0, [r4, #13]
+  81:source\wm8978/wm8978.c **** }
+ 141              		.loc 1 81 1 view .LVU46
+ 142 0074 10BD     		pop	{r4, pc}
+ 143              		.loc 1 81 1 view .LVU47
+ 144              		.cfi_endproc
+ 145              	.LFE130:
+ 147              		.section	.text.wm8978_save_para,"ax",%progbits
+ 148              		.align	1
+ 149              		.global	wm8978_save_para
+ 150              		.syntax unified
+ 151              		.thumb
+ 152              		.thumb_func
+ 154              	wm8978_save_para:
+ 155              	.LVL16:
+ 156              	.LFB131:
+  82:source\wm8978/wm8978.c **** 
+  83:source\wm8978/wm8978.c **** 
+  84:source\wm8978/wm8978.c **** void wm8978_save_para (_wm8978_obj *wm8978dev)
+  85:source\wm8978/wm8978.c **** {
+ 157              		.loc 1 85 1 is_stmt 1 view -0
+ 158              		.cfi_startproc
+ 159              		@ args = 0, pretend = 0, frame = 0
+ 160              		@ frame_needed = 0, uses_anonymous_args = 0
+  86:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 0,wm8978dev->mvol);
+ 161              		.loc 1 86 7 view .LVU49
+  85:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 0,wm8978dev->mvol);
+ 162              		.loc 1 85 1 is_stmt 0 view .LVU50
+ 163 0000 10B5     		push	{r4, lr}
+ 164              		.cfi_def_cfa_offset 8
+ 165              		.cfi_offset 4, -8
+ 166              		.cfi_offset 14, -4
+  85:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 0,wm8978dev->mvol);
+ 167              		.loc 1 85 1 view .LVU51
+ 168 0002 0446     		mov	r4, r0
+ 169              		.loc 1 86 7 view .LVU52
+ 170 0004 0178     		ldrb	r1, [r0]	@ zero_extendqisi2
+ 171 0006 1420     		movs	r0, #20
+ 172              	.LVL17:
+ 173              		.loc 1 86 7 view .LVU53
+ 174 0008 FFF7FEFF 		bl	eeprom_write
+ 175              	.LVL18:
+  87:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 1,wm8978dev->cfreq[0]);
+ 176              		.loc 1 87 7 is_stmt 1 view .LVU54
+ 177 000c 6178     		ldrb	r1, [r4, #1]	@ zero_extendqisi2
+ 178 000e 1520     		movs	r0, #21
+ 179 0010 FFF7FEFF 		bl	eeprom_write
+ 180              	.LVL19:
+  88:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 2,wm8978dev->cfreq[1]);
+ 181              		.loc 1 88 7 view .LVU55
+ 182 0014 A178     		ldrb	r1, [r4, #2]	@ zero_extendqisi2
+ 183 0016 1620     		movs	r0, #22
+ 184 0018 FFF7FEFF 		bl	eeprom_write
+ 185              	.LVL20:
+  89:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 3,wm8978dev->cfreq[2]);
+ 186              		.loc 1 89 7 view .LVU56
+ 187 001c E178     		ldrb	r1, [r4, #3]	@ zero_extendqisi2
+ 188 001e 1720     		movs	r0, #23
+ 189 0020 FFF7FEFF 		bl	eeprom_write
+ 190              	.LVL21:
+  90:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 4,wm8978dev->cfreq[3]);
+ 191              		.loc 1 90 7 view .LVU57
+ 192 0024 2179     		ldrb	r1, [r4, #4]	@ zero_extendqisi2
+ 193 0026 1820     		movs	r0, #24
+ 194 0028 FFF7FEFF 		bl	eeprom_write
+ 195              	.LVL22:
+  91:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 5,wm8978dev->cfreq[4]);
+ 196              		.loc 1 91 7 view .LVU58
+ 197 002c 6179     		ldrb	r1, [r4, #5]	@ zero_extendqisi2
+ 198 002e 1920     		movs	r0, #25
+ 199 0030 FFF7FEFF 		bl	eeprom_write
+ 200              	.LVL23:
+  92:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 6,wm8978dev->freqval[0]);
+ 201              		.loc 1 92 7 view .LVU59
+ 202 0034 A179     		ldrb	r1, [r4, #6]	@ zero_extendqisi2
+ 203 0036 1A20     		movs	r0, #26
+ 204 0038 FFF7FEFF 		bl	eeprom_write
+ 205              	.LVL24:
+  93:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 7,wm8978dev->freqval[1]);
+ 206              		.loc 1 93 7 view .LVU60
+ 207 003c E179     		ldrb	r1, [r4, #7]	@ zero_extendqisi2
+ 208 003e 1B20     		movs	r0, #27
+ 209 0040 FFF7FEFF 		bl	eeprom_write
+ 210              	.LVL25:
+  94:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 8,wm8978dev->freqval[2]);
+ 211              		.loc 1 94 7 view .LVU61
+ 212 0044 217A     		ldrb	r1, [r4, #8]	@ zero_extendqisi2
+ 213 0046 1C20     		movs	r0, #28
+ 214 0048 FFF7FEFF 		bl	eeprom_write
+ 215              	.LVL26:
+  95:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 9,wm8978dev->freqval[3]);
+ 216              		.loc 1 95 7 view .LVU62
+ 217 004c 617A     		ldrb	r1, [r4, #9]	@ zero_extendqisi2
+ 218 004e 1D20     		movs	r0, #29
+ 219 0050 FFF7FEFF 		bl	eeprom_write
+ 220              	.LVL27:
+  96:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 10,wm8978dev->freqval[4]);
+ 221              		.loc 1 96 7 view .LVU63
+ 222 0054 A17A     		ldrb	r1, [r4, #10]	@ zero_extendqisi2
+ 223 0056 1E20     		movs	r0, #30
+ 224 0058 FFF7FEFF 		bl	eeprom_write
+ 225              	.LVL28:
+  97:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 11,wm8978dev->d3);
+ 226              		.loc 1 97 7 view .LVU64
+ 227 005c E17A     		ldrb	r1, [r4, #11]	@ zero_extendqisi2
+ 228 005e 1F20     		movs	r0, #31
+ 229 0060 FFF7FEFF 		bl	eeprom_write
+ 230              	.LVL29:
+  98:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 12,wm8978dev->speakersw);
+ 231              		.loc 1 98 7 view .LVU65
+ 232 0064 217B     		ldrb	r1, [r4, #12]	@ zero_extendqisi2
+ 233 0066 2020     		movs	r0, #32
+ 234 0068 FFF7FEFF 		bl	eeprom_write
+ 235              	.LVL30:
+  99:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 13,wm8978dev->saveflag);      
+ 236              		.loc 1 99 7 view .LVU66
+ 237 006c 617B     		ldrb	r1, [r4, #13]	@ zero_extendqisi2
+ 238 006e 2120     		movs	r0, #33
+ 100:source\wm8978/wm8978.c **** }
+ 239              		.loc 1 100 1 is_stmt 0 view .LVU67
+ 240 0070 BDE81040 		pop	{r4, lr}
+ 241              		.cfi_restore 14
+ 242              		.cfi_restore 4
+ 243              		.cfi_def_cfa_offset 0
+ 244              	.LVL31:
+  99:source\wm8978/wm8978.c ****       eeprom_write(SYSTEM_PARA_SAVE_BASE + 13,wm8978dev->saveflag);      
+ 245              		.loc 1 99 7 view .LVU68
+ 246 0074 FFF7FEBF 		b	eeprom_write
+ 247              	.LVL32:
+ 248              		.cfi_endproc
+ 249              	.LFE131:
+ 251              		.section	.text.WM8978_Write_Reg,"ax",%progbits
+ 252              		.align	1
+ 253              		.global	WM8978_Write_Reg
+ 254              		.syntax unified
+ 255              		.thumb
+ 256              		.thumb_func
+ 258              	WM8978_Write_Reg:
+ 259              	.LVL33:
+ 260              	.LFB132:
+ 101:source\wm8978/wm8978.c **** 
+ 102:source\wm8978/wm8978.c **** 
+ 103:source\wm8978/wm8978.c **** unsigned char WM8978_Write_Reg (unsigned char reg,unsigned short val)
+ 104:source\wm8978/wm8978.c **** {
+ 261              		.loc 1 104 1 is_stmt 1 view -0
+ 262              		.cfi_startproc
+ 263              		@ args = 0, pretend = 0, frame = 0
+ 264              		@ frame_needed = 0, uses_anonymous_args = 0
+ 105:source\wm8978/wm8978.c ****       unsigned char address,data;
+ 265              		.loc 1 105 7 view .LVU70
+ 106:source\wm8978/wm8978.c ****       address = (reg << 1) | ((val >> 8) & 0x01);
+ 266              		.loc 1 106 7 view .LVU71
+ 104:source\wm8978/wm8978.c ****       unsigned char address,data;
+ 267              		.loc 1 104 1 is_stmt 0 view .LVU72
+ 268 0000 38B5     		push	{r3, r4, r5, lr}
+ 269              		.cfi_def_cfa_offset 16
+ 270              		.cfi_offset 3, -16
+ 271              		.cfi_offset 4, -12
+ 272              		.cfi_offset 5, -8
+ 273              		.cfi_offset 14, -4
+ 274              		.loc 1 106 42 view .LVU73
+ 275 0002 C1F30022 		ubfx	r2, r1, #8, #1
+ 104:source\wm8978/wm8978.c ****       unsigned char address,data;
+ 276              		.loc 1 104 1 view .LVU74
+ 277 0006 0C46     		mov	r4, r1
+ 107:source\wm8978/wm8978.c ****       data = (val & 0xFF);
+ 278              		.loc 1 107 12 view .LVU75
+ 279 0008 CBB2     		uxtb	r3, r1
+ 108:source\wm8978/wm8978.c ****       if (I2C_CHANNEL == 0) {
+ 280              		.loc 1 108 23 view .LVU76
+ 281 000a 0949     		ldr	r1, .L7
+ 282              	.LVL34:
+ 283              		.loc 1 108 10 view .LVU77
+ 284 000c 0978     		ldrb	r1, [r1]	@ zero_extendqisi2
+ 106:source\wm8978/wm8978.c ****       data = (val & 0xFF);
+ 285              		.loc 1 106 28 view .LVU78
+ 286 000e 42EA4002 		orr	r2, r2, r0, lsl #1
+ 104:source\wm8978/wm8978.c ****       unsigned char address,data;
+ 287              		.loc 1 104 1 view .LVU79
+ 288 0012 0546     		mov	r5, r0
+ 106:source\wm8978/wm8978.c ****       data = (val & 0xFF);
+ 289              		.loc 1 106 15 view .LVU80
+ 290 0014 D2B2     		uxtb	r2, r2
+ 291              	.LVL35:
+ 107:source\wm8978/wm8978.c ****       if (I2C_CHANNEL == 0) {
+ 292              		.loc 1 107 7 is_stmt 1 view .LVU81
+ 293              		.loc 1 108 7 view .LVU82
+ 294              		.loc 1 108 10 is_stmt 0 view .LVU83
+ 295 0016 41B9     		cbnz	r1, .L4
+ 109:source\wm8978/wm8978.c ****          i2c_write(I2C1,(WM8978_ADDR << 1),address,data);
+ 296              		.loc 1 109 10 is_stmt 1 view .LVU84
+ 297 0018 0648     		ldr	r0, .L7+4
+ 298              	.LVL36:
+ 299              		.loc 1 109 10 is_stmt 0 view .LVU85
+ 300 001a 3421     		movs	r1, #52
+ 301              	.L6:
+ 110:source\wm8978/wm8978.c ****       } else {
+ 111:source\wm8978/wm8978.c ****          i2c_write(I2C2,(WM8978_ADDR << 1),address,data);
+ 302              		.loc 1 111 10 view .LVU86
+ 303 001c FFF7FEFF 		bl	i2c_write
+ 304              	.LVL37:
+ 112:source\wm8978/wm8978.c ****       }
+ 113:source\wm8978/wm8978.c ****       WM8978_REGVAL_TBL[reg] = val;
+ 305              		.loc 1 113 7 is_stmt 1 view .LVU87
+ 306              		.loc 1 113 30 is_stmt 0 view .LVU88
+ 307 0020 054B     		ldr	r3, .L7+8
+ 114:source\wm8978/wm8978.c ****       return 0;
+ 115:source\wm8978/wm8978.c **** }
+ 308              		.loc 1 115 1 view .LVU89
+ 309 0022 0020     		movs	r0, #0
+ 113:source\wm8978/wm8978.c ****       return 0;
+ 310              		.loc 1 113 30 view .LVU90
+ 311 0024 23F81540 		strh	r4, [r3, r5, lsl #1]	@ movhi
+ 114:source\wm8978/wm8978.c ****       return 0;
+ 312              		.loc 1 114 7 is_stmt 1 view .LVU91
+ 313              		.loc 1 115 1 is_stmt 0 view .LVU92
+ 314 0028 38BD     		pop	{r3, r4, r5, pc}
+ 315              	.LVL38:
+ 316              	.L4:
+ 111:source\wm8978/wm8978.c ****       }
+ 317              		.loc 1 111 10 is_stmt 1 view .LVU93
+ 318 002a 0448     		ldr	r0, .L7+12
+ 319              	.LVL39:
+ 111:source\wm8978/wm8978.c ****       }
+ 320              		.loc 1 111 10 is_stmt 0 view .LVU94
+ 321 002c 3421     		movs	r1, #52
+ 322 002e F5E7     		b	.L6
+ 323              	.L8:
+ 324              		.align	2
+ 325              	.L7:
+ 326 0030 00000000 		.word	I2C_CHANNEL
+ 327 0034 00540040 		.word	1073763328
+ 328 0038 00000000 		.word	.LANCHOR0
+ 329 003c 00580040 		.word	1073764352
+ 330              		.cfi_endproc
+ 331              	.LFE132:
+ 333              		.section	.text.WM8978_Read_Reg,"ax",%progbits
+ 334              		.align	1
+ 335              		.global	WM8978_Read_Reg
+ 336              		.syntax unified
+ 337              		.thumb
+ 338              		.thumb_func
+ 340              	WM8978_Read_Reg:
+ 341              	.LVL40:
+ 342              	.LFB133:
+ 116:source\wm8978/wm8978.c **** 
+ 117:source\wm8978/wm8978.c **** 
+ 118:source\wm8978/wm8978.c **** unsigned short WM8978_Read_Reg (unsigned char reg)
+ 119:source\wm8978/wm8978.c **** {
+ 343              		.loc 1 119 1 is_stmt 1 view -0
+ 344              		.cfi_startproc
+ 345              		@ args = 0, pretend = 0, frame = 0
+ 346              		@ frame_needed = 0, uses_anonymous_args = 0
+ 347              		@ link register save eliminated.
+ 120:source\wm8978/wm8978.c ****       return WM8978_REGVAL_TBL[reg];
+ 348              		.loc 1 120 7 view .LVU96
+ 121:source\wm8978/wm8978.c **** }
+ 349              		.loc 1 121 1 is_stmt 0 view .LVU97
+ 350 0000 014B     		ldr	r3, .L10
+ 351 0002 33F81000 		ldrh	r0, [r3, r0, lsl #1]
+ 352              	.LVL41:
+ 353              		.loc 1 121 1 view .LVU98
+ 354 0006 7047     		bx	lr
+ 355              	.L11:
+ 356              		.align	2
+ 357              	.L10:
+ 358 0008 00000000 		.word	.LANCHOR0
+ 359              		.cfi_endproc
+ 360              	.LFE133:
+ 362              		.section	.text.WM8978_MIC_Gain,"ax",%progbits
+ 363              		.align	1
+ 364              		.global	WM8978_MIC_Gain
+ 365              		.syntax unified
+ 366              		.thumb
+ 367              		.thumb_func
+ 369              	WM8978_MIC_Gain:
+ 370              	.LVL42:
+ 371              	.LFB134:
+ 122:source\wm8978/wm8978.c **** 
+ 123:source\wm8978/wm8978.c **** 
+ 124:source\wm8978/wm8978.c **** void WM8978_MIC_Gain (unsigned char gain)
+ 125:source\wm8978/wm8978.c **** {
+ 372              		.loc 1 125 1 is_stmt 1 view -0
+ 373              		.cfi_startproc
+ 374              		@ args = 0, pretend = 0, frame = 0
+ 375              		@ frame_needed = 0, uses_anonymous_args = 0
+ 126:source\wm8978/wm8978.c ****       gain &= 0x3F;
+ 376              		.loc 1 126 7 view .LVU100
+ 125:source\wm8978/wm8978.c ****       gain &= 0x3F;
+ 377              		.loc 1 125 1 is_stmt 0 view .LVU101
+ 378 0000 10B5     		push	{r4, lr}
+ 379              		.cfi_def_cfa_offset 8
+ 380              		.cfi_offset 4, -8
+ 381              		.cfi_offset 14, -4
+ 382              		.loc 1 126 12 view .LVU102
+ 383 0002 00F03F04 		and	r4, r0, #63
+ 384              	.LVL43:
+ 127:source\wm8978/wm8978.c ****       WM8978_Write_Reg(45,gain);		//gain:0~63,-12dB~35.25dB,0.75dB/Step
+ 385              		.loc 1 127 7 is_stmt 1 view .LVU103
+ 386 0006 2146     		mov	r1, r4
+ 387 0008 2D20     		movs	r0, #45
+ 388 000a FFF7FEFF 		bl	WM8978_Write_Reg
+ 389              	.LVL44:
+ 128:source\wm8978/wm8978.c ****       WM8978_Write_Reg(46,gain | 1 << 8);
+ 390              		.loc 1 128 7 view .LVU104
+ 391 000e 44F48071 		orr	r1, r4, #256
+ 392 0012 2E20     		movs	r0, #46
+ 129:source\wm8978/wm8978.c **** }
+ 393              		.loc 1 129 1 is_stmt 0 view .LVU105
+ 394 0014 BDE81040 		pop	{r4, lr}
+ 395              		.cfi_restore 14
+ 396              		.cfi_restore 4
+ 397              		.cfi_def_cfa_offset 0
+ 398              	.LVL45:
+ 128:source\wm8978/wm8978.c ****       WM8978_Write_Reg(46,gain | 1 << 8);
+ 399              		.loc 1 128 7 view .LVU106
+ 400 0018 FFF7FEBF 		b	WM8978_Write_Reg
+ 401              	.LVL46:
+ 402              		.cfi_endproc
+ 403              	.LFE134:
+ 405              		.section	.text.WM8978_LINEIN_Gain,"ax",%progbits
+ 406              		.align	1
+ 407              		.global	WM8978_LINEIN_Gain
+ 408              		.syntax unified
+ 409              		.thumb
+ 410              		.thumb_func
+ 412              	WM8978_LINEIN_Gain:
+ 413              	.LVL47:
+ 414              	.LFB135:
+ 130:source\wm8978/wm8978.c **** 
+ 131:source\wm8978/wm8978.c **** 
+ 132:source\wm8978/wm8978.c **** void WM8978_LINEIN_Gain (unsigned char gain)
+ 133:source\wm8978/wm8978.c **** {
+ 415              		.loc 1 133 1 is_stmt 1 view -0
+ 416              		.cfi_startproc
+ 417              		@ args = 0, pretend = 0, frame = 0
+ 418              		@ frame_needed = 0, uses_anonymous_args = 0
+ 134:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 419              		.loc 1 134 7 view .LVU108
+ 135:source\wm8978/wm8978.c ****       gain &= 0x07;
+ 420              		.loc 1 135 7 view .LVU109
+ 136:source\wm8978/wm8978.c ****       regval=WM8978_Read_Reg(47);
+ 421              		.loc 1 136 7 view .LVU110
+ 422              	.LBB22:
+ 423              	.LBI22:
+ 118:source\wm8978/wm8978.c **** {
+ 424              		.loc 1 118 16 view .LVU111
+ 425              	.LBB23:
+ 120:source\wm8978/wm8978.c **** }
+ 426              		.loc 1 120 7 view .LVU112
+ 120:source\wm8978/wm8978.c **** }
+ 427              		.loc 1 120 7 is_stmt 0 view .LVU113
+ 428              	.LBE23:
+ 429              	.LBE22:
+ 137:source\wm8978/wm8978.c ****       regval &= ~(7 << 4);
+ 430              		.loc 1 137 7 is_stmt 1 view .LVU114
+ 138:source\wm8978/wm8978.c ****       WM8978_Write_Reg(47,regval | gain << 4);	//gain:0~7,0,1~7,-12dB~6dB,3dB/Step
+ 431              		.loc 1 138 7 view .LVU115
+ 133:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 432              		.loc 1 133 1 is_stmt 0 view .LVU116
+ 433 0000 38B5     		push	{r3, r4, r5, lr}
+ 434              		.cfi_def_cfa_offset 16
+ 435              		.cfi_offset 3, -16
+ 436              		.cfi_offset 4, -12
+ 437              		.cfi_offset 5, -8
+ 438              		.cfi_offset 14, -4
+ 439              	.LBB25:
+ 440              	.LBB24:
+ 120:source\wm8978/wm8978.c **** }
+ 441              		.loc 1 120 31 view .LVU117
+ 442 0002 0C4D     		ldr	r5, .L14
+ 443              	.LBE24:
+ 444              	.LBE25:
+ 137:source\wm8978/wm8978.c ****       WM8978_Write_Reg(47,regval | gain << 4);	//gain:0~7,0,1~7,-12dB~6dB,3dB/Step
+ 445              		.loc 1 137 14 view .LVU118
+ 446 0004 B5F85E10 		ldrh	r1, [r5, #94]
+ 447              		.loc 1 138 41 view .LVU119
+ 448 0008 00F00700 		and	r0, r0, #7
+ 449              	.LVL48:
+ 137:source\wm8978/wm8978.c ****       WM8978_Write_Reg(47,regval | gain << 4);	//gain:0~7,0,1~7,-12dB~6dB,3dB/Step
+ 450              		.loc 1 137 14 view .LVU120
+ 451 000c 21F07001 		bic	r1, r1, #112
+ 452              		.loc 1 138 34 view .LVU121
+ 453 0010 41EA0011 		orr	r1, r1, r0, lsl #4
+ 454 0014 0401     		lsls	r4, r0, #4
+ 455              		.loc 1 138 7 view .LVU122
+ 456 0016 89B2     		uxth	r1, r1
+ 457 0018 2F20     		movs	r0, #47
+ 458 001a FFF7FEFF 		bl	WM8978_Write_Reg
+ 459              	.LVL49:
+ 139:source\wm8978/wm8978.c ****       regval = WM8978_Read_Reg(48);
+ 460              		.loc 1 139 7 is_stmt 1 view .LVU123
+ 461              	.LBB26:
+ 462              	.LBI26:
+ 118:source\wm8978/wm8978.c **** {
+ 463              		.loc 1 118 16 view .LVU124
+ 464              	.LBB27:
+ 120:source\wm8978/wm8978.c **** }
+ 465              		.loc 1 120 7 view .LVU125
+ 120:source\wm8978/wm8978.c **** }
+ 466              		.loc 1 120 7 is_stmt 0 view .LVU126
+ 467              	.LBE27:
+ 468              	.LBE26:
+ 140:source\wm8978/wm8978.c ****       regval &= ~(7 << 4);
+ 469              		.loc 1 140 7 is_stmt 1 view .LVU127
+ 141:source\wm8978/wm8978.c ****       WM8978_Write_Reg(48,regval | gain << 4);
+ 470              		.loc 1 141 7 view .LVU128
+ 140:source\wm8978/wm8978.c ****       regval &= ~(7 << 4);
+ 471              		.loc 1 140 14 is_stmt 0 view .LVU129
+ 472 001e B5F86010 		ldrh	r1, [r5, #96]
+ 473 0022 21F07001 		bic	r1, r1, #112
+ 474              		.loc 1 141 34 view .LVU130
+ 475 0026 2143     		orrs	r1, r1, r4
+ 476              		.loc 1 141 7 view .LVU131
+ 477 0028 89B2     		uxth	r1, r1
+ 142:source\wm8978/wm8978.c **** }
+ 478              		.loc 1 142 1 view .LVU132
+ 479 002a BDE83840 		pop	{r3, r4, r5, lr}
+ 480              		.cfi_restore 14
+ 481              		.cfi_restore 5
+ 482              		.cfi_restore 4
+ 483              		.cfi_restore 3
+ 484              		.cfi_def_cfa_offset 0
+ 141:source\wm8978/wm8978.c ****       WM8978_Write_Reg(48,regval | gain << 4);
+ 485              		.loc 1 141 7 view .LVU133
+ 486 002e 3020     		movs	r0, #48
+ 487 0030 FFF7FEBF 		b	WM8978_Write_Reg
+ 488              	.LVL50:
+ 489              	.L15:
+ 141:source\wm8978/wm8978.c ****       WM8978_Write_Reg(48,regval | gain << 4);
+ 490              		.loc 1 141 7 view .LVU134
+ 491              		.align	2
+ 492              	.L14:
+ 493 0034 00000000 		.word	.LANCHOR0
+ 494              		.cfi_endproc
+ 495              	.LFE135:
+ 497              		.section	.text.WM8978_AUX_Gain,"ax",%progbits
+ 498              		.align	1
+ 499              		.global	WM8978_AUX_Gain
+ 500              		.syntax unified
+ 501              		.thumb
+ 502              		.thumb_func
+ 504              	WM8978_AUX_Gain:
+ 505              	.LVL51:
+ 506              	.LFB136:
+ 143:source\wm8978/wm8978.c **** 
+ 144:source\wm8978/wm8978.c **** 
+ 145:source\wm8978/wm8978.c **** void WM8978_AUX_Gain (unsigned char gain)
+ 146:source\wm8978/wm8978.c **** {
+ 507              		.loc 1 146 1 is_stmt 1 view -0
+ 508              		.cfi_startproc
+ 509              		@ args = 0, pretend = 0, frame = 0
+ 510              		@ frame_needed = 0, uses_anonymous_args = 0
+ 147:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 511              		.loc 1 147 7 view .LVU136
+ 148:source\wm8978/wm8978.c ****       gain &= 0x07;
+ 512              		.loc 1 148 7 view .LVU137
+ 149:source\wm8978/wm8978.c ****       regval = WM8978_Read_Reg(47);
+ 513              		.loc 1 149 7 view .LVU138
+ 514              	.LBB28:
+ 515              	.LBI28:
+ 118:source\wm8978/wm8978.c **** {
+ 516              		.loc 1 118 16 view .LVU139
+ 517              	.LBB29:
+ 120:source\wm8978/wm8978.c **** }
+ 518              		.loc 1 120 7 view .LVU140
+ 120:source\wm8978/wm8978.c **** }
+ 519              		.loc 1 120 7 is_stmt 0 view .LVU141
+ 520              	.LBE29:
+ 521              	.LBE28:
+ 150:source\wm8978/wm8978.c ****       regval &= ~(7 << 0);
+ 522              		.loc 1 150 7 is_stmt 1 view .LVU142
+ 151:source\wm8978/wm8978.c ****       WM8978_Write_Reg(47,regval | gain << 0);	//gain:0~7,0,1~7,-12dB~6dB,3dB/Step
+ 523              		.loc 1 151 7 view .LVU143
+ 146:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 524              		.loc 1 146 1 is_stmt 0 view .LVU144
+ 525 0000 38B5     		push	{r3, r4, r5, lr}
+ 526              		.cfi_def_cfa_offset 16
+ 527              		.cfi_offset 3, -16
+ 528              		.cfi_offset 4, -12
+ 529              		.cfi_offset 5, -8
+ 530              		.cfi_offset 14, -4
+ 531              	.LBB31:
+ 532              	.LBB30:
+ 120:source\wm8978/wm8978.c **** }
+ 533              		.loc 1 120 31 view .LVU145
+ 534 0002 0B4D     		ldr	r5, .L17
+ 535              	.LBE30:
+ 536              	.LBE31:
+ 150:source\wm8978/wm8978.c ****       WM8978_Write_Reg(47,regval | gain << 0);	//gain:0~7,0,1~7,-12dB~6dB,3dB/Step
+ 537              		.loc 1 150 14 view .LVU146
+ 538 0004 B5F85E10 		ldrh	r1, [r5, #94]
+ 539              		.loc 1 151 7 view .LVU147
+ 540 0008 00F00704 		and	r4, r0, #7
+ 150:source\wm8978/wm8978.c ****       WM8978_Write_Reg(47,regval | gain << 0);	//gain:0~7,0,1~7,-12dB~6dB,3dB/Step
+ 541              		.loc 1 150 14 view .LVU148
+ 542 000c 21F00701 		bic	r1, r1, #7
+ 543              		.loc 1 151 7 view .LVU149
+ 544 0010 2143     		orrs	r1, r1, r4
+ 545 0012 89B2     		uxth	r1, r1
+ 546 0014 2F20     		movs	r0, #47
+ 547              	.LVL52:
+ 548              		.loc 1 151 7 view .LVU150
+ 549 0016 FFF7FEFF 		bl	WM8978_Write_Reg
+ 550              	.LVL53:
+ 152:source\wm8978/wm8978.c ****       regval = WM8978_Read_Reg(48);
+ 551              		.loc 1 152 7 is_stmt 1 view .LVU151
+ 552              	.LBB32:
+ 553              	.LBI32:
+ 118:source\wm8978/wm8978.c **** {
+ 554              		.loc 1 118 16 view .LVU152
+ 555              	.LBB33:
+ 120:source\wm8978/wm8978.c **** }
+ 556              		.loc 1 120 7 view .LVU153
+ 120:source\wm8978/wm8978.c **** }
+ 557              		.loc 1 120 7 is_stmt 0 view .LVU154
+ 558              	.LBE33:
+ 559              	.LBE32:
+ 153:source\wm8978/wm8978.c ****       regval &= ~(7 << 0);
+ 560              		.loc 1 153 7 is_stmt 1 view .LVU155
+ 154:source\wm8978/wm8978.c ****       WM8978_Write_Reg(48,regval | gain << 0);
+ 561              		.loc 1 154 7 view .LVU156
+ 153:source\wm8978/wm8978.c ****       regval &= ~(7 << 0);
+ 562              		.loc 1 153 14 is_stmt 0 view .LVU157
+ 563 001a B5F86010 		ldrh	r1, [r5, #96]
+ 564 001e 21F00701 		bic	r1, r1, #7
+ 565              		.loc 1 154 7 view .LVU158
+ 566 0022 2143     		orrs	r1, r1, r4
+ 567 0024 89B2     		uxth	r1, r1
+ 155:source\wm8978/wm8978.c **** }
+ 568              		.loc 1 155 1 view .LVU159
+ 569 0026 BDE83840 		pop	{r3, r4, r5, lr}
+ 570              		.cfi_restore 14
+ 571              		.cfi_restore 5
+ 572              		.cfi_restore 4
+ 573              		.cfi_restore 3
+ 574              		.cfi_def_cfa_offset 0
+ 154:source\wm8978/wm8978.c ****       WM8978_Write_Reg(48,regval | gain << 0);
+ 575              		.loc 1 154 7 view .LVU160
+ 576 002a 3020     		movs	r0, #48
+ 577 002c FFF7FEBF 		b	WM8978_Write_Reg
+ 578              	.LVL54:
+ 579              	.L18:
+ 154:source\wm8978/wm8978.c ****       WM8978_Write_Reg(48,regval | gain << 0);
+ 580              		.loc 1 154 7 view .LVU161
+ 581              		.align	2
+ 582              	.L17:
+ 583 0030 00000000 		.word	.LANCHOR0
+ 584              		.cfi_endproc
+ 585              	.LFE136:
+ 587              		.section	.text.WM8978_ADDA_Cfg,"ax",%progbits
+ 588              		.align	1
+ 589              		.global	WM8978_ADDA_Cfg
+ 590              		.syntax unified
+ 591              		.thumb
+ 592              		.thumb_func
+ 594              	WM8978_ADDA_Cfg:
+ 595              	.LVL55:
+ 596              	.LFB137:
+ 156:source\wm8978/wm8978.c **** 
+ 157:source\wm8978/wm8978.c **** 
+ 158:source\wm8978/wm8978.c **** void WM8978_ADDA_Cfg (unsigned char dacen,unsigned char adcen)
+ 159:source\wm8978/wm8978.c **** {
+ 597              		.loc 1 159 1 is_stmt 1 view -0
+ 598              		.cfi_startproc
+ 599              		@ args = 0, pretend = 0, frame = 0
+ 600              		@ frame_needed = 0, uses_anonymous_args = 0
+ 160:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 601              		.loc 1 160 7 view .LVU163
+ 161:source\wm8978/wm8978.c ****       regval = WM8978_Read_Reg(3);
+ 602              		.loc 1 161 7 view .LVU164
+ 603              	.LBB34:
+ 604              	.LBI34:
+ 118:source\wm8978/wm8978.c **** {
+ 605              		.loc 1 118 16 view .LVU165
+ 606              	.LBB35:
+ 120:source\wm8978/wm8978.c **** }
+ 607              		.loc 1 120 7 view .LVU166
+ 608              	.LBE35:
+ 609              	.LBE34:
+ 159:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 610              		.loc 1 159 1 is_stmt 0 view .LVU167
+ 611 0000 38B5     		push	{r3, r4, r5, lr}
+ 612              		.cfi_def_cfa_offset 16
+ 613              		.cfi_offset 3, -16
+ 614              		.cfi_offset 4, -12
+ 615              		.cfi_offset 5, -8
+ 616              		.cfi_offset 14, -4
+ 617              	.LBB38:
+ 618              	.LBB36:
+ 120:source\wm8978/wm8978.c **** }
+ 619              		.loc 1 120 31 view .LVU168
+ 620 0002 0D4D     		ldr	r5, .L24
+ 621              	.LBE36:
+ 622              	.LBE38:
+ 159:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 623              		.loc 1 159 1 view .LVU169
+ 624 0004 0C46     		mov	r4, r1
+ 625              	.LBB39:
+ 626              	.LBB37:
+ 120:source\wm8978/wm8978.c **** }
+ 627              		.loc 1 120 31 view .LVU170
+ 628 0006 EB88     		ldrh	r3, [r5, #6]
+ 629              	.LVL56:
+ 120:source\wm8978/wm8978.c **** }
+ 630              		.loc 1 120 31 view .LVU171
+ 631              	.LBE37:
+ 632              	.LBE39:
+ 162:source\wm8978/wm8978.c ****       if (dacen) regval |= 3 << 0;else regval &= ~(3 << 0);
+ 633              		.loc 1 162 7 is_stmt 1 view .LVU172
+ 634              		.loc 1 162 10 is_stmt 0 view .LVU173
+ 635 0008 68B1     		cbz	r0, .L20
+ 636              		.loc 1 162 18 is_stmt 1 discriminator 1 view .LVU174
+ 637              		.loc 1 162 25 is_stmt 0 discriminator 1 view .LVU175
+ 638 000a 43F00301 		orr	r1, r3, #3
+ 639              	.LVL57:
+ 640              	.L21:
+ 163:source\wm8978/wm8978.c ****       WM8978_Write_Reg(3,regval);
+ 641              		.loc 1 163 7 is_stmt 1 view .LVU176
+ 642 000e 0320     		movs	r0, #3
+ 643              	.LVL58:
+ 644              		.loc 1 163 7 is_stmt 0 view .LVU177
+ 645 0010 FFF7FEFF 		bl	WM8978_Write_Reg
+ 646              	.LVL59:
+ 164:source\wm8978/wm8978.c ****       regval = WM8978_Read_Reg(2);
+ 647              		.loc 1 164 7 is_stmt 1 view .LVU178
+ 648              	.LBB40:
+ 649              	.LBI40:
+ 118:source\wm8978/wm8978.c **** {
+ 650              		.loc 1 118 16 view .LVU179
+ 651              	.LBB41:
+ 120:source\wm8978/wm8978.c **** }
+ 652              		.loc 1 120 7 view .LVU180
+ 120:source\wm8978/wm8978.c **** }
+ 653              		.loc 1 120 31 is_stmt 0 view .LVU181
+ 654 0014 AB88     		ldrh	r3, [r5, #4]
+ 655              	.LVL60:
+ 120:source\wm8978/wm8978.c **** }
+ 656              		.loc 1 120 31 view .LVU182
+ 657              	.LBE41:
+ 658              	.LBE40:
+ 165:source\wm8978/wm8978.c ****       if (adcen) regval |= 3 << 0;else regval &= ~(3 << 0);
+ 659              		.loc 1 165 7 is_stmt 1 view .LVU183
+ 660              		.loc 1 165 10 is_stmt 0 view .LVU184
+ 661 0016 54B1     		cbz	r4, .L22
+ 662              		.loc 1 165 18 is_stmt 1 discriminator 1 view .LVU185
+ 663              		.loc 1 165 25 is_stmt 0 discriminator 1 view .LVU186
+ 664 0018 43F00301 		orr	r1, r3, #3
+ 665              	.LVL61:
+ 666              	.L23:
+ 166:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,regval);
+ 667              		.loc 1 166 7 is_stmt 1 view .LVU187
+ 167:source\wm8978/wm8978.c **** }
+ 668              		.loc 1 167 1 is_stmt 0 view .LVU188
+ 669 001c BDE83840 		pop	{r3, r4, r5, lr}
+ 670              		.cfi_remember_state
+ 671              		.cfi_restore 14
+ 672              		.cfi_restore 5
+ 673              		.cfi_restore 4
+ 674              		.cfi_restore 3
+ 675              		.cfi_def_cfa_offset 0
+ 166:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,regval);
+ 676              		.loc 1 166 7 view .LVU189
+ 677 0020 0220     		movs	r0, #2
+ 678 0022 FFF7FEBF 		b	WM8978_Write_Reg
+ 679              	.LVL62:
+ 680              	.L20:
+ 681              		.cfi_restore_state
+ 162:source\wm8978/wm8978.c ****       WM8978_Write_Reg(3,regval);
+ 682              		.loc 1 162 40 is_stmt 1 discriminator 2 view .LVU190
+ 162:source\wm8978/wm8978.c ****       WM8978_Write_Reg(3,regval);
+ 683              		.loc 1 162 47 is_stmt 0 discriminator 2 view .LVU191
+ 684 0026 23F00303 		bic	r3, r3, #3
+ 685              	.LVL63:
+ 162:source\wm8978/wm8978.c ****       WM8978_Write_Reg(3,regval);
+ 686              		.loc 1 162 47 discriminator 2 view .LVU192
+ 687 002a 99B2     		uxth	r1, r3
+ 688              	.LVL64:
+ 162:source\wm8978/wm8978.c ****       WM8978_Write_Reg(3,regval);
+ 689              		.loc 1 162 47 discriminator 2 view .LVU193
+ 690 002c EFE7     		b	.L21
+ 691              	.LVL65:
+ 692              	.L22:
+ 165:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,regval);
+ 693              		.loc 1 165 40 is_stmt 1 discriminator 2 view .LVU194
+ 165:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,regval);
+ 694              		.loc 1 165 47 is_stmt 0 discriminator 2 view .LVU195
+ 695 002e 23F00301 		bic	r1, r3, #3
+ 696 0032 89B2     		uxth	r1, r1
+ 697              	.LVL66:
+ 165:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,regval);
+ 698              		.loc 1 165 47 discriminator 2 view .LVU196
+ 699 0034 F2E7     		b	.L23
+ 700              	.L25:
+ 701 0036 00BF     		.align	2
+ 702              	.L24:
+ 703 0038 00000000 		.word	.LANCHOR0
+ 704              		.cfi_endproc
+ 705              	.LFE137:
+ 707              		.section	.text.WM8978_Input_Cfg,"ax",%progbits
+ 708              		.align	1
+ 709              		.global	WM8978_Input_Cfg
+ 710              		.syntax unified
+ 711              		.thumb
+ 712              		.thumb_func
+ 714              	WM8978_Input_Cfg:
+ 715              	.LVL67:
+ 716              	.LFB138:
+ 168:source\wm8978/wm8978.c **** 
+ 169:source\wm8978/wm8978.c **** 
+ 170:source\wm8978/wm8978.c **** void WM8978_Input_Cfg (unsigned char micen,unsigned char lineinen,unsigned char auxen)
+ 171:source\wm8978/wm8978.c **** {
+ 717              		.loc 1 171 1 is_stmt 1 view -0
+ 718              		.cfi_startproc
+ 719              		@ args = 0, pretend = 0, frame = 0
+ 720              		@ frame_needed = 0, uses_anonymous_args = 0
+ 172:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 721              		.loc 1 172 7 view .LVU198
+ 173:source\wm8978/wm8978.c ****       regval = WM8978_Read_Reg(2);
+ 722              		.loc 1 173 7 view .LVU199
+ 723              	.LBB42:
+ 724              	.LBI42:
+ 118:source\wm8978/wm8978.c **** {
+ 725              		.loc 1 118 16 view .LVU200
+ 726              	.LBB43:
+ 120:source\wm8978/wm8978.c **** }
+ 727              		.loc 1 120 7 view .LVU201
+ 728              	.LBE43:
+ 729              	.LBE42:
+ 171:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 730              		.loc 1 171 1 is_stmt 0 view .LVU202
+ 731 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 732              		.cfi_def_cfa_offset 24
+ 733              		.cfi_offset 3, -24
+ 734              		.cfi_offset 4, -20
+ 735              		.cfi_offset 5, -16
+ 736              		.cfi_offset 6, -12
+ 737              		.cfi_offset 7, -8
+ 738              		.cfi_offset 14, -4
+ 739              	.LBB46:
+ 740              	.LBB44:
+ 120:source\wm8978/wm8978.c **** }
+ 741              		.loc 1 120 31 view .LVU203
+ 742 0002 144F     		ldr	r7, .L36
+ 743              	.LBE44:
+ 744              	.LBE46:
+ 171:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 745              		.loc 1 171 1 view .LVU204
+ 746 0004 0D46     		mov	r5, r1
+ 747              	.LBB47:
+ 748              	.LBB45:
+ 120:source\wm8978/wm8978.c **** }
+ 749              		.loc 1 120 31 view .LVU205
+ 750 0006 BB88     		ldrh	r3, [r7, #4]
+ 751              	.LVL68:
+ 120:source\wm8978/wm8978.c **** }
+ 752              		.loc 1 120 31 view .LVU206
+ 753              	.LBE45:
+ 754              	.LBE47:
+ 174:source\wm8978/wm8978.c ****       if (micen) regval |= 3 << 2;else regval &= ~(3 << 2);
+ 755              		.loc 1 174 7 is_stmt 1 view .LVU207
+ 171:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 756              		.loc 1 171 1 is_stmt 0 view .LVU208
+ 757 0008 1446     		mov	r4, r2
+ 758              		.loc 1 174 10 view .LVU209
+ 759 000a 0646     		mov	r6, r0
+ 760 000c B0B1     		cbz	r0, .L27
+ 761              		.loc 1 174 18 is_stmt 1 discriminator 1 view .LVU210
+ 762              		.loc 1 174 25 is_stmt 0 discriminator 1 view .LVU211
+ 763 000e 43F00C01 		orr	r1, r3, #12
+ 764              	.LVL69:
+ 765              	.L28:
+ 175:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,regval);
+ 766              		.loc 1 175 7 is_stmt 1 view .LVU212
+ 767 0012 0220     		movs	r0, #2
+ 768              	.LVL70:
+ 769              		.loc 1 175 7 is_stmt 0 view .LVU213
+ 770 0014 FFF7FEFF 		bl	WM8978_Write_Reg
+ 771              	.LVL71:
+ 176:source\wm8978/wm8978.c ****       regval = WM8978_Read_Reg(44);
+ 772              		.loc 1 176 7 is_stmt 1 view .LVU214
+ 773              	.LBB48:
+ 774              	.LBI48:
+ 118:source\wm8978/wm8978.c **** {
+ 775              		.loc 1 118 16 view .LVU215
+ 776              	.LBB49:
+ 120:source\wm8978/wm8978.c **** }
+ 777              		.loc 1 120 7 view .LVU216
+ 120:source\wm8978/wm8978.c **** }
+ 778              		.loc 1 120 31 is_stmt 0 view .LVU217
+ 779 0018 B7F85830 		ldrh	r3, [r7, #88]
+ 780              	.LVL72:
+ 120:source\wm8978/wm8978.c **** }
+ 781              		.loc 1 120 31 view .LVU218
+ 782              	.LBE49:
+ 783              	.LBE48:
+ 177:source\wm8978/wm8978.c ****       if (micen) regval |= 3 << 4 | 3 << 0;else regval &= ~(3 << 4 | 3 << 0);
+ 784              		.loc 1 177 7 is_stmt 1 view .LVU219
+ 785              		.loc 1 177 10 is_stmt 0 view .LVU220
+ 786 001c 96B1     		cbz	r6, .L29
+ 787              		.loc 1 177 18 is_stmt 1 discriminator 1 view .LVU221
+ 788              		.loc 1 177 25 is_stmt 0 discriminator 1 view .LVU222
+ 789 001e 43F03301 		orr	r1, r3, #51
+ 790              	.LVL73:
+ 791              	.L30:
+ 178:source\wm8978/wm8978.c ****       WM8978_Write_Reg(44,regval);
+ 792              		.loc 1 178 7 is_stmt 1 view .LVU223
+ 793 0022 2C20     		movs	r0, #44
+ 794 0024 FFF7FEFF 		bl	WM8978_Write_Reg
+ 795              	.LVL74:
+ 179:source\wm8978/wm8978.c ****       if (lineinen) WM8978_LINEIN_Gain(5);else WM8978_LINEIN_Gain(0);
+ 796              		.loc 1 179 7 view .LVU224
+ 797              		.loc 1 179 10 is_stmt 0 view .LVU225
+ 798 0028 85B1     		cbz	r5, .L31
+ 799              		.loc 1 179 21 is_stmt 1 discriminator 1 view .LVU226
+ 800 002a 0520     		movs	r0, #5
+ 801              	.L34:
+ 802              		.loc 1 179 48 is_stmt 0 discriminator 2 view .LVU227
+ 803 002c FFF7FEFF 		bl	WM8978_LINEIN_Gain
+ 804              	.LVL75:
+ 180:source\wm8978/wm8978.c ****       if (auxen) WM8978_AUX_Gain(7);else WM8978_AUX_Gain(0);
+ 805              		.loc 1 180 7 is_stmt 1 discriminator 2 view .LVU228
+ 806              		.loc 1 180 10 is_stmt 0 discriminator 2 view .LVU229
+ 807 0030 74B1     		cbz	r4, .L33
+ 808              		.loc 1 180 18 is_stmt 1 discriminator 1 view .LVU230
+ 809 0032 0720     		movs	r0, #7
+ 810              	.L35:
+ 181:source\wm8978/wm8978.c **** }
+ 811              		.loc 1 181 1 is_stmt 0 discriminator 2 view .LVU231
+ 812 0034 BDE8F840 		pop	{r3, r4, r5, r6, r7, lr}
+ 813              		.cfi_remember_state
+ 814              		.cfi_restore 14
+ 815              		.cfi_restore 7
+ 816              		.cfi_restore 6
+ 817              		.cfi_restore 5
+ 818              		.cfi_restore 4
+ 819              		.cfi_restore 3
+ 820              		.cfi_def_cfa_offset 0
+ 180:source\wm8978/wm8978.c ****       if (auxen) WM8978_AUX_Gain(7);else WM8978_AUX_Gain(0);
+ 821              		.loc 1 180 42 discriminator 2 view .LVU232
+ 822 0038 FFF7FEBF 		b	WM8978_AUX_Gain
+ 823              	.LVL76:
+ 824              	.L27:
+ 825              		.cfi_restore_state
+ 174:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,regval);
+ 826              		.loc 1 174 40 is_stmt 1 discriminator 2 view .LVU233
+ 174:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,regval);
+ 827              		.loc 1 174 47 is_stmt 0 discriminator 2 view .LVU234
+ 828 003c 23F00C03 		bic	r3, r3, #12
+ 829              	.LVL77:
+ 174:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,regval);
+ 830              		.loc 1 174 47 discriminator 2 view .LVU235
+ 831 0040 99B2     		uxth	r1, r3
+ 832              	.LVL78:
+ 174:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,regval);
+ 833              		.loc 1 174 47 discriminator 2 view .LVU236
+ 834 0042 E6E7     		b	.L28
+ 835              	.LVL79:
+ 836              	.L29:
+ 177:source\wm8978/wm8978.c ****       WM8978_Write_Reg(44,regval);
+ 837              		.loc 1 177 49 is_stmt 1 discriminator 2 view .LVU237
+ 177:source\wm8978/wm8978.c ****       WM8978_Write_Reg(44,regval);
+ 838              		.loc 1 177 56 is_stmt 0 discriminator 2 view .LVU238
+ 839 0044 23F03303 		bic	r3, r3, #51
+ 840              	.LVL80:
+ 177:source\wm8978/wm8978.c ****       WM8978_Write_Reg(44,regval);
+ 841              		.loc 1 177 56 discriminator 2 view .LVU239
+ 842 0048 99B2     		uxth	r1, r3
+ 843              	.LVL81:
+ 177:source\wm8978/wm8978.c ****       WM8978_Write_Reg(44,regval);
+ 844              		.loc 1 177 56 discriminator 2 view .LVU240
+ 845 004a EAE7     		b	.L30
+ 846              	.LVL82:
+ 847              	.L31:
+ 179:source\wm8978/wm8978.c ****       if (auxen) WM8978_AUX_Gain(7);else WM8978_AUX_Gain(0);
+ 848              		.loc 1 179 48 is_stmt 1 discriminator 2 view .LVU241
+ 849 004c 2846     		mov	r0, r5
+ 850 004e EDE7     		b	.L34
+ 851              	.L33:
+ 180:source\wm8978/wm8978.c **** }
+ 852              		.loc 1 180 42 discriminator 2 view .LVU242
+ 853 0050 2046     		mov	r0, r4
+ 854 0052 EFE7     		b	.L35
+ 855              	.L37:
+ 856              		.align	2
+ 857              	.L36:
+ 858 0054 00000000 		.word	.LANCHOR0
+ 859              		.cfi_endproc
+ 860              	.LFE138:
+ 862              		.section	.text.WM8978_Output_Cfg,"ax",%progbits
+ 863              		.align	1
+ 864              		.global	WM8978_Output_Cfg
+ 865              		.syntax unified
+ 866              		.thumb
+ 867              		.thumb_func
+ 869              	WM8978_Output_Cfg:
+ 870              	.LVL83:
+ 871              	.LFB139:
+ 182:source\wm8978/wm8978.c **** 
+ 183:source\wm8978/wm8978.c **** 
+ 184:source\wm8978/wm8978.c **** void WM8978_Output_Cfg (unsigned char dacen,unsigned char bpsen)
+ 185:source\wm8978/wm8978.c **** {
+ 872              		.loc 1 185 1 view -0
+ 873              		.cfi_startproc
+ 874              		@ args = 0, pretend = 0, frame = 0
+ 875              		@ frame_needed = 0, uses_anonymous_args = 0
+ 186:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 876              		.loc 1 186 7 view .LVU244
+ 187:source\wm8978/wm8978.c ****       if (dacen) regval |= 1 << 0;
+ 877              		.loc 1 187 7 view .LVU245
+ 185:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 878              		.loc 1 185 1 is_stmt 0 view .LVU246
+ 879 0000 10B5     		push	{r4, lr}
+ 880              		.cfi_def_cfa_offset 8
+ 881              		.cfi_offset 4, -8
+ 882              		.cfi_offset 14, -4
+ 186:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 883              		.loc 1 186 22 view .LVU247
+ 884 0002 041E     		subs	r4, r0, #0
+ 885 0004 18BF     		it	ne
+ 886 0006 0124     		movne	r4, #1
+ 887              	.LVL84:
+ 188:source\wm8978/wm8978.c ****       if (bpsen) {
+ 888              		.loc 1 188 7 is_stmt 1 view .LVU248
+ 889              		.loc 1 188 10 is_stmt 0 view .LVU249
+ 890 0008 09B1     		cbz	r1, .L39
+ 189:source\wm8978/wm8978.c **** 	 regval |= 1 << 1;			//bpsen:Bypass,MIC,LINE IN,AUX
+ 891              		.loc 1 189 3 is_stmt 1 view .LVU250
+ 892              	.LVL85:
+ 190:source\wm8978/wm8978.c **** 	 regval |= 5 << 2;
+ 893              		.loc 1 190 3 view .LVU251
+ 894              		.loc 1 190 10 is_stmt 0 view .LVU252
+ 895 000a 44F01604 		orr	r4, r4, #22
+ 896              	.LVL86:
+ 897              	.L39:
+ 191:source\wm8978/wm8978.c ****       }
+ 192:source\wm8978/wm8978.c ****       WM8978_Write_Reg(50,regval);
+ 898              		.loc 1 192 7 is_stmt 1 view .LVU253
+ 899 000e 2146     		mov	r1, r4
+ 900              	.LVL87:
+ 901              		.loc 1 192 7 is_stmt 0 view .LVU254
+ 902 0010 3220     		movs	r0, #50
+ 903              	.LVL88:
+ 904              		.loc 1 192 7 view .LVU255
+ 905 0012 FFF7FEFF 		bl	WM8978_Write_Reg
+ 906              	.LVL89:
+ 193:source\wm8978/wm8978.c ****       WM8978_Write_Reg(51,regval);
+ 907              		.loc 1 193 7 is_stmt 1 view .LVU256
+ 908 0016 2146     		mov	r1, r4
+ 909 0018 3320     		movs	r0, #51
+ 194:source\wm8978/wm8978.c **** }
+ 910              		.loc 1 194 1 is_stmt 0 view .LVU257
+ 911 001a BDE81040 		pop	{r4, lr}
+ 912              		.cfi_restore 14
+ 913              		.cfi_restore 4
+ 914              		.cfi_def_cfa_offset 0
+ 915              	.LVL90:
+ 193:source\wm8978/wm8978.c ****       WM8978_Write_Reg(51,regval);
+ 916              		.loc 1 193 7 view .LVU258
+ 917 001e FFF7FEBF 		b	WM8978_Write_Reg
+ 918              	.LVL91:
+ 919              		.cfi_endproc
+ 920              	.LFE139:
+ 922              		.section	.text.WM8978_I2S_Cfg,"ax",%progbits
+ 923              		.align	1
+ 924              		.global	WM8978_I2S_Cfg
+ 925              		.syntax unified
+ 926              		.thumb
+ 927              		.thumb_func
+ 929              	WM8978_I2S_Cfg:
+ 930              	.LVL92:
+ 931              	.LFB140:
+ 195:source\wm8978/wm8978.c **** 
+ 196:source\wm8978/wm8978.c **** 
+ 197:source\wm8978/wm8978.c **** void WM8978_I2S_Cfg (unsigned char fmt,unsigned char len)
+ 198:source\wm8978/wm8978.c **** {
+ 932              		.loc 1 198 1 is_stmt 1 view -0
+ 933              		.cfi_startproc
+ 934              		@ args = 0, pretend = 0, frame = 0
+ 935              		@ frame_needed = 0, uses_anonymous_args = 0
+ 936              		@ link register save eliminated.
+ 199:source\wm8978/wm8978.c ****       fmt &= 0x03;			//fmt:0,LSB;1,MSB;2,I2S;3,PCM/DSP;
+ 937              		.loc 1 199 7 view .LVU260
+ 200:source\wm8978/wm8978.c ****       len &= 0x03;			//len:0,16;1,20;2,24;3,32;
+ 938              		.loc 1 200 7 view .LVU261
+ 201:source\wm8978/wm8978.c ****       WM8978_Write_Reg(4,(fmt << 3) | (len << 5));
+ 939              		.loc 1 201 7 view .LVU262
+ 940              		.loc 1 201 44 is_stmt 0 view .LVU263
+ 941 0000 01F00301 		and	r1, r1, #3
+ 942              	.LVL93:
+ 943              		.loc 1 201 31 view .LVU264
+ 944 0004 00F00300 		and	r0, r0, #3
+ 945              	.LVL94:
+ 946              		.loc 1 201 44 view .LVU265
+ 947 0008 4901     		lsls	r1, r1, #5
+ 948              		.loc 1 201 7 view .LVU266
+ 949 000a 41EAC001 		orr	r1, r1, r0, lsl #3
+ 950 000e 0420     		movs	r0, #4
+ 951 0010 FFF7FEBF 		b	WM8978_Write_Reg
+ 952              	.LVL95:
+ 953              		.cfi_endproc
+ 954              	.LFE140:
+ 956              		.section	.text.WM8978_HPvol_Set,"ax",%progbits
+ 957              		.align	1
+ 958              		.global	WM8978_HPvol_Set
+ 959              		.syntax unified
+ 960              		.thumb
+ 961              		.thumb_func
+ 963              	WM8978_HPvol_Set:
+ 964              	.LVL96:
+ 965              	.LFB141:
+ 202:source\wm8978/wm8978.c **** }
+ 203:source\wm8978/wm8978.c **** 
+ 204:source\wm8978/wm8978.c **** 
+ 205:source\wm8978/wm8978.c **** void WM8978_HPvol_Set (unsigned char voll,unsigned char volr)
+ 206:source\wm8978/wm8978.c **** {
+ 966              		.loc 1 206 1 is_stmt 1 view -0
+ 967              		.cfi_startproc
+ 968              		@ args = 0, pretend = 0, frame = 0
+ 969              		@ frame_needed = 0, uses_anonymous_args = 0
+ 207:source\wm8978/wm8978.c ****       voll &= 0x3F;
+ 970              		.loc 1 207 7 view .LVU268
+ 208:source\wm8978/wm8978.c ****       volr &= 0x3F;
+ 971              		.loc 1 208 7 view .LVU269
+ 209:source\wm8978/wm8978.c ****       if (voll == 0) voll |= 1 << 6;
+ 972              		.loc 1 209 7 view .LVU270
+ 206:source\wm8978/wm8978.c ****       voll &= 0x3F;
+ 973              		.loc 1 206 1 is_stmt 0 view .LVU271
+ 974 0000 10B5     		push	{r4, lr}
+ 975              		.cfi_def_cfa_offset 8
+ 976              		.cfi_offset 4, -8
+ 977              		.cfi_offset 14, -4
+ 978              		.loc 1 209 27 view .LVU272
+ 979 0002 10F03F00 		ands	r0, r0, #63
+ 980              	.LVL97:
+ 981              		.loc 1 209 27 view .LVU273
+ 982 0006 08BF     		it	eq
+ 983 0008 4020     		moveq	r0, #64
+ 984              	.LVL98:
+ 210:source\wm8978/wm8978.c ****       if (volr == 0) volr |= 1 << 6;
+ 985              		.loc 1 210 7 is_stmt 1 view .LVU274
+ 986              		.loc 1 210 27 is_stmt 0 view .LVU275
+ 987 000a 11F03F04 		ands	r4, r1, #63
+ 988 000e 08BF     		it	eq
+ 989 0010 4024     		moveq	r4, #64
+ 990              	.LVL99:
+ 211:source\wm8978/wm8978.c ****       WM8978_Write_Reg(52,voll);
+ 991              		.loc 1 211 7 is_stmt 1 view .LVU276
+ 992 0012 0146     		mov	r1, r0
+ 993 0014 3420     		movs	r0, #52
+ 994              	.LVL100:
+ 995              		.loc 1 211 7 is_stmt 0 view .LVU277
+ 996 0016 FFF7FEFF 		bl	WM8978_Write_Reg
+ 997              	.LVL101:
+ 212:source\wm8978/wm8978.c ****       WM8978_Write_Reg(53,volr | (1 << 8));
+ 998              		.loc 1 212 7 is_stmt 1 view .LVU278
+ 999 001a 44F48071 		orr	r1, r4, #256
+ 1000 001e 3520     		movs	r0, #53
+ 213:source\wm8978/wm8978.c **** }
+ 1001              		.loc 1 213 1 is_stmt 0 view .LVU279
+ 1002 0020 BDE81040 		pop	{r4, lr}
+ 1003              		.cfi_restore 14
+ 1004              		.cfi_restore 4
+ 1005              		.cfi_def_cfa_offset 0
+ 1006              	.LVL102:
+ 212:source\wm8978/wm8978.c ****       WM8978_Write_Reg(53,volr | (1 << 8));
+ 1007              		.loc 1 212 7 view .LVU280
+ 1008 0024 FFF7FEBF 		b	WM8978_Write_Reg
+ 1009              	.LVL103:
+ 1010              		.cfi_endproc
+ 1011              	.LFE141:
+ 1013              		.section	.text.WM8978_SPKvol_Set,"ax",%progbits
+ 1014              		.align	1
+ 1015              		.global	WM8978_SPKvol_Set
+ 1016              		.syntax unified
+ 1017              		.thumb
+ 1018              		.thumb_func
+ 1020              	WM8978_SPKvol_Set:
+ 1021              	.LVL104:
+ 1022              	.LFB142:
+ 214:source\wm8978/wm8978.c **** 
+ 215:source\wm8978/wm8978.c **** 
+ 216:source\wm8978/wm8978.c **** void WM8978_SPKvol_Set (unsigned char volx)
+ 217:source\wm8978/wm8978.c **** {
+ 1023              		.loc 1 217 1 is_stmt 1 view -0
+ 1024              		.cfi_startproc
+ 1025              		@ args = 0, pretend = 0, frame = 0
+ 1026              		@ frame_needed = 0, uses_anonymous_args = 0
+ 218:source\wm8978/wm8978.c ****       volx &= 0x3F;
+ 1027              		.loc 1 218 7 view .LVU282
+ 219:source\wm8978/wm8978.c ****       if (volx == 0) volx |= 1 << 6;
+ 1028              		.loc 1 219 7 view .LVU283
+ 217:source\wm8978/wm8978.c ****       volx &= 0x3F;
+ 1029              		.loc 1 217 1 is_stmt 0 view .LVU284
+ 1030 0000 10B5     		push	{r4, lr}
+ 1031              		.cfi_def_cfa_offset 8
+ 1032              		.cfi_offset 4, -8
+ 1033              		.cfi_offset 14, -4
+ 1034              		.loc 1 219 27 view .LVU285
+ 1035 0002 10F03F04 		ands	r4, r0, #63
+ 1036 0006 08BF     		it	eq
+ 1037 0008 4024     		moveq	r4, #64
+ 1038              	.LVL105:
+ 220:source\wm8978/wm8978.c ****       WM8978_Write_Reg(54,volx);
+ 1039              		.loc 1 220 7 is_stmt 1 view .LVU286
+ 1040 000a 2146     		mov	r1, r4
+ 1041 000c 3620     		movs	r0, #54
+ 1042 000e FFF7FEFF 		bl	WM8978_Write_Reg
+ 1043              	.LVL106:
+ 221:source\wm8978/wm8978.c ****       WM8978_Write_Reg(55,volx | (1 << 8));
+ 1044              		.loc 1 221 7 view .LVU287
+ 1045 0012 44F48071 		orr	r1, r4, #256
+ 1046 0016 3720     		movs	r0, #55
+ 222:source\wm8978/wm8978.c **** }
+ 1047              		.loc 1 222 1 is_stmt 0 view .LVU288
+ 1048 0018 BDE81040 		pop	{r4, lr}
+ 1049              		.cfi_restore 14
+ 1050              		.cfi_restore 4
+ 1051              		.cfi_def_cfa_offset 0
+ 1052              	.LVL107:
+ 221:source\wm8978/wm8978.c ****       WM8978_Write_Reg(55,volx | (1 << 8));
+ 1053              		.loc 1 221 7 view .LVU289
+ 1054 001c FFF7FEBF 		b	WM8978_Write_Reg
+ 1055              	.LVL108:
+ 1056              		.cfi_endproc
+ 1057              	.LFE142:
+ 1059              		.section	.text.WM8978_3D_Set,"ax",%progbits
+ 1060              		.align	1
+ 1061              		.global	WM8978_3D_Set
+ 1062              		.syntax unified
+ 1063              		.thumb
+ 1064              		.thumb_func
+ 1066              	WM8978_3D_Set:
+ 1067              	.LVL109:
+ 1068              	.LFB143:
+ 223:source\wm8978/wm8978.c **** 
+ 224:source\wm8978/wm8978.c **** 
+ 225:source\wm8978/wm8978.c **** void WM8978_3D_Set (unsigned char depth)
+ 226:source\wm8978/wm8978.c **** {
+ 1069              		.loc 1 226 1 is_stmt 1 view -0
+ 1070              		.cfi_startproc
+ 1071              		@ args = 0, pretend = 0, frame = 0
+ 1072              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1073              		@ link register save eliminated.
+ 227:source\wm8978/wm8978.c ****       depth &= 0x0F;
+ 1074              		.loc 1 227 7 view .LVU291
+ 228:source\wm8978/wm8978.c ****       WM8978_Write_Reg(41,depth);
+ 1075              		.loc 1 228 7 view .LVU292
+ 1076 0000 00F00F01 		and	r1, r0, #15
+ 1077 0004 2920     		movs	r0, #41
+ 1078              	.LVL110:
+ 1079              		.loc 1 228 7 is_stmt 0 view .LVU293
+ 1080 0006 FFF7FEBF 		b	WM8978_Write_Reg
+ 1081              	.LVL111:
+ 1082              		.cfi_endproc
+ 1083              	.LFE143:
+ 1085              		.section	.text.WM8978_EQ_3D_Dir,"ax",%progbits
+ 1086              		.align	1
+ 1087              		.global	WM8978_EQ_3D_Dir
+ 1088              		.syntax unified
+ 1089              		.thumb
+ 1090              		.thumb_func
+ 1092              	WM8978_EQ_3D_Dir:
+ 1093              	.LVL112:
+ 1094              	.LFB144:
+ 229:source\wm8978/wm8978.c **** }
+ 230:source\wm8978/wm8978.c **** 
+ 231:source\wm8978/wm8978.c **** 
+ 232:source\wm8978/wm8978.c **** void WM8978_EQ_3D_Dir (unsigned char dir)
+ 233:source\wm8978/wm8978.c **** {
+ 1095              		.loc 1 233 1 is_stmt 1 view -0
+ 1096              		.cfi_startproc
+ 1097              		@ args = 0, pretend = 0, frame = 0
+ 1098              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1099              		@ link register save eliminated.
+ 234:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 1100              		.loc 1 234 7 view .LVU295
+ 235:source\wm8978/wm8978.c ****       regval = WM8978_Read_Reg(0x12);
+ 1101              		.loc 1 235 7 view .LVU296
+ 1102              	.LBB50:
+ 1103              	.LBI50:
+ 118:source\wm8978/wm8978.c **** {
+ 1104              		.loc 1 118 16 view .LVU297
+ 1105              	.LBB51:
+ 120:source\wm8978/wm8978.c **** }
+ 1106              		.loc 1 120 7 view .LVU298
+ 120:source\wm8978/wm8978.c **** }
+ 1107              		.loc 1 120 31 is_stmt 0 view .LVU299
+ 1108 0000 054B     		ldr	r3, .L53
+ 1109 0002 998C     		ldrh	r1, [r3, #36]
+ 1110              	.LVL113:
+ 120:source\wm8978/wm8978.c **** }
+ 1111              		.loc 1 120 31 view .LVU300
+ 1112              	.LBE51:
+ 1113              	.LBE50:
+ 236:source\wm8978/wm8978.c ****       if (dir) regval |= 1 << 8;else regval &= ~(1 << 8);
+ 1114              		.loc 1 236 7 is_stmt 1 view .LVU301
+ 1115              		.loc 1 236 10 is_stmt 0 view .LVU302
+ 1116 0004 20B1     		cbz	r0, .L51
+ 1117              		.loc 1 236 16 is_stmt 1 discriminator 1 view .LVU303
+ 1118              		.loc 1 236 23 is_stmt 0 discriminator 1 view .LVU304
+ 1119 0006 41F48071 		orr	r1, r1, #256
+ 1120              	.LVL114:
+ 1121              	.L52:
+ 237:source\wm8978/wm8978.c ****       WM8978_Write_Reg(18,regval);
+ 1122              		.loc 1 237 7 is_stmt 1 view .LVU305
+ 1123 000a 1220     		movs	r0, #18
+ 1124              	.LVL115:
+ 1125              		.loc 1 237 7 is_stmt 0 view .LVU306
+ 1126 000c FFF7FEBF 		b	WM8978_Write_Reg
+ 1127              	.LVL116:
+ 1128              	.L51:
+ 236:source\wm8978/wm8978.c ****       if (dir) regval |= 1 << 8;else regval &= ~(1 << 8);
+ 1129              		.loc 1 236 38 is_stmt 1 discriminator 2 view .LVU307
+ 236:source\wm8978/wm8978.c ****       if (dir) regval |= 1 << 8;else regval &= ~(1 << 8);
+ 1130              		.loc 1 236 45 is_stmt 0 discriminator 2 view .LVU308
+ 1131 0010 21F48071 		bic	r1, r1, #256
+ 1132              	.LVL117:
+ 236:source\wm8978/wm8978.c ****       if (dir) regval |= 1 << 8;else regval &= ~(1 << 8);
+ 1133              		.loc 1 236 45 discriminator 2 view .LVU309
+ 1134 0014 89B2     		uxth	r1, r1
+ 1135              	.LVL118:
+ 236:source\wm8978/wm8978.c ****       if (dir) regval |= 1 << 8;else regval &= ~(1 << 8);
+ 1136              		.loc 1 236 45 discriminator 2 view .LVU310
+ 1137 0016 F8E7     		b	.L52
+ 1138              	.L54:
+ 1139              		.align	2
+ 1140              	.L53:
+ 1141 0018 00000000 		.word	.LANCHOR0
+ 1142              		.cfi_endproc
+ 1143              	.LFE144:
+ 1145              		.section	.text.WM8978_EQ1_Set,"ax",%progbits
+ 1146              		.align	1
+ 1147              		.global	WM8978_EQ1_Set
+ 1148              		.syntax unified
+ 1149              		.thumb
+ 1150              		.thumb_func
+ 1152              	WM8978_EQ1_Set:
+ 1153              	.LVL119:
+ 1154              	.LFB145:
+ 238:source\wm8978/wm8978.c **** }
+ 239:source\wm8978/wm8978.c **** 
+ 240:source\wm8978/wm8978.c **** 
+ 241:source\wm8978/wm8978.c **** void WM8978_EQ1_Set (unsigned char cfreq,unsigned char gain)
+ 242:source\wm8978/wm8978.c **** {
+ 1155              		.loc 1 242 1 is_stmt 1 view -0
+ 1156              		.cfi_startproc
+ 1157              		@ args = 0, pretend = 0, frame = 0
+ 1158              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1159              		@ link register save eliminated.
+ 243:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 1160              		.loc 1 243 7 view .LVU312
+ 244:source\wm8978/wm8978.c ****       cfreq &= 0x03;
+ 1161              		.loc 1 244 7 view .LVU313
+ 245:source\wm8978/wm8978.c ****       if (gain > 24) gain = 24;
+ 1162              		.loc 1 245 7 view .LVU314
+ 1163              	.LBB52:
+ 1164              	.LBB53:
+ 120:source\wm8978/wm8978.c **** }
+ 1165              		.loc 1 120 31 is_stmt 0 view .LVU315
+ 1166 0000 084B     		ldr	r3, .L56
+ 1167 0002 1829     		cmp	r1, #24
+ 1168              	.LBE53:
+ 1169              	.LBE52:
+ 246:source\wm8978/wm8978.c ****       gain = 24 - gain;
+ 247:source\wm8978/wm8978.c ****       regval = WM8978_Read_Reg(18);
+ 248:source\wm8978/wm8978.c ****       regval&=0x100;
+ 1170              		.loc 1 248 13 view .LVU316
+ 1171 0004 9B8C     		ldrh	r3, [r3, #36]
+ 1172 0006 28BF     		it	cs
+ 1173 0008 1821     		movcs	r1, #24
+ 1174              	.LVL120:
+ 246:source\wm8978/wm8978.c ****       gain = 24 - gain;
+ 1175              		.loc 1 246 7 is_stmt 1 view .LVU317
+ 247:source\wm8978/wm8978.c ****       regval&=0x100;
+ 1176              		.loc 1 247 7 view .LVU318
+ 1177              	.LBB55:
+ 1178              	.LBI52:
+ 118:source\wm8978/wm8978.c **** {
+ 1179              		.loc 1 118 16 view .LVU319
+ 1180              	.LBB54:
+ 120:source\wm8978/wm8978.c **** }
+ 1181              		.loc 1 120 7 view .LVU320
+ 120:source\wm8978/wm8978.c **** }
+ 1182              		.loc 1 120 7 is_stmt 0 view .LVU321
+ 1183              	.LBE54:
+ 1184              	.LBE55:
+ 1185              		.loc 1 248 7 is_stmt 1 view .LVU322
+ 249:source\wm8978/wm8978.c ****       regval |= cfreq << 5;		//cfreq:0~3:80/105/135/175Hz
+ 1186              		.loc 1 249 7 view .LVU323
+ 1187              		.loc 1 249 23 is_stmt 0 view .LVU324
+ 1188 000a 00F00300 		and	r0, r0, #3
+ 1189              	.LVL121:
+ 248:source\wm8978/wm8978.c ****       regval |= cfreq << 5;		//cfreq:0~3:80/105/135/175Hz
+ 1190              		.loc 1 248 13 view .LVU325
+ 1191 000e 03F48073 		and	r3, r3, #256
+ 246:source\wm8978/wm8978.c ****       regval = WM8978_Read_Reg(18);
+ 1192              		.loc 1 246 12 view .LVU326
+ 1193 0012 C1F11801 		rsb	r1, r1, #24
+ 1194              	.LVL122:
+ 1195              		.loc 1 249 14 view .LVU327
+ 1196 0016 43EA4010 		orr	r0, r3, r0, lsl #5
+ 1197              	.LVL123:
+ 250:source\wm8978/wm8978.c ****       regval |= gain;
+ 1198              		.loc 1 250 7 is_stmt 1 view .LVU328
+ 251:source\wm8978/wm8978.c ****       WM8978_Write_Reg(18,regval);
+ 1199              		.loc 1 251 7 view .LVU329
+ 250:source\wm8978/wm8978.c ****       regval |= gain;
+ 1200              		.loc 1 250 14 is_stmt 0 view .LVU330
+ 1201 001a C9B2     		uxtb	r1, r1
+ 1202              		.loc 1 251 7 view .LVU331
+ 1203 001c 0143     		orrs	r1, r1, r0
+ 1204 001e 1220     		movs	r0, #18
+ 1205 0020 FFF7FEBF 		b	WM8978_Write_Reg
+ 1206              	.LVL124:
+ 1207              	.L57:
+ 1208              		.loc 1 251 7 view .LVU332
+ 1209              		.align	2
+ 1210              	.L56:
+ 1211 0024 00000000 		.word	.LANCHOR0
+ 1212              		.cfi_endproc
+ 1213              	.LFE145:
+ 1215              		.section	.text.WM8978_EQ2_Set,"ax",%progbits
+ 1216              		.align	1
+ 1217              		.global	WM8978_EQ2_Set
+ 1218              		.syntax unified
+ 1219              		.thumb
+ 1220              		.thumb_func
+ 1222              	WM8978_EQ2_Set:
+ 1223              	.LVL125:
+ 1224              	.LFB146:
+ 252:source\wm8978/wm8978.c **** }
+ 253:source\wm8978/wm8978.c **** 
+ 254:source\wm8978/wm8978.c **** 
+ 255:source\wm8978/wm8978.c **** void WM8978_EQ2_Set (unsigned char cfreq,unsigned char gain)
+ 256:source\wm8978/wm8978.c **** {
+ 1225              		.loc 1 256 1 is_stmt 1 view -0
+ 1226              		.cfi_startproc
+ 1227              		@ args = 0, pretend = 0, frame = 0
+ 1228              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1229              		@ link register save eliminated.
+ 257:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 1230              		.loc 1 257 7 view .LVU334
+ 258:source\wm8978/wm8978.c ****       cfreq &= 0x03;
+ 1231              		.loc 1 258 7 view .LVU335
+ 259:source\wm8978/wm8978.c ****       if (gain > 24) gain = 24;
+ 1232              		.loc 1 259 7 view .LVU336
+ 1233 0000 1829     		cmp	r1, #24
+ 1234 0002 28BF     		it	cs
+ 1235 0004 1821     		movcs	r1, #24
+ 1236              	.LVL126:
+ 260:source\wm8978/wm8978.c ****       gain = 24 - gain;
+ 1237              		.loc 1 260 7 view .LVU337
+ 261:source\wm8978/wm8978.c ****       regval |= cfreq << 5;		//cfreq:0~3:230/300/385/500Hz
+ 1238              		.loc 1 261 7 view .LVU338
+ 260:source\wm8978/wm8978.c ****       gain = 24 - gain;
+ 1239              		.loc 1 260 12 is_stmt 0 view .LVU339
+ 1240 0006 C1F11801 		rsb	r1, r1, #24
+ 1241              	.LVL127:
+ 1242              		.loc 1 261 23 view .LVU340
+ 1243 000a 00F00300 		and	r0, r0, #3
+ 1244              	.LVL128:
+ 262:source\wm8978/wm8978.c ****       regval |= gain;
+ 1245              		.loc 1 262 7 is_stmt 1 view .LVU341
+ 263:source\wm8978/wm8978.c ****       WM8978_Write_Reg(19,regval);
+ 1246              		.loc 1 263 7 view .LVU342
+ 262:source\wm8978/wm8978.c ****       regval |= gain;
+ 1247              		.loc 1 262 14 is_stmt 0 view .LVU343
+ 1248 000e C9B2     		uxtb	r1, r1
+ 1249              		.loc 1 263 7 view .LVU344
+ 1250 0010 41EA4011 		orr	r1, r1, r0, lsl #5
+ 1251 0014 1320     		movs	r0, #19
+ 1252 0016 FFF7FEBF 		b	WM8978_Write_Reg
+ 1253              	.LVL129:
+ 1254              		.loc 1 263 7 view .LVU345
+ 1255              		.cfi_endproc
+ 1256              	.LFE146:
+ 1258              		.section	.text.WM8978_EQ3_Set,"ax",%progbits
+ 1259              		.align	1
+ 1260              		.global	WM8978_EQ3_Set
+ 1261              		.syntax unified
+ 1262              		.thumb
+ 1263              		.thumb_func
+ 1265              	WM8978_EQ3_Set:
+ 1266              	.LVL130:
+ 1267              	.LFB147:
+ 264:source\wm8978/wm8978.c **** }
+ 265:source\wm8978/wm8978.c **** 
+ 266:source\wm8978/wm8978.c **** 
+ 267:source\wm8978/wm8978.c **** void WM8978_EQ3_Set (unsigned char cfreq,unsigned char gain)
+ 268:source\wm8978/wm8978.c **** {
+ 1268              		.loc 1 268 1 is_stmt 1 view -0
+ 1269              		.cfi_startproc
+ 1270              		@ args = 0, pretend = 0, frame = 0
+ 1271              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1272              		@ link register save eliminated.
+ 269:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 1273              		.loc 1 269 7 view .LVU347
+ 270:source\wm8978/wm8978.c ****       cfreq &= 0x03;
+ 1274              		.loc 1 270 7 view .LVU348
+ 271:source\wm8978/wm8978.c ****       if (gain > 24) gain = 24;
+ 1275              		.loc 1 271 7 view .LVU349
+ 1276 0000 1829     		cmp	r1, #24
+ 1277 0002 28BF     		it	cs
+ 1278 0004 1821     		movcs	r1, #24
+ 1279              	.LVL131:
+ 272:source\wm8978/wm8978.c ****       gain = 24 - gain;
+ 1280              		.loc 1 272 7 view .LVU350
+ 273:source\wm8978/wm8978.c ****       regval |= cfreq << 5;		//cfreq:0~3:650/850/1100/1400Hz
+ 1281              		.loc 1 273 7 view .LVU351
+ 272:source\wm8978/wm8978.c ****       gain = 24 - gain;
+ 1282              		.loc 1 272 12 is_stmt 0 view .LVU352
+ 1283 0006 C1F11801 		rsb	r1, r1, #24
+ 1284              	.LVL132:
+ 1285              		.loc 1 273 23 view .LVU353
+ 1286 000a 00F00300 		and	r0, r0, #3
+ 1287              	.LVL133:
+ 274:source\wm8978/wm8978.c ****       regval |= gain;
+ 1288              		.loc 1 274 7 is_stmt 1 view .LVU354
+ 275:source\wm8978/wm8978.c ****       WM8978_Write_Reg(20,regval);
+ 1289              		.loc 1 275 7 view .LVU355
+ 274:source\wm8978/wm8978.c ****       regval |= gain;
+ 1290              		.loc 1 274 14 is_stmt 0 view .LVU356
+ 1291 000e C9B2     		uxtb	r1, r1
+ 1292              		.loc 1 275 7 view .LVU357
+ 1293 0010 41EA4011 		orr	r1, r1, r0, lsl #5
+ 1294 0014 1420     		movs	r0, #20
+ 1295 0016 FFF7FEBF 		b	WM8978_Write_Reg
+ 1296              	.LVL134:
+ 1297              		.loc 1 275 7 view .LVU358
+ 1298              		.cfi_endproc
+ 1299              	.LFE147:
+ 1301              		.section	.text.WM8978_EQ4_Set,"ax",%progbits
+ 1302              		.align	1
+ 1303              		.global	WM8978_EQ4_Set
+ 1304              		.syntax unified
+ 1305              		.thumb
+ 1306              		.thumb_func
+ 1308              	WM8978_EQ4_Set:
+ 1309              	.LVL135:
+ 1310              	.LFB148:
+ 276:source\wm8978/wm8978.c **** }
+ 277:source\wm8978/wm8978.c **** 
+ 278:source\wm8978/wm8978.c **** 
+ 279:source\wm8978/wm8978.c **** void WM8978_EQ4_Set (unsigned char cfreq,unsigned char gain)
+ 280:source\wm8978/wm8978.c **** {
+ 1311              		.loc 1 280 1 is_stmt 1 view -0
+ 1312              		.cfi_startproc
+ 1313              		@ args = 0, pretend = 0, frame = 0
+ 1314              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1315              		@ link register save eliminated.
+ 281:source\wm8978/wm8978.c ****       unsigned short regval = 0;
+ 1316              		.loc 1 281 7 view .LVU360
+ 282:source\wm8978/wm8978.c ****       cfreq &= 0x03;
+ 1317              		.loc 1 282 7 view .LVU361
+ 283:source\wm8978/wm8978.c ****       if (gain > 24) gain = 24;
+ 1318              		.loc 1 283 7 view .LVU362
+ 1319 0000 1829     		cmp	r1, #24
+ 1320 0002 28BF     		it	cs
+ 1321 0004 1821     		movcs	r1, #24
+ 1322              	.LVL136:
+ 284:source\wm8978/wm8978.c ****       gain = 24 - gain;
+ 1323              		.loc 1 284 7 view .LVU363
+ 285:source\wm8978/wm8978.c ****       regval |= cfreq << 5;		//cfreq:0~3:1800/2400/3200/4100Hz
+ 1324              		.loc 1 285 7 view .LVU364
+ 284:source\wm8978/wm8978.c ****       gain = 24 - gain;
+ 1325              		.loc 1 284 12 is_stmt 0 view .LVU365
+ 1326 0006 C1F11801 		rsb	r1, r1, #24
+ 1327              	.LVL137:
+ 1328              		.loc 1 285 23 view .LVU366
+ 1329 000a 00F00300 		and	r0, r0, #3
+ 1330              	.LVL138:
+ 286:source\wm8978/wm8978.c ****       regval |= gain;
+ 1331              		.loc 1 286 7 is_stmt 1 view .LVU367
+ 287:source\wm8978/wm8978.c ****       WM8978_Write_Reg(21,regval);
+ 1332              		.loc 1 287 7 view .LVU368
+ 286:source\wm8978/wm8978.c ****       regval |= gain;
+ 1333              		.loc 1 286 14 is_stmt 0 view .LVU369
+ 1334 000e C9B2     		uxtb	r1, r1
+ 1335              		.loc 1 287 7 view .LVU370
+ 1336 0010 41EA4011 		orr	r1, r1, r0, lsl #5
+ 1337 0014 1520     		movs	r0, #21
+ 1338 0016 FFF7FEBF 		b	WM8978_Write_Reg
+ 1339              	.LVL139:
+ 1340              		.loc 1 287 7 view .LVU371
+ 1341              		.cfi_endproc
+ 1342              	.LFE148:
+ 1344              		.section	.text.WM8978_EQ5_Set,"ax",%progbits
+ 1345              		.align	1
+ 1346              		.global	WM8978_EQ5_Set
+ 1347              		.syntax unified
+ 1348              		.thumb
+ 1349              		.thumb_func
+ 1351              	WM8978_EQ5_Set:
+ 1352              	.LVL140:
+ 1353              	.LFB149:
+ 288:source\wm8978/wm8978.c **** }
+ 289:source\wm8978/wm8978.c **** 
+ 290:source\wm8978/wm8978.c **** 
+ 291:source\wm8978/wm8978.c **** void WM8978_EQ5_Set (unsigned char cfreq,unsigned char gain)
+ 292:source\wm8978/wm8978.c **** {
+ 1354              		.loc 1 292 1 is_stmt 1 view -0
+ 1355              		.cfi_startproc
+ 1356              		@ args = 0, pretend = 0, frame = 0
+ 1357              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1358              		@ link register save eliminated.
+ 293:source\wm8978/wm8978.c ****        unsigned short regval = 0;
+ 1359              		.loc 1 293 8 view .LVU373
+ 294:source\wm8978/wm8978.c ****        cfreq &= 0x03;
+ 1360              		.loc 1 294 8 view .LVU374
+ 295:source\wm8978/wm8978.c ****        if (gain > 24) gain = 24;
+ 1361              		.loc 1 295 8 view .LVU375
+ 1362 0000 1829     		cmp	r1, #24
+ 1363 0002 28BF     		it	cs
+ 1364 0004 1821     		movcs	r1, #24
+ 1365              	.LVL141:
+ 296:source\wm8978/wm8978.c ****        gain = 24 - gain;
+ 1366              		.loc 1 296 8 view .LVU376
+ 297:source\wm8978/wm8978.c ****        regval |= cfreq << 5;		//cfreq:0~3:5300/6900/9000/11700Hz
+ 1367              		.loc 1 297 8 view .LVU377
+ 296:source\wm8978/wm8978.c ****        gain = 24 - gain;
+ 1368              		.loc 1 296 13 is_stmt 0 view .LVU378
+ 1369 0006 C1F11801 		rsb	r1, r1, #24
+ 1370              	.LVL142:
+ 1371              		.loc 1 297 24 view .LVU379
+ 1372 000a 00F00300 		and	r0, r0, #3
+ 1373              	.LVL143:
+ 298:source\wm8978/wm8978.c ****        regval |= gain;			//gain:0~24,-12~+12dB
+ 1374              		.loc 1 298 8 is_stmt 1 view .LVU380
+ 299:source\wm8978/wm8978.c ****        WM8978_Write_Reg(22,regval);
+ 1375              		.loc 1 299 8 view .LVU381
+ 298:source\wm8978/wm8978.c ****        regval |= gain;			//gain:0~24,-12~+12dB
+ 1376              		.loc 1 298 15 is_stmt 0 view .LVU382
+ 1377 000e C9B2     		uxtb	r1, r1
+ 1378              		.loc 1 299 8 view .LVU383
+ 1379 0010 41EA4011 		orr	r1, r1, r0, lsl #5
+ 1380 0014 1620     		movs	r0, #22
+ 1381 0016 FFF7FEBF 		b	WM8978_Write_Reg
+ 1382              	.LVL144:
+ 1383              		.loc 1 299 8 view .LVU384
+ 1384              		.cfi_endproc
+ 1385              	.LFE149:
+ 1387              		.section	.text.WM8978_Init,"ax",%progbits
+ 1388              		.align	1
+ 1389              		.global	WM8978_Init
+ 1390              		.syntax unified
+ 1391              		.thumb
+ 1392              		.thumb_func
+ 1394              	WM8978_Init:
+ 1395              	.LFB150:
+ 300:source\wm8978/wm8978.c **** }
+ 301:source\wm8978/wm8978.c **** 
+ 302:source\wm8978/wm8978.c **** 
+ 303:source\wm8978/wm8978.c **** unsigned char WM8978_Init (void)
+ 304:source\wm8978/wm8978.c **** {
+ 1396              		.loc 1 304 1 is_stmt 1 view -0
+ 1397              		.cfi_startproc
+ 1398              		@ args = 0, pretend = 0, frame = 0
+ 1399              		@ frame_needed = 0, uses_anonymous_args = 0
+ 305:source\wm8978/wm8978.c ****       unsigned char res;
+ 1400              		.loc 1 305 7 view .LVU386
+ 306:source\wm8978/wm8978.c ****       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOC, ENABLE);
+ 1401              		.loc 1 306 7 view .LVU387
+ 304:source\wm8978/wm8978.c ****       unsigned char res;
+ 1402              		.loc 1 304 1 is_stmt 0 view .LVU388
+ 1403 0000 10B5     		push	{r4, lr}
+ 1404              		.cfi_def_cfa_offset 8
+ 1405              		.cfi_offset 4, -8
+ 1406              		.cfi_offset 14, -4
+ 1407              		.loc 1 306 7 view .LVU389
+ 1408 0002 0121     		movs	r1, #1
+ 1409 0004 0620     		movs	r0, #6
+ 1410 0006 FFF7FEFF 		bl	RCC_AHB1PeriphClockCmd
+ 1411              	.LVL145:
+ 307:source\wm8978/wm8978.c ****       //PB12,13
+ 308:source\wm8978/wm8978.c ****       GPIO_Init_Pin(GPIOB,GPIO_Pin_12,GPIO_Speed_100MHz,GPIO_Mode_AF_PP_PU);
+ 1412              		.loc 1 308 7 is_stmt 1 view .LVU390
+ 1413 000a 3748     		ldr	r0, .L65
+ 1414 000c 1223     		movs	r3, #18
+ 1415 000e 0322     		movs	r2, #3
+ 1416 0010 4FF48051 		mov	r1, #4096
+ 1417 0014 FFF7FEFF 		bl	GPIO_Init_Pin
+ 1418              	.LVL146:
+ 309:source\wm8978/wm8978.c ****       GPIO_Init_Pin(GPIOB,GPIO_Pin_13,GPIO_Speed_100MHz,GPIO_Mode_AF_PP_PU);
+ 1419              		.loc 1 309 7 view .LVU391
+ 1420 0018 3348     		ldr	r0, .L65
+ 1421 001a 1223     		movs	r3, #18
+ 1422 001c 0322     		movs	r2, #3
+ 1423 001e 4FF40051 		mov	r1, #8192
+ 1424 0022 FFF7FEFF 		bl	GPIO_Init_Pin
+ 1425              	.LVL147:
+ 310:source\wm8978/wm8978.c ****       //PC2,3,6
+ 311:source\wm8978/wm8978.c ****       GPIO_Init_Pin(GPIOC,GPIO_Pin_2,GPIO_Speed_100MHz,GPIO_Mode_AF_PP_PU);
+ 1426              		.loc 1 311 7 view .LVU392
+ 1427 0026 3148     		ldr	r0, .L65+4
+ 1428 0028 1223     		movs	r3, #18
+ 1429 002a 0322     		movs	r2, #3
+ 1430 002c 0421     		movs	r1, #4
+ 1431 002e FFF7FEFF 		bl	GPIO_Init_Pin
+ 1432              	.LVL148:
+ 312:source\wm8978/wm8978.c ****       GPIO_Init_Pin(GPIOC,GPIO_Pin_3,GPIO_Speed_100MHz,GPIO_Mode_AF_PP_PU);
+ 1433              		.loc 1 312 7 view .LVU393
+ 1434 0032 2E48     		ldr	r0, .L65+4
+ 1435 0034 1223     		movs	r3, #18
+ 1436 0036 0322     		movs	r2, #3
+ 1437 0038 0821     		movs	r1, #8
+ 1438 003a FFF7FEFF 		bl	GPIO_Init_Pin
+ 1439              	.LVL149:
+ 313:source\wm8978/wm8978.c ****       GPIO_Init_Pin(GPIOC,GPIO_Pin_6,GPIO_Speed_100MHz,GPIO_Mode_AF_PP_PU);
+ 1440              		.loc 1 313 7 view .LVU394
+ 1441 003e 1223     		movs	r3, #18
+ 1442 0040 2A48     		ldr	r0, .L65+4
+ 1443 0042 0322     		movs	r2, #3
+ 1444 0044 4021     		movs	r1, #64
+ 1445 0046 FFF7FEFF 		bl	GPIO_Init_Pin
+ 1446              	.LVL150:
+ 314:source\wm8978/wm8978.c ****       GPIO_PinAFConfig(GPIOB,GPIO_PinSource12,GPIO_AF_SPI2);	//PB12,AF5  I2S_LRCK
+ 1447              		.loc 1 314 7 view .LVU395
+ 1448 004a 2748     		ldr	r0, .L65
+ 1449 004c 0522     		movs	r2, #5
+ 1450 004e 0C21     		movs	r1, #12
+ 1451 0050 FFF7FEFF 		bl	GPIO_PinAFConfig
+ 1452              	.LVL151:
+ 315:source\wm8978/wm8978.c ****       GPIO_PinAFConfig(GPIOB,GPIO_PinSource13,GPIO_AF_SPI2);	//PB13,AF5  I2S_SCLK
+ 1453              		.loc 1 315 7 view .LVU396
+ 1454 0054 2448     		ldr	r0, .L65
+ 1455 0056 0522     		movs	r2, #5
+ 1456 0058 0D21     		movs	r1, #13
+ 1457 005a FFF7FEFF 		bl	GPIO_PinAFConfig
+ 1458              	.LVL152:
+ 316:source\wm8978/wm8978.c ****       GPIO_PinAFConfig(GPIOC,GPIO_PinSource3,GPIO_AF_SPI2);	//PC3 ,AF5  I2S_DACDATA
+ 1459              		.loc 1 316 7 view .LVU397
+ 1460 005e 2348     		ldr	r0, .L65+4
+ 1461 0060 0522     		movs	r2, #5
+ 1462 0062 0321     		movs	r1, #3
+ 1463 0064 FFF7FEFF 		bl	GPIO_PinAFConfig
+ 1464              	.LVL153:
+ 317:source\wm8978/wm8978.c ****       GPIO_PinAFConfig(GPIOC,GPIO_PinSource6,GPIO_AF_SPI2);	//PC6 ,AF5  I2S_MCK
+ 1465              		.loc 1 317 7 view .LVU398
+ 1466 0068 2048     		ldr	r0, .L65+4
+ 1467 006a 0522     		movs	r2, #5
+ 1468 006c 0621     		movs	r1, #6
+ 1469 006e FFF7FEFF 		bl	GPIO_PinAFConfig
+ 1470              	.LVL154:
+ 318:source\wm8978/wm8978.c ****       GPIO_PinAFConfig(GPIOC,GPIO_PinSource2,GPIO_AF_SPI2);	//PC2 ,AF6  I2S_ADCDATA  I2S2ext_SD
+ 1471              		.loc 1 318 7 view .LVU399
+ 1472 0072 1E48     		ldr	r0, .L65+4
+ 1473 0074 0522     		movs	r2, #5
+ 1474 0076 0221     		movs	r1, #2
+ 1475 0078 FFF7FEFF 		bl	GPIO_PinAFConfig
+ 1476              	.LVL155:
+ 319:source\wm8978/wm8978.c ****       res = WM8978_Write_Reg(0,0);
+ 1477              		.loc 1 319 7 view .LVU400
+ 1478              		.loc 1 319 13 is_stmt 0 view .LVU401
+ 1479 007c 0021     		movs	r1, #0
+ 1480 007e 0846     		mov	r0, r1
+ 1481 0080 FFF7FEFF 		bl	WM8978_Write_Reg
+ 1482              	.LVL156:
+ 320:source\wm8978/wm8978.c ****       if (res) return 1;
+ 1483              		.loc 1 320 7 is_stmt 1 view .LVU402
+ 1484              		.loc 1 320 10 is_stmt 0 view .LVU403
+ 1485 0084 0446     		mov	r4, r0
+ 1486 0086 60BB     		cbnz	r0, .L64
+ 321:source\wm8978/wm8978.c ****       WM8978_Write_Reg(1,0x1B);		//R1,MICEN,BIASEN,VMIDSEL[1:0]:11(5K)
+ 1487              		.loc 1 321 7 is_stmt 1 view .LVU404
+ 1488 0088 1B21     		movs	r1, #27
+ 1489 008a 0120     		movs	r0, #1
+ 1490              	.LVL157:
+ 1491              		.loc 1 321 7 is_stmt 0 view .LVU405
+ 1492 008c FFF7FEFF 		bl	WM8978_Write_Reg
+ 1493              	.LVL158:
+ 322:source\wm8978/wm8978.c ****       WM8978_Write_Reg(2,0x1B0);	//R2,ROUT1,LOUT1,BOOSTENR,BOOSTENL
+ 1494              		.loc 1 322 7 is_stmt 1 view .LVU406
+ 1495 0090 4FF4D871 		mov	r1, #432
+ 1496 0094 0220     		movs	r0, #2
+ 1497 0096 FFF7FEFF 		bl	WM8978_Write_Reg
+ 1498              	.LVL159:
+ 323:source\wm8978/wm8978.c ****       WM8978_Write_Reg(3,0x6C);		//R3,LOUT2,ROUT2,RMIX,LMIX
+ 1499              		.loc 1 323 7 view .LVU407
+ 1500 009a 6C21     		movs	r1, #108
+ 1501 009c 0320     		movs	r0, #3
+ 1502 009e FFF7FEFF 		bl	WM8978_Write_Reg
+ 1503              	.LVL160:
+ 324:source\wm8978/wm8978.c ****       WM8978_Write_Reg(6,0);		//R6,MCLK
+ 1504              		.loc 1 324 7 view .LVU408
+ 1505 00a2 2146     		mov	r1, r4
+ 1506 00a4 0620     		movs	r0, #6
+ 1507 00a6 FFF7FEFF 		bl	WM8978_Write_Reg
+ 1508              	.LVL161:
+ 325:source\wm8978/wm8978.c ****       WM8978_Write_Reg(43,1 << 4);	//R43,INVROUT2
+ 1509              		.loc 1 325 7 view .LVU409
+ 1510 00aa 1021     		movs	r1, #16
+ 1511 00ac 2B20     		movs	r0, #43
+ 1512 00ae FFF7FEFF 		bl	WM8978_Write_Reg
+ 1513              	.LVL162:
+ 326:source\wm8978/wm8978.c ****       WM8978_Write_Reg(47,1 << 8);	//R47,PGABOOSTL,MIC
+ 1514              		.loc 1 326 7 view .LVU410
+ 1515 00b2 4FF48071 		mov	r1, #256
+ 1516 00b6 2F20     		movs	r0, #47
+ 1517 00b8 FFF7FEFF 		bl	WM8978_Write_Reg
+ 1518              	.LVL163:
+ 327:source\wm8978/wm8978.c ****       WM8978_Write_Reg(48,1 << 8);	//R48,PGABOOSTR,MIC
+ 1519              		.loc 1 327 7 view .LVU411
+ 1520 00bc 4FF48071 		mov	r1, #256
+ 1521 00c0 3020     		movs	r0, #48
+ 1522 00c2 FFF7FEFF 		bl	WM8978_Write_Reg
+ 1523              	.LVL164:
+ 328:source\wm8978/wm8978.c ****       WM8978_Write_Reg(49,1 << 1);	//R49,TSDEN
+ 1524              		.loc 1 328 7 view .LVU412
+ 1525 00c6 0221     		movs	r1, #2
+ 1526 00c8 3120     		movs	r0, #49
+ 1527 00ca FFF7FEFF 		bl	WM8978_Write_Reg
+ 1528              	.LVL165:
+ 329:source\wm8978/wm8978.c ****       WM8978_Write_Reg(10,1 << 3);	//R10,SOFTMUTE,128x,SNR
+ 1529              		.loc 1 329 7 view .LVU413
+ 1530 00ce 0821     		movs	r1, #8
+ 1531 00d0 0A20     		movs	r0, #10
+ 1532 00d2 FFF7FEFF 		bl	WM8978_Write_Reg
+ 1533              	.LVL166:
+ 330:source\wm8978/wm8978.c ****       WM8978_Write_Reg(14,1 << 3);	//R14,ADC 128x
+ 1534              		.loc 1 330 7 view .LVU414
+ 1535 00d6 0821     		movs	r1, #8
+ 1536 00d8 0E20     		movs	r0, #14
+ 1537 00da FFF7FEFF 		bl	WM8978_Write_Reg
+ 1538              	.LVL167:
+ 331:source\wm8978/wm8978.c ****       return 0;
+ 1539              		.loc 1 331 7 view .LVU415
+ 1540              	.L63:
+ 332:source\wm8978/wm8978.c **** }
+ 1541              		.loc 1 332 1 is_stmt 0 view .LVU416
+ 1542 00de 2046     		mov	r0, r4
+ 1543 00e0 10BD     		pop	{r4, pc}
+ 1544              	.LVL168:
+ 1545              	.L64:
+ 320:source\wm8978/wm8978.c ****       WM8978_Write_Reg(1,0x1B);		//R1,MICEN,BIASEN,VMIDSEL[1:0]:11(5K)
+ 1546              		.loc 1 320 23 view .LVU417
+ 1547 00e2 0124     		movs	r4, #1
+ 1548 00e4 FBE7     		b	.L63
+ 1549              	.L66:
+ 1550 00e6 00BF     		.align	2
+ 1551              	.L65:
+ 1552 00e8 00040240 		.word	1073873920
+ 1553 00ec 00080240 		.word	1073874944
+ 1554              		.cfi_endproc
+ 1555              	.LFE150:
+ 1557              		.global	wm8978set
+ 1558              		.section	.data.WM8978_REGVAL_TBL,"aw"
+ 1559              		.align	1
+ 1560              		.set	.LANCHOR0,. + 0
+ 1563              	WM8978_REGVAL_TBL:
+ 1564 0000 0000     		.short	0
+ 1565 0002 0000     		.short	0
+ 1566 0004 0000     		.short	0
+ 1567 0006 0000     		.short	0
+ 1568 0008 5000     		.short	80
+ 1569 000a 0000     		.short	0
+ 1570 000c 4001     		.short	320
+ 1571 000e 0000     		.short	0
+ 1572 0010 0000     		.short	0
+ 1573 0012 0000     		.short	0
+ 1574 0014 0000     		.short	0
+ 1575 0016 FF00     		.short	255
+ 1576 0018 FF00     		.short	255
+ 1577 001a 0000     		.short	0
+ 1578 001c 0001     		.short	256
+ 1579 001e FF00     		.short	255
+ 1580 0020 FF00     		.short	255
+ 1581 0022 0000     		.short	0
+ 1582 0024 2C01     		.short	300
+ 1583 0026 2C00     		.short	44
+ 1584 0028 2C00     		.short	44
+ 1585 002a 2C00     		.short	44
+ 1586 002c 2C00     		.short	44
+ 1587 002e 0000     		.short	0
+ 1588 0030 3200     		.short	50
+ 1589 0032 0000     		.short	0
+ 1590 0034 0000     		.short	0
+ 1591 0036 0000     		.short	0
+ 1592 0038 0000     		.short	0
+ 1593 003a 0000     		.short	0
+ 1594 003c 0000     		.short	0
+ 1595 003e 0000     		.short	0
+ 1596 0040 3800     		.short	56
+ 1597 0042 0B00     		.short	11
+ 1598 0044 3200     		.short	50
+ 1599 0046 0000     		.short	0
+ 1600 0048 0800     		.short	8
+ 1601 004a 0C00     		.short	12
+ 1602 004c 9300     		.short	147
+ 1603 004e E900     		.short	233
+ 1604 0050 0000     		.short	0
+ 1605 0052 0000     		.short	0
+ 1606 0054 0000     		.short	0
+ 1607 0056 0000     		.short	0
+ 1608 0058 0300     		.short	3
+ 1609 005a 1000     		.short	16
+ 1610 005c 1000     		.short	16
+ 1611 005e 0001     		.short	256
+ 1612 0060 0001     		.short	256
+ 1613 0062 0200     		.short	2
+ 1614 0064 0100     		.short	1
+ 1615 0066 0100     		.short	1
+ 1616 0068 3900     		.short	57
+ 1617 006a 3900     		.short	57
+ 1618 006c 3900     		.short	57
+ 1619 006e 3900     		.short	57
+ 1620 0070 0100     		.short	1
+ 1621 0072 0100     		.short	1
+ 1622              		.section	.data.wm8978set,"aw"
+ 1625              	wm8978set:
+ 1626 0000 32       		.byte	50
+ 1627 0001 00000000 		.ascii	"\000\000\000\000\000"
+ 1627      00
+ 1628 0006 00000000 		.ascii	"\000\000\000\000\000"
+ 1628      00
+ 1629 000b 00       		.byte	0
+ 1630 000c 01       		.byte	1
+ 1631 000d 00       		.byte	0
+ 1632              		.text
+ 1633              	.Letext0:
+ 1634              		.file 2 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 1635              		.file 3 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 1636              		.file 4 "/project/stm32f4x_iolib/include/cmsis/stm32f4xx.h"
+ 1637              		.file 5 "/project/stm32f4x_iolib/include/stm32f4xx_gpio.h"
+ 1638              		.file 6 "source\\wm8978\\../prototype.h"
+ 1639              		.file 7 "/project/stm32f4x_iolib/include/fundefs.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 wm8978.c
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:20     .text.wm8978_read_para:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:26     .text.wm8978_read_para:00000000 wm8978_read_para
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:148    .text.wm8978_save_para:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:154    .text.wm8978_save_para:00000000 wm8978_save_para
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:252    .text.WM8978_Write_Reg:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:258    .text.WM8978_Write_Reg:00000000 WM8978_Write_Reg
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:326    .text.WM8978_Write_Reg:00000030 $d
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:334    .text.WM8978_Read_Reg:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:340    .text.WM8978_Read_Reg:00000000 WM8978_Read_Reg
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:358    .text.WM8978_Read_Reg:00000008 $d
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:363    .text.WM8978_MIC_Gain:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:369    .text.WM8978_MIC_Gain:00000000 WM8978_MIC_Gain
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:406    .text.WM8978_LINEIN_Gain:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:412    .text.WM8978_LINEIN_Gain:00000000 WM8978_LINEIN_Gain
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:493    .text.WM8978_LINEIN_Gain:00000034 $d
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:498    .text.WM8978_AUX_Gain:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:504    .text.WM8978_AUX_Gain:00000000 WM8978_AUX_Gain
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:583    .text.WM8978_AUX_Gain:00000030 $d
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:588    .text.WM8978_ADDA_Cfg:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:594    .text.WM8978_ADDA_Cfg:00000000 WM8978_ADDA_Cfg
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:703    .text.WM8978_ADDA_Cfg:00000038 $d
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:708    .text.WM8978_Input_Cfg:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:714    .text.WM8978_Input_Cfg:00000000 WM8978_Input_Cfg
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:858    .text.WM8978_Input_Cfg:00000054 $d
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:863    .text.WM8978_Output_Cfg:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:869    .text.WM8978_Output_Cfg:00000000 WM8978_Output_Cfg
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:923    .text.WM8978_I2S_Cfg:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:929    .text.WM8978_I2S_Cfg:00000000 WM8978_I2S_Cfg
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:957    .text.WM8978_HPvol_Set:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:963    .text.WM8978_HPvol_Set:00000000 WM8978_HPvol_Set
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1014   .text.WM8978_SPKvol_Set:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1020   .text.WM8978_SPKvol_Set:00000000 WM8978_SPKvol_Set
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1060   .text.WM8978_3D_Set:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1066   .text.WM8978_3D_Set:00000000 WM8978_3D_Set
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1086   .text.WM8978_EQ_3D_Dir:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1092   .text.WM8978_EQ_3D_Dir:00000000 WM8978_EQ_3D_Dir
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1141   .text.WM8978_EQ_3D_Dir:00000018 $d
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1146   .text.WM8978_EQ1_Set:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1152   .text.WM8978_EQ1_Set:00000000 WM8978_EQ1_Set
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1211   .text.WM8978_EQ1_Set:00000024 $d
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1216   .text.WM8978_EQ2_Set:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1222   .text.WM8978_EQ2_Set:00000000 WM8978_EQ2_Set
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1259   .text.WM8978_EQ3_Set:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1265   .text.WM8978_EQ3_Set:00000000 WM8978_EQ3_Set
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1302   .text.WM8978_EQ4_Set:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1308   .text.WM8978_EQ4_Set:00000000 WM8978_EQ4_Set
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1345   .text.WM8978_EQ5_Set:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1351   .text.WM8978_EQ5_Set:00000000 WM8978_EQ5_Set
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1388   .text.WM8978_Init:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1394   .text.WM8978_Init:00000000 WM8978_Init
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1552   .text.WM8978_Init:000000e8 $d
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1625   .data.wm8978set:00000000 wm8978set
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1559   .data.WM8978_REGVAL_TBL:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccN3PMDX.s:1563   .data.WM8978_REGVAL_TBL:00000000 WM8978_REGVAL_TBL
+
+UNDEFINED SYMBOLS
+eeprom_read
+eeprom_write
+i2c_write
+I2C_CHANNEL
+RCC_AHB1PeriphClockCmd
+GPIO_Init_Pin
+GPIO_PinAFConfig

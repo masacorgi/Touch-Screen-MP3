@@ -1,0 +1,728 @@
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 4
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"adc.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.convert_voltage,"ax",%progbits
+  20              		.align	1
+  21              		.global	convert_voltage
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	convert_voltage:
+  27              	.LVL0:
+  28              	.LFB130:
+  29              		.file 1 "source\\adc_dac\\adc.c"
+   1:source\adc_dac/adc.c **** /********************************************************************************/
+   2:source\adc_dac/adc.c **** /* adc.c                                                                        */
+   3:source\adc_dac/adc.c **** /* STM32F407ZGT6                                                                */
+   4:source\adc_dac/adc.c **** /* (Lee ChangWoo HL2IRW  hl2irw@daum.net 010-8573-6860)                 	*/
+   5:source\adc_dac/adc.c **** /* stm32f4x_test								*/
+   6:source\adc_dac/adc.c **** /********************************************************************************/
+   7:source\adc_dac/adc.c **** #include "../../hwdefs.h"
+   8:source\adc_dac/adc.c **** #include "../prototype.h"
+   9:source\adc_dac/adc.c **** 
+  10:source\adc_dac/adc.c **** #define T_OFFSET			-10
+  11:source\adc_dac/adc.c **** 
+  12:source\adc_dac/adc.c **** volatile unsigned short adc_count,adc_tcount;
+  13:source\adc_dac/adc.c **** volatile unsigned int adc_vsum,adc_tsum;
+  14:source\adc_dac/adc.c **** short adc_voltage,adc_temperature;
+  15:source\adc_dac/adc.c **** 
+  16:source\adc_dac/adc.c **** 
+  17:source\adc_dac/adc.c **** unsigned short convert_voltage (unsigned short adc_data)
+  18:source\adc_dac/adc.c **** {
+  30              		.loc 1 18 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		@ link register save eliminated.
+  19:source\adc_dac/adc.c ****       unsigned int value;
+  35              		.loc 1 19 7 view .LVU1
+  20:source\adc_dac/adc.c ****       value = (unsigned int)((adc_data * 26406) >> 15);
+  36              		.loc 1 20 7 view .LVU2
+  21:source\adc_dac/adc.c ****       return (unsigned short)value;
+  37              		.loc 1 21 7 view .LVU3
+  20:source\adc_dac/adc.c ****       value = (unsigned int)((adc_data * 26406) >> 15);
+  38              		.loc 1 20 40 is_stmt 0 view .LVU4
+  39 0000 46F22673 		movw	r3, #26406
+  40 0004 5843     		muls	r0, r3, r0
+  41              	.LVL1:
+  22:source\adc_dac/adc.c **** 
+  23:source\adc_dac/adc.c **** }
+  42              		.loc 1 23 1 view .LVU5
+  43 0006 C00B     		lsrs	r0, r0, #15
+  44 0008 7047     		bx	lr
+  45              		.cfi_endproc
+  46              	.LFE130:
+  48              		.global	__aeabi_f2d
+  49              		.global	__aeabi_dmul
+  50              		.global	__aeabi_dsub
+  51              		.global	__aeabi_ddiv
+  52              		.global	__aeabi_dadd
+  53              		.global	__aeabi_d2iz
+  54              		.section	.text.cal_temperature,"ax",%progbits
+  55              		.align	1
+  56              		.global	cal_temperature
+  57              		.syntax unified
+  58              		.thumb
+  59              		.thumb_func
+  61              	cal_temperature:
+  62              	.LVL2:
+  63              	.LFB131:
+  24:source\adc_dac/adc.c **** 
+  25:source\adc_dac/adc.c **** 
+  26:source\adc_dac/adc.c **** short cal_temperature (unsigned short adc_data)
+  27:source\adc_dac/adc.c **** {
+  64              		.loc 1 27 1 is_stmt 1 view -0
+  65              		.cfi_startproc
+  66              		@ args = 0, pretend = 0, frame = 0
+  67              		@ frame_needed = 0, uses_anonymous_args = 0
+  28:source\adc_dac/adc.c ****       unsigned int adcx;
+  68              		.loc 1 28 7 view .LVU7
+  29:source\adc_dac/adc.c ****       short result;
+  69              		.loc 1 29 7 view .LVU8
+  30:source\adc_dac/adc.c ****       double temperate;
+  70              		.loc 1 30 7 view .LVU9
+  31:source\adc_dac/adc.c ****       adcx = adc_data;
+  71              		.loc 1 31 7 view .LVU10
+  32:source\adc_dac/adc.c ****       temperate = (float)adcx * (3.3 / 4096);
+  72              		.loc 1 32 7 view .LVU11
+  33:source\adc_dac/adc.c ****       temperate = (temperate - 0.76) / 0.0025 + (25 + T_OFFSET);
+  73              		.loc 1 33 7 view .LVU12
+  32:source\adc_dac/adc.c ****       temperate = (float)adcx * (3.3 / 4096);
+  74              		.loc 1 32 19 is_stmt 0 view .LVU13
+  75 0000 07EE900A 		vmov	s15, r0	@ int
+  76 0004 F8EE677A 		vcvt.f32.u32	s15, s15
+  27:source\adc_dac/adc.c ****       unsigned int adcx;
+  77              		.loc 1 27 1 view .LVU14
+  78 0008 08B5     		push	{r3, lr}
+  79              		.cfi_def_cfa_offset 8
+  80              		.cfi_offset 3, -8
+  81              		.cfi_offset 14, -4
+  32:source\adc_dac/adc.c ****       temperate = (float)adcx * (3.3 / 4096);
+  82              		.loc 1 32 19 view .LVU15
+  83 000a 17EE900A 		vmov	r0, s15
+  84              	.LVL3:
+  32:source\adc_dac/adc.c ****       temperate = (float)adcx * (3.3 / 4096);
+  85              		.loc 1 32 19 view .LVU16
+  86 000e FFF7FEFF 		bl	__aeabi_f2d
+  87              	.LVL4:
+  32:source\adc_dac/adc.c ****       temperate = (float)adcx * (3.3 / 4096);
+  88              		.loc 1 32 17 view .LVU17
+  89 0012 0FA3     		adr	r3, .L3+8
+  90 0014 D3E90023 		ldrd	r2, [r3]
+  91 0018 FFF7FEFF 		bl	__aeabi_dmul
+  92              	.LVL5:
+  93              		.loc 1 33 30 view .LVU18
+  94 001c 0EA3     		adr	r3, .L3+16
+  95 001e D3E90023 		ldrd	r2, [r3]
+  96 0022 FFF7FEFF 		bl	__aeabi_dsub
+  97              	.LVL6:
+  98              		.loc 1 33 38 view .LVU19
+  99 0026 0EA3     		adr	r3, .L3+24
+ 100 0028 D3E90023 		ldrd	r2, [r3]
+ 101 002c FFF7FEFF 		bl	__aeabi_ddiv
+ 102              	.LVL7:
+  34:source\adc_dac/adc.c ****       result = temperate * 100;
+ 103              		.loc 1 34 7 is_stmt 1 view .LVU20
+  35:source\adc_dac/adc.c ****       return result;
+ 104              		.loc 1 35 7 view .LVU21
+  33:source\adc_dac/adc.c ****       result = temperate * 100;
+ 105              		.loc 1 33 17 is_stmt 0 view .LVU22
+ 106 0030 054B     		ldr	r3, .L3
+ 107 0032 0022     		movs	r2, #0
+ 108 0034 FFF7FEFF 		bl	__aeabi_dadd
+ 109              	.LVL8:
+  34:source\adc_dac/adc.c ****       result = temperate * 100;
+ 110              		.loc 1 34 26 view .LVU23
+ 111 0038 044B     		ldr	r3, .L3+4
+ 112 003a 0022     		movs	r2, #0
+ 113 003c FFF7FEFF 		bl	__aeabi_dmul
+ 114              	.LVL9:
+  34:source\adc_dac/adc.c ****       result = temperate * 100;
+ 115              		.loc 1 34 14 view .LVU24
+ 116 0040 FFF7FEFF 		bl	__aeabi_d2iz
+ 117              	.LVL10:
+  36:source\adc_dac/adc.c **** }
+ 118              		.loc 1 36 1 view .LVU25
+ 119 0044 00B2     		sxth	r0, r0
+ 120 0046 08BD     		pop	{r3, pc}
+ 121              	.L4:
+ 122              		.align	3
+ 123              	.L3:
+ 124 0048 00002E40 		.word	1076756480
+ 125 004c 00005940 		.word	1079574528
+ 126 0050 66666666 		.word	1717986918
+ 127 0054 66664A3F 		.word	1061840486
+ 128 0058 52B81E85 		.word	-2061584302
+ 129 005c EB51E83F 		.word	1072189931
+ 130 0060 7B14AE47 		.word	1202590843
+ 131 0064 E17A643F 		.word	1063549665
+ 132              		.cfi_endproc
+ 133              	.LFE131:
+ 135              		.section	.text.ADC_Config,"ax",%progbits
+ 136              		.align	1
+ 137              		.global	ADC_Config
+ 138              		.syntax unified
+ 139              		.thumb
+ 140              		.thumb_func
+ 142              	ADC_Config:
+ 143              	.LFB132:
+  37:source\adc_dac/adc.c **** 
+  38:source\adc_dac/adc.c **** 
+  39:source\adc_dac/adc.c **** void ADC_Config (void)
+  40:source\adc_dac/adc.c **** {
+ 144              		.loc 1 40 1 is_stmt 1 view -0
+ 145              		.cfi_startproc
+ 146              		@ args = 0, pretend = 0, frame = 40
+ 147              		@ frame_needed = 0, uses_anonymous_args = 0
+  41:source\adc_dac/adc.c ****       ADC_CommonInitTypeDef ADC_CommonInitStructure;
+ 148              		.loc 1 41 7 view .LVU27
+  42:source\adc_dac/adc.c ****       ADC_InitTypeDef ADC_InitStruct;
+ 149              		.loc 1 42 7 view .LVU28
+  43:source\adc_dac/adc.c ****       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF,ENABLE);
+ 150              		.loc 1 43 7 view .LVU29
+  40:source\adc_dac/adc.c ****       ADC_CommonInitTypeDef ADC_CommonInitStructure;
+ 151              		.loc 1 40 1 is_stmt 0 view .LVU30
+ 152 0000 70B5     		push	{r4, r5, r6, lr}
+ 153              		.cfi_def_cfa_offset 16
+ 154              		.cfi_offset 4, -16
+ 155              		.cfi_offset 5, -12
+ 156              		.cfi_offset 6, -8
+ 157              		.cfi_offset 14, -4
+ 158              		.loc 1 43 7 view .LVU31
+ 159 0002 0121     		movs	r1, #1
+  40:source\adc_dac/adc.c ****       ADC_CommonInitTypeDef ADC_CommonInitStructure;
+ 160              		.loc 1 40 1 view .LVU32
+ 161 0004 8AB0     		sub	sp, sp, #40
+ 162              		.cfi_def_cfa_offset 56
+ 163              		.loc 1 43 7 view .LVU33
+ 164 0006 2020     		movs	r0, #32
+ 165 0008 FFF7FEFF 		bl	RCC_AHB1PeriphClockCmd
+ 166              	.LVL11:
+  44:source\adc_dac/adc.c ****       GPIO_Init_Pin(GPIOF,GPIO_Pin_7,GPIO_Speed_100MHz,GPIO_Mode_ADC);
+ 167              		.loc 1 44 7 is_stmt 1 view .LVU34
+ 168 000c 0323     		movs	r3, #3
+ 169 000e 1A46     		mov	r2, r3
+ 170 0010 2B48     		ldr	r0, .L6
+  45:source\adc_dac/adc.c ****       RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_ADC3,ENABLE);
+  46:source\adc_dac/adc.c ****       RCC_APB2PeriphResetCmd(RCC_APB2Periph_ADC1,ENABLE);
+  47:source\adc_dac/adc.c ****       RCC_APB2PeriphResetCmd(RCC_APB2Periph_ADC1,DISABLE);
+  48:source\adc_dac/adc.c ****       RCC_APB2PeriphResetCmd(RCC_APB2Periph_ADC3,ENABLE);
+  49:source\adc_dac/adc.c ****       RCC_APB2PeriphResetCmd(RCC_APB2Periph_ADC3,DISABLE);
+  50:source\adc_dac/adc.c ****       ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;
+  51:source\adc_dac/adc.c ****       ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div4;
+  52:source\adc_dac/adc.c ****       ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
+  53:source\adc_dac/adc.c ****       ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
+  54:source\adc_dac/adc.c ****       ADC_CommonInit(&ADC_CommonInitStructure);
+  55:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_Resolution = ADC_Resolution_12b;
+  56:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_ScanConvMode = ENABLE;
+  57:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_ContinuousConvMode = DISABLE;
+  58:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
+  59:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_DataAlign = ADC_DataAlign_Right;
+  60:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_NbrOfConversion = 1;
+  61:source\adc_dac/adc.c ****       ADC_Init(ADC1,&ADC_InitStruct);
+ 171              		.loc 1 61 7 is_stmt 0 view .LVU35
+ 172 0012 2C4E     		ldr	r6, .L6+4
+  44:source\adc_dac/adc.c ****       GPIO_Init_Pin(GPIOF,GPIO_Pin_7,GPIO_Speed_100MHz,GPIO_Mode_ADC);
+ 173              		.loc 1 44 7 view .LVU36
+ 174 0014 8021     		movs	r1, #128
+ 175 0016 FFF7FEFF 		bl	GPIO_Init_Pin
+ 176              	.LVL12:
+  45:source\adc_dac/adc.c ****       RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_ADC3,ENABLE);
+ 177              		.loc 1 45 7 is_stmt 1 view .LVU37
+ 178 001a 0121     		movs	r1, #1
+ 179 001c 4FF4A060 		mov	r0, #1280
+ 180 0020 FFF7FEFF 		bl	RCC_APB2PeriphClockCmd
+ 181              	.LVL13:
+  46:source\adc_dac/adc.c ****       RCC_APB2PeriphResetCmd(RCC_APB2Periph_ADC1,DISABLE);
+ 182              		.loc 1 46 7 view .LVU38
+ 183 0024 0121     		movs	r1, #1
+ 184 0026 4FF48070 		mov	r0, #256
+ 185 002a FFF7FEFF 		bl	RCC_APB2PeriphResetCmd
+ 186              	.LVL14:
+  47:source\adc_dac/adc.c ****       RCC_APB2PeriphResetCmd(RCC_APB2Periph_ADC3,ENABLE);
+ 187              		.loc 1 47 7 view .LVU39
+ 188 002e 0021     		movs	r1, #0
+ 189 0030 4FF48070 		mov	r0, #256
+ 190 0034 FFF7FEFF 		bl	RCC_APB2PeriphResetCmd
+ 191              	.LVL15:
+  48:source\adc_dac/adc.c ****       RCC_APB2PeriphResetCmd(RCC_APB2Periph_ADC3,DISABLE);
+ 192              		.loc 1 48 7 view .LVU40
+ 193 0038 0121     		movs	r1, #1
+ 194 003a 4FF48060 		mov	r0, #1024
+ 195 003e FFF7FEFF 		bl	RCC_APB2PeriphResetCmd
+ 196              	.LVL16:
+  49:source\adc_dac/adc.c ****       ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;
+ 197              		.loc 1 49 7 view .LVU41
+ 198 0042 0021     		movs	r1, #0
+ 199 0044 4FF48060 		mov	r0, #1024
+ 200 0048 FFF7FEFF 		bl	RCC_APB2PeriphResetCmd
+ 201              	.LVL17:
+  50:source\adc_dac/adc.c ****       ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div4;
+ 202              		.loc 1 50 7 view .LVU42
+  51:source\adc_dac/adc.c ****       ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
+ 203              		.loc 1 51 45 is_stmt 0 view .LVU43
+ 204 004c 0025     		movs	r5, #0
+ 205 004e 4FF48033 		mov	r3, #65536
+  54:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_Resolution = ADC_Resolution_12b;
+ 206              		.loc 1 54 7 view .LVU44
+ 207 0052 6846     		mov	r0, sp
+  51:source\adc_dac/adc.c ****       ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
+ 208              		.loc 1 51 45 view .LVU45
+ 209 0054 CDE90053 		strd	r5, r3, [sp]
+  52:source\adc_dac/adc.c ****       ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
+ 210              		.loc 1 52 7 is_stmt 1 view .LVU46
+  53:source\adc_dac/adc.c ****       ADC_CommonInit(&ADC_CommonInitStructure);
+ 211              		.loc 1 53 52 is_stmt 0 view .LVU47
+ 212 0058 CDE90255 		strd	r5, r5, [sp, #8]
+  54:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_Resolution = ADC_Resolution_12b;
+ 213              		.loc 1 54 7 is_stmt 1 view .LVU48
+ 214 005c FFF7FEFF 		bl	ADC_CommonInit
+ 215              	.LVL18:
+  55:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_ScanConvMode = ENABLE;
+ 216              		.loc 1 55 7 view .LVU49
+  56:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_ContinuousConvMode = DISABLE;
+ 217              		.loc 1 56 7 view .LVU50
+  57:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
+ 218              		.loc 1 57 7 view .LVU51
+  55:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_ScanConvMode = ENABLE;
+ 219              		.loc 1 55 37 is_stmt 0 view .LVU52
+ 220 0060 0495     		str	r5, [sp, #16]
+  58:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_DataAlign = ADC_DataAlign_Right;
+ 221              		.loc 1 58 47 view .LVU53
+ 222 0062 0695     		str	r5, [sp, #24]
+  59:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_NbrOfConversion = 1;
+ 223              		.loc 1 59 36 view .LVU54
+ 224 0064 0895     		str	r5, [sp, #32]
+  62:source\adc_dac/adc.c ****       ADC_Init(ADC3,&ADC_InitStruct);
+ 225              		.loc 1 62 7 view .LVU55
+ 226 0066 184D     		ldr	r5, .L6+8
+  56:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_ContinuousConvMode = DISABLE;
+ 227              		.loc 1 56 39 view .LVU56
+ 228 0068 0124     		movs	r4, #1
+  61:source\adc_dac/adc.c ****       ADC_Init(ADC3,&ADC_InitStruct);
+ 229              		.loc 1 61 7 view .LVU57
+ 230 006a 04A9     		add	r1, sp, #16
+ 231 006c 3046     		mov	r0, r6
+  56:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_ContinuousConvMode = DISABLE;
+ 232              		.loc 1 56 39 view .LVU58
+ 233 006e ADF81440 		strh	r4, [sp, #20]	@ movhi
+  58:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_DataAlign = ADC_DataAlign_Right;
+ 234              		.loc 1 58 7 is_stmt 1 view .LVU59
+  59:source\adc_dac/adc.c ****       ADC_InitStruct.ADC_NbrOfConversion = 1;
+ 235              		.loc 1 59 7 view .LVU60
+  60:source\adc_dac/adc.c ****       ADC_Init(ADC1,&ADC_InitStruct);
+ 236              		.loc 1 60 7 view .LVU61
+  60:source\adc_dac/adc.c ****       ADC_Init(ADC1,&ADC_InitStruct);
+ 237              		.loc 1 60 42 is_stmt 0 view .LVU62
+ 238 0072 8DF82440 		strb	r4, [sp, #36]
+  61:source\adc_dac/adc.c ****       ADC_Init(ADC3,&ADC_InitStruct);
+ 239              		.loc 1 61 7 is_stmt 1 view .LVU63
+ 240 0076 FFF7FEFF 		bl	ADC_Init
+ 241              	.LVL19:
+ 242              		.loc 1 62 7 view .LVU64
+ 243 007a 04A9     		add	r1, sp, #16
+ 244 007c 2846     		mov	r0, r5
+ 245 007e FFF7FEFF 		bl	ADC_Init
+ 246              	.LVL20:
+  63:source\adc_dac/adc.c ****       ADC_TempSensorVrefintCmd(ENABLE);
+ 247              		.loc 1 63 7 view .LVU65
+ 248 0082 2046     		mov	r0, r4
+ 249 0084 FFF7FEFF 		bl	ADC_TempSensorVrefintCmd
+ 250              	.LVL21:
+  64:source\adc_dac/adc.c ****       ADC_Cmd(ADC1,ENABLE);
+ 251              		.loc 1 64 7 view .LVU66
+ 252 0088 2146     		mov	r1, r4
+ 253 008a 3046     		mov	r0, r6
+ 254 008c FFF7FEFF 		bl	ADC_Cmd
+ 255              	.LVL22:
+  65:source\adc_dac/adc.c ****       ADC_Cmd(ADC3,ENABLE);
+ 256              		.loc 1 65 7 view .LVU67
+ 257 0090 2146     		mov	r1, r4
+ 258 0092 2846     		mov	r0, r5
+ 259 0094 FFF7FEFF 		bl	ADC_Cmd
+ 260              	.LVL23:
+  66:source\adc_dac/adc.c ****       ADC_RegularChannelConfig(ADC1,ADC_Channel_16,1,ADC_SampleTime_15Cycles);
+ 261              		.loc 1 66 7 view .LVU68
+ 262 0098 2346     		mov	r3, r4
+ 263 009a 2246     		mov	r2, r4
+ 264 009c 3046     		mov	r0, r6
+ 265 009e 1021     		movs	r1, #16
+ 266 00a0 FFF7FEFF 		bl	ADC_RegularChannelConfig
+ 267              	.LVL24:
+  67:source\adc_dac/adc.c ****       ADC_RegularChannelConfig(ADC3,ADC_Channel_5,1,ADC_SampleTime_15Cycles);
+ 268              		.loc 1 67 7 view .LVU69
+ 269 00a4 2346     		mov	r3, r4
+ 270 00a6 2246     		mov	r2, r4
+ 271 00a8 0521     		movs	r1, #5
+ 272 00aa 2846     		mov	r0, r5
+ 273 00ac FFF7FEFF 		bl	ADC_RegularChannelConfig
+ 274              	.LVL25:
+  68:source\adc_dac/adc.c ****       ADC_SoftwareStartConv(ADC1);
+ 275              		.loc 1 68 7 view .LVU70
+ 276 00b0 3046     		mov	r0, r6
+ 277 00b2 FFF7FEFF 		bl	ADC_SoftwareStartConv
+ 278              	.LVL26:
+  69:source\adc_dac/adc.c ****       ADC_SoftwareStartConv(ADC3);
+ 279              		.loc 1 69 7 view .LVU71
+ 280 00b6 2846     		mov	r0, r5
+ 281 00b8 FFF7FEFF 		bl	ADC_SoftwareStartConv
+ 282              	.LVL27:
+  70:source\adc_dac/adc.c **** }
+ 283              		.loc 1 70 1 is_stmt 0 view .LVU72
+ 284 00bc 0AB0     		add	sp, sp, #40
+ 285              		.cfi_def_cfa_offset 16
+ 286              		@ sp needed
+ 287 00be 70BD     		pop	{r4, r5, r6, pc}
+ 288              	.L7:
+ 289              		.align	2
+ 290              	.L6:
+ 291 00c0 00140240 		.word	1073878016
+ 292 00c4 00200140 		.word	1073815552
+ 293 00c8 00220140 		.word	1073816064
+ 294              		.cfi_endproc
+ 295              	.LFE132:
+ 297              		.section	.text.adc_process,"ax",%progbits
+ 298              		.align	1
+ 299              		.global	adc_process
+ 300              		.syntax unified
+ 301              		.thumb
+ 302              		.thumb_func
+ 304              	adc_process:
+ 305              	.LFB133:
+  71:source\adc_dac/adc.c **** 
+  72:source\adc_dac/adc.c **** 
+  73:source\adc_dac/adc.c **** void adc_process (void)
+  74:source\adc_dac/adc.c **** {
+ 306              		.loc 1 74 1 is_stmt 1 view -0
+ 307              		.cfi_startproc
+ 308              		@ args = 0, pretend = 0, frame = 0
+ 309              		@ frame_needed = 0, uses_anonymous_args = 0
+  75:source\adc_dac/adc.c ****       if (ADC_GetFlagStatus(ADC3,ADC_FLAG_EOC)) {
+ 310              		.loc 1 75 7 view .LVU74
+  74:source\adc_dac/adc.c ****       if (ADC_GetFlagStatus(ADC3,ADC_FLAG_EOC)) {
+ 311              		.loc 1 74 1 is_stmt 0 view .LVU75
+ 312 0000 38B5     		push	{r3, r4, r5, lr}
+ 313              		.cfi_def_cfa_offset 16
+ 314              		.cfi_offset 3, -16
+ 315              		.cfi_offset 4, -12
+ 316              		.cfi_offset 5, -8
+ 317              		.cfi_offset 14, -4
+ 318              		.loc 1 75 11 view .LVU76
+ 319 0002 2948     		ldr	r0, .L16
+ 320 0004 0221     		movs	r1, #2
+ 321 0006 FFF7FEFF 		bl	ADC_GetFlagStatus
+ 322              	.LVL28:
+ 323              		.loc 1 75 10 view .LVU77
+ 324 000a 28B3     		cbz	r0, .L9
+  76:source\adc_dac/adc.c ****          adc_vsum += ADC_GetConversionValue(ADC3);
+ 325              		.loc 1 76 10 is_stmt 1 view .LVU78
+ 326              		.loc 1 76 19 is_stmt 0 view .LVU79
+ 327 000c 274C     		ldr	r4, .L16+4
+ 328              		.loc 1 76 22 view .LVU80
+ 329 000e 2648     		ldr	r0, .L16
+ 330 0010 FFF7FEFF 		bl	ADC_GetConversionValue
+ 331              	.LVL29:
+ 332              		.loc 1 76 19 view .LVU81
+ 333 0014 2368     		ldr	r3, [r4]
+  77:source\adc_dac/adc.c ****          adc_count++;
+ 334              		.loc 1 77 19 view .LVU82
+ 335 0016 264A     		ldr	r2, .L16+8
+  76:source\adc_dac/adc.c ****          adc_vsum += ADC_GetConversionValue(ADC3);
+ 336              		.loc 1 76 19 view .LVU83
+ 337 0018 1844     		add	r0, r0, r3
+ 338 001a 2060     		str	r0, [r4]
+ 339              		.loc 1 77 10 is_stmt 1 view .LVU84
+ 340              		.loc 1 77 19 is_stmt 0 view .LVU85
+ 341 001c 1388     		ldrh	r3, [r2]
+ 342 001e 0133     		adds	r3, r3, #1
+ 343 0020 9BB2     		uxth	r3, r3
+ 344 0022 1380     		strh	r3, [r2]	@ movhi
+  78:source\adc_dac/adc.c ****          if (adc_count >= 100) {
+ 345              		.loc 1 78 10 is_stmt 1 view .LVU86
+ 346              		.loc 1 78 24 is_stmt 0 view .LVU87
+ 347 0024 1388     		ldrh	r3, [r2]
+ 348 0026 9BB2     		uxth	r3, r3
+ 349              		.loc 1 78 13 view .LVU88
+ 350 0028 632B     		cmp	r3, #99
+ 351 002a 12D9     		bls	.L10
+  79:source\adc_dac/adc.c ****       	    adc_count = 0;
+ 352              		.loc 1 79 12 is_stmt 1 view .LVU89
+ 353              		.loc 1 79 22 is_stmt 0 view .LVU90
+ 354 002c 0025     		movs	r5, #0
+ 355 002e 1580     		strh	r5, [r2]	@ movhi
+  80:source\adc_dac/adc.c ****             adc_voltage = convert_voltage(adc_vsum / 100);
+ 356              		.loc 1 80 13 is_stmt 1 view .LVU91
+ 357              		.loc 1 80 52 is_stmt 0 view .LVU92
+ 358 0030 2068     		ldr	r0, [r4]
+ 359              	.LVL30:
+ 360              	.LBB4:
+ 361              	.LBI4:
+  17:source\adc_dac/adc.c **** {
+ 362              		.loc 1 17 16 is_stmt 1 view .LVU93
+ 363              	.LBB5:
+  19:source\adc_dac/adc.c ****       value = (unsigned int)((adc_data * 26406) >> 15);
+ 364              		.loc 1 19 7 view .LVU94
+  20:source\adc_dac/adc.c ****       return (unsigned short)value;
+ 365              		.loc 1 20 7 view .LVU95
+ 366              	.LBE5:
+ 367              	.LBE4:
+ 368              		.loc 1 80 52 is_stmt 0 view .LVU96
+ 369 0032 6423     		movs	r3, #100
+ 370 0034 B0FBF3F0 		udiv	r0, r0, r3
+ 371              	.LVL31:
+ 372              	.LBB8:
+ 373              	.LBB6:
+  20:source\adc_dac/adc.c ****       return (unsigned short)value;
+ 374              		.loc 1 20 40 view .LVU97
+ 375 0038 46F22673 		movw	r3, #26406
+ 376 003c 80B2     		uxth	r0, r0
+ 377 003e 5843     		muls	r0, r3, r0
+ 378              	.LBE6:
+ 379              	.LBE8:
+ 380              		.loc 1 80 25 view .LVU98
+ 381 0040 1C4B     		ldr	r3, .L16+12
+ 382              	.LBB9:
+ 383              	.LBB7:
+  20:source\adc_dac/adc.c ****       return (unsigned short)value;
+ 384              		.loc 1 20 49 view .LVU99
+ 385 0042 C013     		asrs	r0, r0, #15
+ 386              	.LVL32:
+  21:source\adc_dac/adc.c **** 
+ 387              		.loc 1 21 7 is_stmt 1 view .LVU100
+  21:source\adc_dac/adc.c **** 
+ 388              		.loc 1 21 7 is_stmt 0 view .LVU101
+ 389              	.LBE7:
+ 390              	.LBE9:
+ 391              		.loc 1 80 27 view .LVU102
+ 392 0044 1880     		strh	r0, [r3]	@ movhi
+  81:source\adc_dac/adc.c ****             //lcd_printf(1,3,"adc3 %4d mV dac1 %4d mV",adc_voltage,adc_voltage + 1000);
+  82:source\adc_dac/adc.c ****             Dac1_Set_Voltage(adc_voltage + 1000);
+ 393              		.loc 1 82 13 is_stmt 1 view .LVU103
+ 394 0046 00F57A70 		add	r0, r0, #1000
+ 395              	.LVL33:
+ 396              		.loc 1 82 13 is_stmt 0 view .LVU104
+ 397 004a 80B2     		uxth	r0, r0
+ 398              	.LVL34:
+ 399              		.loc 1 82 13 view .LVU105
+ 400 004c FFF7FEFF 		bl	Dac1_Set_Voltage
+ 401              	.LVL35:
+  83:source\adc_dac/adc.c ****             adc_vsum = 0;
+ 402              		.loc 1 83 13 is_stmt 1 view .LVU106
+ 403              		.loc 1 83 22 is_stmt 0 view .LVU107
+ 404 0050 2560     		str	r5, [r4]
+ 405              	.L10:
+  84:source\adc_dac/adc.c ****          }
+  85:source\adc_dac/adc.c ****          ADC_SoftwareStartConv(ADC3);
+ 406              		.loc 1 85 10 is_stmt 1 view .LVU108
+ 407 0052 1548     		ldr	r0, .L16
+ 408 0054 FFF7FEFF 		bl	ADC_SoftwareStartConv
+ 409              	.LVL36:
+ 410              	.L9:
+  86:source\adc_dac/adc.c ****       }
+  87:source\adc_dac/adc.c ****       if (ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC)) {
+ 411              		.loc 1 87 7 view .LVU109
+ 412              		.loc 1 87 11 is_stmt 0 view .LVU110
+ 413 0058 1748     		ldr	r0, .L16+16
+ 414 005a 0221     		movs	r1, #2
+ 415 005c FFF7FEFF 		bl	ADC_GetFlagStatus
+ 416              	.LVL37:
+ 417              		.loc 1 87 10 view .LVU111
+ 418 0060 00B3     		cbz	r0, .L8
+  88:source\adc_dac/adc.c ****          adc_tsum += ADC_GetConversionValue(ADC1);
+ 419              		.loc 1 88 10 is_stmt 1 view .LVU112
+ 420              		.loc 1 88 19 is_stmt 0 view .LVU113
+ 421 0062 164C     		ldr	r4, .L16+20
+ 422              		.loc 1 88 22 view .LVU114
+ 423 0064 1448     		ldr	r0, .L16+16
+ 424 0066 FFF7FEFF 		bl	ADC_GetConversionValue
+ 425              	.LVL38:
+ 426              		.loc 1 88 19 view .LVU115
+ 427 006a 2368     		ldr	r3, [r4]
+  89:source\adc_dac/adc.c ****          adc_tcount++;
+ 428              		.loc 1 89 20 view .LVU116
+ 429 006c 144A     		ldr	r2, .L16+24
+  88:source\adc_dac/adc.c ****          adc_tsum += ADC_GetConversionValue(ADC1);
+ 430              		.loc 1 88 19 view .LVU117
+ 431 006e 1844     		add	r0, r0, r3
+ 432 0070 2060     		str	r0, [r4]
+ 433              		.loc 1 89 10 is_stmt 1 view .LVU118
+ 434              		.loc 1 89 20 is_stmt 0 view .LVU119
+ 435 0072 1388     		ldrh	r3, [r2]
+ 436 0074 0133     		adds	r3, r3, #1
+ 437 0076 9BB2     		uxth	r3, r3
+ 438 0078 1380     		strh	r3, [r2]	@ movhi
+  90:source\adc_dac/adc.c ****          if (adc_tcount >= 100) {
+ 439              		.loc 1 90 10 is_stmt 1 view .LVU120
+ 440              		.loc 1 90 25 is_stmt 0 view .LVU121
+ 441 007a 1388     		ldrh	r3, [r2]
+ 442 007c 9BB2     		uxth	r3, r3
+ 443              		.loc 1 90 13 view .LVU122
+ 444 007e 632B     		cmp	r3, #99
+ 445 0080 0BD9     		bls	.L12
+  91:source\adc_dac/adc.c ****       	    adc_tcount = 0;
+ 446              		.loc 1 91 12 is_stmt 1 view .LVU123
+ 447              		.loc 1 91 23 is_stmt 0 view .LVU124
+ 448 0082 0025     		movs	r5, #0
+ 449 0084 1580     		strh	r5, [r2]	@ movhi
+  92:source\adc_dac/adc.c ****             adc_temperature = cal_temperature(adc_tsum / 100);
+ 450              		.loc 1 92 13 is_stmt 1 view .LVU125
+ 451              		.loc 1 92 56 is_stmt 0 view .LVU126
+ 452 0086 6423     		movs	r3, #100
+ 453 0088 2068     		ldr	r0, [r4]
+ 454 008a B0FBF3F0 		udiv	r0, r0, r3
+ 455              		.loc 1 92 31 view .LVU127
+ 456 008e 80B2     		uxth	r0, r0
+ 457 0090 FFF7FEFF 		bl	cal_temperature
+ 458              	.LVL39:
+ 459              		.loc 1 92 29 view .LVU128
+ 460 0094 0B4B     		ldr	r3, .L16+28
+  93:source\adc_dac/adc.c ****             //lcd_printf(1,4,"Temperature %3d.%.2d ",adc_temperature / 100,adc_temperature % 100);
+  94:source\adc_dac/adc.c ****             adc_tsum = 0;
+ 461              		.loc 1 94 22 view .LVU129
+ 462 0096 2560     		str	r5, [r4]
+  92:source\adc_dac/adc.c ****             adc_temperature = cal_temperature(adc_tsum / 100);
+ 463              		.loc 1 92 29 view .LVU130
+ 464 0098 1880     		strh	r0, [r3]	@ movhi
+ 465              		.loc 1 94 13 is_stmt 1 view .LVU131
+ 466              	.L12:
+  95:source\adc_dac/adc.c ****          }
+  96:source\adc_dac/adc.c ****          ADC_SoftwareStartConv(ADC1);
+ 467              		.loc 1 96 10 view .LVU132
+  97:source\adc_dac/adc.c ****       }
+  98:source\adc_dac/adc.c **** }...
+ 468              		.loc 1 98 1 is_stmt 0 view .LVU133
+ 469 009a BDE83840 		pop	{r3, r4, r5, lr}
+ 470              		.cfi_remember_state
+ 471              		.cfi_restore 14
+ 472              		.cfi_restore 5
+ 473              		.cfi_restore 4
+ 474              		.cfi_restore 3
+ 475              		.cfi_def_cfa_offset 0
+  96:source\adc_dac/adc.c ****          ADC_SoftwareStartConv(ADC1);
+ 476              		.loc 1 96 10 view .LVU134
+ 477 009e 0648     		ldr	r0, .L16+16
+ 478 00a0 FFF7FEBF 		b	ADC_SoftwareStartConv
+ 479              	.LVL40:
+ 480              	.L8:
+ 481              		.cfi_restore_state
+ 482              		.loc 1 98 1 view .LVU135
+ 483 00a4 38BD     		pop	{r3, r4, r5, pc}
+ 484              	.L17:
+ 485 00a6 00BF     		.align	2
+ 486              	.L16:
+ 487 00a8 00220140 		.word	1073816064
+ 488 00ac 00000000 		.word	.LANCHOR0
+ 489 00b0 00000000 		.word	.LANCHOR1
+ 490 00b4 00000000 		.word	.LANCHOR2
+ 491 00b8 00200140 		.word	1073815552
+ 492 00bc 00000000 		.word	.LANCHOR3
+ 493 00c0 00000000 		.word	.LANCHOR4
+ 494 00c4 00000000 		.word	.LANCHOR5
+ 495              		.cfi_endproc
+ 496              	.LFE133:
+ 498              		.global	adc_temperature
+ 499              		.global	adc_voltage
+ 500              		.global	adc_tsum
+ 501              		.global	adc_vsum
+ 502              		.global	adc_tcount
+ 503              		.global	adc_count
+ 504              		.section	.bss.adc_count,"aw",%nobits
+ 505              		.align	1
+ 506              		.set	.LANCHOR1,. + 0
+ 509              	adc_count:
+ 510 0000 0000     		.space	2
+ 511              		.section	.bss.adc_tcount,"aw",%nobits
+ 512              		.align	1
+ 513              		.set	.LANCHOR4,. + 0
+ 516              	adc_tcount:
+ 517 0000 0000     		.space	2
+ 518              		.section	.bss.adc_temperature,"aw",%nobits
+ 519              		.align	1
+ 520              		.set	.LANCHOR5,. + 0
+ 523              	adc_temperature:
+ 524 0000 0000     		.space	2
+ 525              		.section	.bss.adc_tsum,"aw",%nobits
+ 526              		.align	2
+ 527              		.set	.LANCHOR3,. + 0
+ 530              	adc_tsum:
+ 531 0000 00000000 		.space	4
+ 532              		.section	.bss.adc_voltage,"aw",%nobits
+ 533              		.align	1
+ 534              		.set	.LANCHOR2,. + 0
+ 537              	adc_voltage:
+ 538 0000 0000     		.space	2
+ 539              		.section	.bss.adc_vsum,"aw",%nobits
+ 540              		.align	2
+ 541              		.set	.LANCHOR0,. + 0
+ 544              	adc_vsum:
+ 545 0000 00000000 		.space	4
+ 546              		.text
+ 547              	.Letext0:
+ 548              		.file 2 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 549              		.file 3 "c:\\program files (x86)\\gnu arm embedded toolchain\\10 2021.10\\arm-none-eabi\\include\\
+ 550              		.file 4 "/project/stm32f4x_iolib/include/cmsis/stm32f4xx.h"
+ 551              		.file 5 "/project/stm32f4x_iolib/include/stm32f4xx_adc.h"
+ 552              		.file 6 "/project/stm32f4x_iolib/include/stm32f4xx_gpio.h"
+ 553              		.file 7 "/project/stm32f4x_iolib/include/fundefs.h"
+ 554              		.file 8 "source\\adc_dac\\../prototype.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 adc.c
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:20     .text.convert_voltage:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:26     .text.convert_voltage:00000000 convert_voltage
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:55     .text.cal_temperature:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:61     .text.cal_temperature:00000000 cal_temperature
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:124    .text.cal_temperature:00000048 $d
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:136    .text.ADC_Config:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:142    .text.ADC_Config:00000000 ADC_Config
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:291    .text.ADC_Config:000000c0 $d
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:298    .text.adc_process:00000000 $t
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:304    .text.adc_process:00000000 adc_process
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:487    .text.adc_process:000000a8 $d
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:523    .bss.adc_temperature:00000000 adc_temperature
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:537    .bss.adc_voltage:00000000 adc_voltage
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:530    .bss.adc_tsum:00000000 adc_tsum
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:544    .bss.adc_vsum:00000000 adc_vsum
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:516    .bss.adc_tcount:00000000 adc_tcount
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:509    .bss.adc_count:00000000 adc_count
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:505    .bss.adc_count:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:512    .bss.adc_tcount:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:519    .bss.adc_temperature:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:526    .bss.adc_tsum:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:533    .bss.adc_voltage:00000000 $d
+C:\Users\dinot\AppData\Local\Temp\ccHUjBzx.s:540    .bss.adc_vsum:00000000 $d
+
+UNDEFINED SYMBOLS
+__aeabi_f2d
+__aeabi_dmul
+__aeabi_dsub
+__aeabi_ddiv
+__aeabi_dadd
+__aeabi_d2iz
+RCC_AHB1PeriphClockCmd
+GPIO_Init_Pin
+RCC_APB2PeriphClockCmd
+RCC_APB2PeriphResetCmd
+ADC_CommonInit
+ADC_Init
+ADC_TempSensorVrefintCmd
+ADC_Cmd
+ADC_RegularChannelConfig
+ADC_SoftwareStartConv
+ADC_GetFlagStatus
+ADC_GetConversionValue
+Dac1_Set_Voltage
